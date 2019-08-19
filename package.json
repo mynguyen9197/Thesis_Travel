@@ -1,0 +1,20 @@
+{
+  "name": "travel",
+  "version": "1.0.0",
+  "description": "A travel and restaurant website that shows hotel and restaurant reviews, accommodation bookings",
+  "main": "app.js",
+  "scripts": {
+    "start": "nodemon ./bin/www",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "My&Hai",
+  "license": "ISC",
+  "devDependencies": {
+    "nodemon": "^1.19.1"
+  },
+  "dependencies": {
+    "body-parse": "^0.1.0",
+    "express": "^4.17.1",
+    "path": "^0.12.7"
+  }
+}
