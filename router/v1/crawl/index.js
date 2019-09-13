@@ -10,8 +10,7 @@ const Activity = require(global.appRoot + '/models/activity')
 const { wrapAsync } = require(global.appRoot + '/utils')
 
 const url = 'https://www.tripadvisor.com.vn'
-const parsedResults = []
-let resultCount = 0
+const listUrl = []
 
 const getWebsiteContent = async (url_hoian) => {
   try {
@@ -19,8 +18,9 @@ const getWebsiteContent = async (url_hoian) => {
     const $ = cheerio.load(response.data)
     $('.attraction_element').map((i, el) => {
         const url_detail = $(el).find('a').attr('href')
-        getDetail(url + url_detail.replace(/\n/g, '') + '#photos;aggregationId=&albumid=101&filter=7')
+        listUrl.push(url + url_detail.replace(/\n/g, ''))
     })
+    console.log(listUrl)
   } catch (error) {
     console.error(error)
   }
@@ -45,7 +45,7 @@ const getDetail = async (url) => {
   try {
     const browser = await puppeteer.launch()
     const page = await browser.newPage()
-    await page.goto(url).then(async() => {
+    await page.goto(url + '#photos;aggregationId=&albumid=101&filter=7').then(async() => {
       page.content().then(async(content) =>{
         const $ = cheerio.load(content)
         const name = $('#HEADING').text()
@@ -80,9 +80,7 @@ const getDetail = async (url) => {
 }
 
 router.get('/', wrapAsync(async(req, res, next) => {
-  await getDetail(url + '/Attractions-g298082-Activities-Hoi_An_Quang_Nam_Province.html').then((result) => {
-    res.status(201).send("save succesfully")
-  })
+  await getDetail(url + '/Attraction_Review-g298082-d11963063-Reviews-Bay_Mau_Coconut_Forest-Hoi_An_Quang_Nam_Province.html')
 }))
 
 const getImages = async(html) => {
