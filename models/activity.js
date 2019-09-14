@@ -2,11 +2,15 @@ const mongoose = require('mongoose')
 const mongoosePaginate = require('mongoose-paginate')
 
 const ActivitySchema = mongoose.Schema({
-    title: String,
+    name: String,
+    thumbnail: String,
     rating: Number,
     review: Number,
+    ranking: String,
+    address: String,
     comment: [],
-    images: []
+    images: [],
+    type: Number
 })
 
 ActivitySchema.plugin(mongoosePaginate)
