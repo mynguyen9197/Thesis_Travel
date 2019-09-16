@@ -41,7 +41,8 @@ router.get('/filter', wrapAsync(async(req, res, next) => {
 router.get('/search=:name/filter', wrapAsync(async(req, res, next) => {
     const types = req.query.type
     const { name } = req.params
-    const activities = await Activity.find({type: {$in: types}, name: {$in: name}},{comment: 0, review: 0, address: 0, images: 0})
+    console.log({name, types})
+    const activities = await Activity.find({type: {$in: types}, name: { $regex: name, $options: 'i' }},{comment: 0, review: 0, address: 0, images: 0})
     if ( activities === null ) {
         return res.status(404).send({error: 'No Activity Was Found'})
     }
