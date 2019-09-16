@@ -5,7 +5,7 @@ const Activity = require(global.appRoot + '/models/activity')
 const { wrapAsync } = require(global.appRoot + '/utils')
 
 router.get('/', wrapAsync(async(req, res, next) => {
-    const activities = await Activity.find({}, {comment: 0, review: 0, address: 0, images: 0, ranking: 0})
+    const activities = await Activity.find({}, {comment: 0, review: 0, address: 0, images: 0})
     if ( activities === null ) {
         return res.status(404).send({error: 'No Activity Was Found'})
     }
@@ -14,20 +14,46 @@ router.get('/', wrapAsync(async(req, res, next) => {
 
 router.get('/type=:type', wrapAsync(async(req, res, next) => {
     const { type } = req.params
-    const activities = await Activity.find({type: type},{comment: 0, review: 0, address: 0, images: 0, ranking: 0})
+    const activities = await Activity.find({type: type},{comment: 0, review: 0, address: 0, images: 0})
     if ( activities === null ) {
         return res.status(404).send({error: 'No Activity Was Found'})
     }
     return res.status(200).json(activities)
 }))
 
-router.get('/:id', wrapAsync(async(req, res, next) => {
-    const { id } = req.params
-    const activityDetail = await Activity.findById(id)
-    if ( activityDetail === null ) {
-        return res.status(404).send({error: 'Activity Was Not Found'})
+router.get('/filter', wrapAsync(async(req, res, next) => {
+    const types = req.query.type
+    const activities = await Activity.find({type: {$in: types}},{comment: 0, review: 0, address: 0, images: 0})
+    if ( activities === null ) {
+        return res.status(404).send({error: 'No Activity Was Found'})
     }
-    return res.status(200).json(activityDetail)
+    const result = []
+    const map = new Map()
+    for(const item of activities){
+        if(!map.has(item.name)){
+            map.set(item.name, true)
+            result.push(item)
+        }
+    }
+    return res.status(200).json(result)
+}))
+
+router.get('/search=:name/filter', wrapAsync(async(req, res, next) => {
+    const types = req.query.type
+    const { name } = req.params
+    const activities = await Activity.find({type: {$in: types}, name: {$in: name}},{comment: 0, review: 0, address: 0, images: 0})
+    if ( activities === null ) {
+        return res.status(404).send({error: 'No Activity Was Found'})
+    }
+    const result = []
+    const map = new Map()
+    for(const item of activities){
+        if(!map.has(item.name)){
+            map.set(item.name, true)
+            result.push(item)
+        }
+    }
+    return res.status(200).json(result)
 }))
 
 module.exports = router
