@@ -1,10 +1,7 @@
 const express = require('express')
 const bodyParser = require('body-parser')
 const path = require('path')
-const mongoose = require('mongoose')
 const cors = require('cors');
-
-mongoose.connect('mongodb://127.0.0.1:27017/hoian_travel')
 
 const app = express()
 

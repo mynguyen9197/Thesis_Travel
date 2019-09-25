@@ -6,12 +6,31 @@ const puppeteer = require('puppeteer')
 
 const router = express.Router()
 
-const Activity = require(global.appRoot + '/models/activity')
+const activity = require(global.appRoot + '/models/activity')
 const { wrapAsync } = require(global.appRoot + '/utils')
 
-const url = 'https://www.tripadvisor.com.vn'
+const url = 'https://www.tripadvisor.com/'
+const getLinksPage = async (url_category) => {
+  try {
+    const listPage = []
+    const response = await axios.get(url + url_category + '.html')
+    let $ = cheerio.load(response.data)
+    const pages = $('.pageNumbers').html()
+    listPage.push(url + url_category + '.html')
+    if(pages != null){
+      $ = cheerio.load(pages)
+      $('a').map((i, el) => {
+        const url_detail = $(el).attr('href')
+        listPage.push(url + url_detail.replace(/\n/g, ''))
+      })
+    }
+    return listPage
+  } catch (error) {
+    console.error(error)
+  }
+}
 
-const getWebsiteContent = async (url_hoian) => {
+const getActivityLinks = async (url_hoian) => {
   try {
     const listUrl = []
     const response = await axios.get(url_hoian)
@@ -33,52 +52,104 @@ const getReviews = async(html) => {
     const quote = $(el).find('a').text()
     const review_text = $(el).find('.partial_entry').text()
     const commet = {
-      quote: quote,
-      review_text: review_text
+      quote: quote.replace(/'/g, "`"),
+      content: review_text.replace(/'/g, "`")
     }
     review_comment.push(commet)
   })
   return review_comment
 }
 
-const getDetail = async (url, type) => {
+const getDetail = async (url) => {
   try {
     const browser = await puppeteer.launch()
     const page = await browser.newPage()
     await page.goto(url + '#photos;aggregationId=&albumid=101&filter=7').then(async() => {
       page.content().then(async(content) =>{
-        const $ = cheerio.load(content)
+        let $ = cheerio.load(content)
         const name = $('#HEADING').text()
         const thumbnail = $('.attractions_large').find('img').attr('src')
         const rating = $('.ratingContainer').find('span').attr('alt')
         const review = $('.ratingContainer').text()
         const ranking = $('.popIndexContainer').text()
-        const address = $('.attractionsBLInfo').find('.detail ').text()
+
+        /*contact*/
+        const address = $('.address').text()
+        const phone = $('.phone').text()
+        
+        /*about */
+        const allAbout = $('.attractions-attraction-detail-about-card-AttractionDetailAboutCard__section--1_Efg').text()
+        const aboutList = allAbout.split("Open Now")
+        let open_hour = "", duration=""
+        if(aboutList.length == 2){
+          const more = aboutList[1].split("See all hours")
+          open_hour = more[0]
+          duration = more.length == 2 ? more[1] : ""
+        }
+        const about = aboutList[0]
+
         let comment = {}
         let images = {}
+        
+        const kind_of_place = $('.attractionCategories').text().split(" More")[0].split(", ")
+        
+        const detail = {
+          name: name,
+          thumbnail: thumbnail,
+          rating: parseFloat(rating.split(" ")[0].replace(",", ".")),
+          review: parseInt(review.split(" ")[0]),
+          ranking: ranking, 
+          about: about,
+          open_hour: open_hour,
+          duration: duration
+        }
+        const savedActivity= await activity.insertPlace(detail)
+        
+        const contact = {
+          address: address,
+          phone: phone,
+          place_id: savedActivity.insertId
+        }
+        await activity.insertContact(contact)
 
         const reviews_html = $('.listContainer').html()
         await getReviews(reviews_html).then((result) => {
           comment = result
         })
-
-        const images_html = $('.photoGridBox').html()
-        await getImages(images_html).then((result) => {
-          images = result
-        })
+        for(let i=0; i<comment.length;i++){
+          if(comment[i] != null){
+            await activity.insertComment(comment[i], savedActivity.insertId)
+          }
+        }
         
-        const detail = new Activity({
-          name: name,
-          thumbnail: thumbnail,
-          rating: parseFloat(rating.split(" ")[0].replace(",", ".")),
-          review: parseInt(review.split(" ")[0]),
-          comment: comment,
-          images: images,
-          type: type,
-          ranking: ranking,
-          address: address
+        const images_html = $('.photoGridBox').html()
+        if(images_html != null){
+          await getImages(images_html).then((result) => {
+            images = result
+          })
+          for(let i=0; i<images.length;i++){
+            if(images[i] != null){
+              await activity.insertImage(images[i], savedActivity.insertId)
+            }
+          }
+        }
+        
+        const review_detail_html = $('.collapsibleContent').html()
+        let review_detail = []
+        $ = cheerio.load(review_detail_html)
+        $('.row_num').map((i, el) => {
+          review_detail.push($(el).text())
         })
-        await detail.save()
+        await activity.insertReview(review_detail.join(';'), savedActivity.insertId)
+
+        let listKinds = await activity.loadAllKinds()
+        listKinds = listKinds.map(x => x.name)
+        for(let i=0;i<kind_of_place.length;i++){
+          const index = listKinds.indexOf(kind_of_place[i])
+          if(index != -1){
+            await activity.insertActivityPlace(index + 1, savedActivity.insertId)
+          }
+        }
       })
     })
   } catch (error) {
@@ -90,37 +161,29 @@ const getImages = async(html) => {
   const listImages = []
   const $ = cheerio.load(html)
   $('.albumGridItem').map(async(i, el) => {
-    const src = $(el).find('.fillSquare').find('img').attr('src')
-    listImages.push(src)
+    if($(el).find('.fillSquare') != null){
+      if($(el).find('.fillSquare').find('img') != null){
+        const src = $(el).find('.fillSquare').find('img').attr('src')
+        listImages.push(src)
+      }
+    }
   })
   return listImages
 }
 
-/*lấy dánh sách các địa điểm theo nhóm*/
-router.get('/getActivitiesLists', wrapAsync(async(req, res, next) => {
-  const sightSeeing = await getWebsiteContent(url + '/Attractions-g298082-Activities-c47-t163-Hoi_An_Quang_Nam_Province.html')
-  const maturalPark = await getWebsiteContent(url + '/Attractions-g298082-Activities-c57-Hoi_An_Quang_Nam_Province.html')
-  const shopping = await getWebsiteContent(url + '/Attractions-g298082-Activities-c26-Hoi_An_Quang_Nam_Province.html')
-  const scenic = await getWebsiteContent(url + '/Attractions-g298082-Activities-c47-Hoi_An_Quang_Nam_Province.html')
-  const history = await getWebsiteContent(url + '/Attractions-g298082-Activities-c47-t17-Hoi_An_Quang_Nam_Province.html')
-  const museum = await getWebsiteContent(url + '/Attractions-g298082-Activities-c49-Hoi_An_Quang_Nam_Province.html')
-  const religion = await getWebsiteContent(url + '/Attractions-g298082-Activities-c47-t10-Hoi_An_Quang_Nam_Province.html')
-  const artroom = await getWebsiteContent(url + '/Attractions-g298082-Activities-c49-t1-Hoi_An_Quang_Nam_Province.html')
-  res.status(200).send({
-    sightSeeing: sightSeeing,
-    maturalPark: maturalPark,
-    shopping: shopping,
-    scenic: scenic,
-    history: history,
-    museum: museum,
-    religion: religion,
-    artroom: artroom
-  })
+router.get('/getpages/:url', wrapAsync(async(req, res, next) => {
+  const pageLinks = await getLinksPage(req.params.url)
+  let activityLinks = []
+  for(let i=0; i<pageLinks.length;i++){
+    const activityLink = await getActivityLinks(pageLinks[i])
+    activityLinks = activityLinks.concat(activityLink)
+  }
+  res.status(200).send({activityLinks: activityLinks, count:activityLinks.length})
 }))
 
 router.post('/saveDetail', wrapAsync(async(req, res, next) => {
-  const { link, type } = req.body
-  await getDetail(link, type).then(() => {
+  const { link } = req.body
+  await getDetail(link).then(() => {
     res.status(200).send("")
   })
 }))
