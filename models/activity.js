@@ -41,6 +41,36 @@ const loadAllActivities = (() => {
     return load(sql)
 })
 
+const loadDetailById = ((placeid) => {
+    const sql = `select * from place p where p.id=${placeid};`
+    return load(sql)
+})
+
+const loadImagesByPlaceId = ((placeid) => {
+    const sql = `select * from images i where i.place_id=${placeid};`
+    return load(sql)
+})
+
+const loadContactByPlaceId = ((placeid) => {
+    const sql = `select * from contact c where c.place_id=${placeid};`
+    return load(sql)
+})
+
+const loadCommentsByPlaceId = ((placeid) => {
+    const sql = `select * from Comments c where c.place_id=${placeid};`
+    return load(sql)
+})
+
+const loadReviewByPlaceId = ((placeid) => {
+    const sql = `select * from review_detail r where r.place_id=${placeid};`
+    return load(sql)
+})
+
+const loadKindOfActivityOfPlace = ((placeid) => {
+    const sql = `select ap.*, k.name as kind_of_activity from place p, activity_place ap, kind_of_activity k where p.id = ${placeid} and p.id=ap.place_id and k.id=ap.activity_id;`
+    return load(sql)
+})
+
 module.exports = {
     insertPlace: insertPlace,
     insertImage: insertImage,
@@ -49,5 +79,11 @@ module.exports = {
     insertReview: insertReview,
     insertActivityPlace: insertActivityPlace,
     loadAllKinds: loadAllKinds,
-    loadAllActivities: loadAllActivities
+    loadAllActivities: loadAllActivities,
+    loadDetailById: loadDetailById,
+    loadKindOfActivityOfPlace: loadKindOfActivityOfPlace,
+    loadImagesByPlaceId: loadImagesByPlaceId,
+    loadContactByPlaceId: loadContactByPlaceId,
+    loadCommentsByPlaceId: loadCommentsByPlaceId,
+    loadReviewByPlaceId: loadReviewByPlaceId
 }

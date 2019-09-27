@@ -57,4 +57,15 @@ router.get('/search=:name/filter', wrapAsync(async(req, res, next) => {
     return res.status(200).json(result)
 }))
 
+router.get('/detail/:placeid', wrapAsync(async(req, res, next) => {
+    const { placeid } = req.params
+    const place_detail = await Activity.loadDetailById(placeid)
+    const images = await Activity.loadImagesByPlaceId(placeid)
+    const comments = await Activity.loadCommentsByPlaceId(placeid)
+    const contact = await Activity.loadContactByPlaceId(placeid)
+    const review = await Activity.loadReviewByPlaceId(placeid)
+    const kind = await Activity.loadKindOfActivityOfPlace(placeid)
+    return res.status(200).send({place_detail: place_detail, images: images, comments: comments, contact: contact, review:review, kind: kind})
+}))
+
 module.exports = router
