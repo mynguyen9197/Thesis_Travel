@@ -1,12 +1,174 @@
-"id";"name"
-1;"Sights & Landmarks"
-2;"Spas & Wellness"
-3;"Nature & Parks"
-4;"Museums"
-5;"Nightlife"
-6;"Water & Amusement Parks"
-7;"Fun & Games"
-8;"Shopping"
-9;"Concerts & Shows"
-10;"Food & Drink"
-11;"Classes & Workshops"
+"id";"name";"category";"parent"
+1;"Featured Tours and Tickets";1;0
+2;"Local Experiences";1;0
+3;"Recommended Experiences";1;0
+4;"Air, Helicopter & Balloon Tours";1;0
+5;"Cruises, Sailing & Water Tours";1;0
+6;"Cultural & Theme Tours";1;0
+7;"Day Trips & Excursions";1;0
+8;"Food, Wine & Nightlife";1;0
+9;"Sightseeing Tickets & Passes";1;0
+10;"Outdoor Activities";1;0
+11;"Shopping & Fashion";1;0
+12;"Shows, Concerts & Sports";1;0
+13;"Tours & Sightseeing";1;0
+14;"Theme Parks";1;0
+15;"Transfers & Ground Transport";1;0
+16;"Walking & Biking Tours";1;0
+17;"Water Sports";1;0
+18;"Weddings & Honeymoons";1;0
+19;"Family Friendly";1;0
+20;"Shore Excursions";1;0
+21;"Multi-day & Extended Tours";1;0
+22;"Luxury & Special Occasions";1;0
+23;"Private & Custom Tours";1;0
+24;"Spa Tours";1;0
+25;"Classes & Workshops";1;0
+26;"Sights & Landmarks";2;0
+27;"Spas & Wellness";2;0
+28;"Nature & Parks";2;0
+29;"Museums";2;0
+30;"Nightlife";2;0
+31;"Water & Amusement Parks";2;0
+32;"Fun & Games";2;0
+33;"Cooking Class";1;2
+34;"Cultural Tour";1;2
+35;"Local Multi-day Tours";1;2
+36;"Painting Classes";1;2
+37;"Vietnamese Cooking Classes in Hoi An";1;3
+38;"3 Days in Hoi An: Suggested Itineraries";1;3
+39;"Top Day Trips from Hoi An";1;3
+40;"Air Tours";1;4
+41;"Day Cruises";1;5
+42;"Sailing Trips";1;5
+43;"Sunset Cruises";1;5
+44;"Lunch Cruises";1;5
+45;"Duck Tours";1;5
+46;"Cultural Tours";1;6
+47;"Historical & Heritage Tours";1;6
+48;"Literary, Art & Music Tours";1;6
+49;"Architecture Tours";1;6
+50;"Ghost & Vampire Tours";1;6
+51;"Archaeology Tours";1;6
+52;"Day Trips";1;7
+53;"Rail Tours";1;7
+54;"Private Day Trips";1;7
+55;"Bar, Club & Pub Tours";1;8
+56;"Cooking Classes";1;8
+57;"Dining Experiences";1;8
+58;"Wine Tasting & Winery Tours";1;8
+59;"Beer & Brewery Tours";1;8
+60;"Food Tours";1;8
+61;"Nightlife";1;8
+62;"Coffee & Tea Tours";1;8
+63;"Attraction Tickets";1;9
+64;"Sightseeing Passes";1;9
+65;"Museum Tickets & Passes";1;9
+66;"Eco Tours";1;10
+67;"4WD, ATV & Off-Road Tours";1;10
+68;"Fishing Charters & Tours";1;10
+69;"Hiking & Camping";1;10
+70;"Nature & Wildlife";1;10
+71;"Safaris";1;10
+72;"Adrenaline & Extreme";1;10
+73;"Climbing";1;10
+74;"Lift Tickets";1;10
+75;"Running Tours";1;10
+76;"Shopping Tours";1;11
+77;"Fashion Shows & Tours";1;11
+78;"Family-friendly Shows";1;12
+79;"Concerts & Special Events";1;12
+80;"Theater, Shows & Musicals";1;12
+81;"Dinner Packages";1;12
+82;"Self-guided Tours & Rentals";1;13
+83;"Segway Tours";1;13
+84;"Full-day Tours";1;13
+85;"Half-day Tours";1;13
+86;"Bus & Minivan Tours";1;13
+87;"Sustainable Tours";1;13
+88;"Photography Tours";1;13
+89;"Audio Guided Tours";1;13
+90;"Night Tours";1;13
+91;"Hop-on Hop-off Tours";1;13
+92;"Vespa, Scooter & Moped Tours";1;13
+93;"Skip-the-Line Tours";1;13
+94;"City Tours";1;13
+95;"Motorcycle Tours";1;13
+96;"Theme Park Tickets & Tours";1;14
+97;"Ferry Services";1;15
+98;"Airport & Ground Transfers";1;15
+99;"Private Transfers";1;15
+100;"Bus Services";1;15
+101;"Rail Services";1;15
+102;"Walking Tours";1;16
+103;"Bike & Mountain Bike Tours";1;16
+104;"Kayaking & Canoeing";1;17
+105;"Snorkeling";1;17
+106;"Other Water Sports";1;17
+107;"Jet Boats & Speed Boats";1;17
+108;"Scuba Diving";1;17
+109;"Wedding Packages";1;18
+110;"Family Friendly Tours & Activities";1;19
+111;"Ports of Call Tours";1;20
+112;"Overnight Tours";1;21
+113;"Multi-day Tours";1;21
+114;"Multi-day Rail Tours";1;21
+115;"Multi-day Cruises";1;21
+116;"Luxury Tours";1;22
+117;"Romantic Tours";1;22
+118;"Private Sightseeing Tours";1;23
+119;"Onsens";1;24
+120;"Day Spas";1;24
+121;"Thermal Spas & Hot Springs";1;24
+122;"Yoga Classes";1;25
+123;"Points of Interest & Landmarks";2;26
+124;"Sacred & Religious Sites";2;26
+125;"Historic Sites";2;26
+126;"Farms";2;26
+127;"Bridges";2;26
+128;"Scenic Walking Areas";2;26
+129;"Architectural Buildings";2;26
+130;"Churches & Cathedrals";2;26
+131;"Historic Walking Areas";2;26
+132;"Lighthouses";2;26
+133;"Monuments & Statues";2;26
+134;"Scenic Drives";2;26
+135;"Spas";2;27
+136;"Health/Fitness Clubs & Gyms";2;27
+137;"Thermal Spas";2;27
+138;"Yoga & Pilates";2;27
+139;"Onsen Resorts";2;27
+140;"Roman Baths";2;27
+141;"Beaches";2;28
+142;"Islands";2;28
+143;"Motorcycle Trails";2;28
+144;"Nature & Wildlife Areas";2;28
+145;"Forests";2;28
+146;"Gardens";2;28
+147;"Art Galleries";2;29
+148;"Art Museums";2;29
+149;"History Museums";2;29
+150;"Specialty Museums";2;29
+151;"Bars & Clubs";2;30
+152;"Coffeehouses";2;30
+153;"Bar, Club & Pub Tours";2;30
+154;"Wine Bars";2;30
+155;"Theme Parks";2;31
+156;"Paint & Pottery Studios";2;32
+157;"Room Escape Games";2;32
+158;"Scavenger Hunts";2;32
+159;"Game & Entertainment Centers";2;32
+160;"Movie Theaters";2;32
+161;"Theaters";3;0
+162;"Performances";3;0
+163;"Gift & Specialty Shops";4;0
+164;"Art Galleries";4;0
+165;"Shopping Malls";4;0
+166;"Flea & Street Markets";4;0
+167;"Shopping Tours";4;0
+168;"Factory Outlets";4;0
+169;"Department Stores";4;0
+170;"Fashion Shows & Tours";4;0
+171;"Taxis & Shuttles";5;0
+172;"Mass Transportation Systems";5;0
+173;"Bus Transportation";5;0
