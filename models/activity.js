@@ -1,8 +1,8 @@
 const { load, save } = require(global.appRoot + '/models/db-access')
 
 const insertPlace = (async(place) => {
-    const sql = `insert into place(name, about, thumbnail, rating, review, ranking, open_hour, duration) 
-    values('${place.name}', '${place.about}', '${place.thumbnail}', ${place.rating}, ${place.review}, '${place.ranking}', '${place.open_hour}', '${place.duration}');`;
+    const sql = `insert into place(name, about, thumbnail, rating, review, ranking, open_hour, duration, review_detail) 
+    values('${place.name}', '${place.about}', '${place.thumbnail}', ${place.rating}, ${place.review}, '${place.ranking}', '${place.open_hour}', '${place.duration}', '${place.review_detail}');`;
     return save(sql)
 })
 
@@ -21,18 +21,13 @@ const insertComment = ((comment, place_id) => {
     return save(sql)
 })
 
-const insertReview = ((review, place_id) => {
-    const sql = `insert into review_detail(level, place_id) values('${review}', ${place_id});`;
-    return save(sql)
-})
-
 const insertActivityPlace = ((activity_id, place_id) => {
     const sql = `insert into activity_place(activity_id, place_id) values(${activity_id}, ${place_id});`;
     return save(sql)
 })
 
 const loadAllKinds = (() => {
-    const sql = `select name from kind_of_activity`
+    const sql = `select name from activity;`
     return load(sql)
 })
 
@@ -76,7 +71,6 @@ module.exports = {
     insertImage: insertImage,
     insertContact: insertContact,
     insertComment: insertComment,
-    insertReview: insertReview,
     insertActivityPlace: insertActivityPlace,
     loadAllKinds: loadAllKinds,
     loadAllActivities: loadAllActivities,
