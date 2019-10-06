@@ -1,26 +1,53 @@
 const { load, save } = require(global.appRoot + '/models/db-access')
 
-const insertTour = async(tour) => {
-    const sql = `insert into tour(name, rating, review, price, overview, hightlight, wtd, important_info, additional, cancel_policy, review_detail, key_detail, advantage) 
-    values('${tour.name}', ${tour.rating}, ${tour.review}, ${tour.price}, '${tour.overview}', '${tour.highlight}', '${tour.wtd}', '${tour.important_info}', '${tour.additional}', '${tour.cancel_policy}', '${tour.review_detail}', '${tour.review_detail}', '${tour.advantage}');`;
+const insertTour = async(tour, tourism) => {
+    const sql = `insert into tour(name, rating, review, price, overview, highlight, wtd, important_info, additional, cancel_policy, key_detail, advantage, thumbnail, tourism_id) 
+    values('${tour.name}', ${tour.rating}, ${tour.review}, ${tour.price}, '${tour.overview}', '${tour.highlight}', '${tour.wtd}', '${tour.important_info}', '${tour.additional}', '${tour.cancel_policy}', '${tour.key_detail}', '${tour.advantage}', '${tour.thumbnail}', ${tourism});`;
     return save(sql)
 }
 
 const insertTourKind = async(tourid, kind_id) => {
-    const sql = `insert into tour_kind(tour_id, kind_id) values(${tourid}, ${kind_id});`
+    const sql = `insert into activity_tour(tour_id, activity_id) values(${tourid}, ${kind_id});`
     return save(sql)
 }
 
-const insertTourism = async(tourism) => {
-    const sql = `insert into tourism(name, link) values('${tourism.name}, ${tourism.link})`
+const insertTourism = async(tourism_name) => {
+    const sql = `insert into tourism(name) values('${tourism_name}')`
     return save(sql)
 }
 
-const insertComment = ((comment, tourid) => {
+const insertComment = async(comment, tourid) => {
     const sql = `insert into comments(quote, content, tour_id) values('${comment.quote}', '${comment.content}', ${tourid});`;
+    return save(sql)
+}
+
+const insertImage = ((image, tour) => {
+    const sql = `insert into images(address, tour_id) values('${image}', ${tour});`;
     return save(sql)
 })
 
+const loadAllTours = () => {
+    const sql = `select name from tour ORDER BY id ASC;`
+    return load(sql)
+}
+
+const loadAllTourism = () => {
+    const sql = `select name from tourism ORDER BY id ASC;`
+    return load(sql)
+}
+
+const findTourByName = (name) => {
+    const sql = `select id from tour where name='${name}';`
+    return load(sql)
+}
+
+const findTourismByName = (name) => {
+    const sql = `select id from tourism where name='${name}';`
+    return load(sql)
+}
+
 module.exports = {
-    insertTour, insertTourKind
+    insertTour, insertTourKind, insertTourism,
+    insertComment, loadAllTourism, insertImage,
+    loadAllTours, findTourByName, findTourismByName
 }
