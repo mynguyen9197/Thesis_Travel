@@ -46,8 +46,37 @@ const findTourismByName = (name) => {
     return load(sql)
 }
 
+const findTourismById = (tourism_id) => {
+    const sql = `select * from tourism where id=${tourism_id};`
+    return load(sql)
+}
+
+const loadTourByActivityId = ((act_ids) => {
+    const query = `SELECT DISTINCT t.id, t.name, t.thumbnail, t.rating, t.price, t.review FROM tour t, activity_tour at WHERE t.id=at.tour_id and at.activity_id in (${act_ids}) ORDER BY rating DESC, 
+    review DESC;`
+    return load(query)
+})
+
+const findTourById = (id) => {
+    const sql = `select * from tour where id=${id};`
+    return load(sql)
+}
+
+const loadImagesByTourId = ((tour_id) => {
+    const sql = `select * from images i where i.tour_id=${tour_id};`
+    return load(sql)
+})
+
+const loadCommentsByTourId = ((tour_id) => {
+    const sql = `select * from Comments c where c.tour_id=${tour_id};`
+    return load(sql)
+})
+
 module.exports = {
     insertTour, insertTourKind, insertTourism,
     insertComment, loadAllTourism, insertImage,
-    loadAllTours, findTourByName, findTourismByName
+    loadAllTours, findTourByName, findTourismByName,
+    loadTourByActivityId, findTourById,
+    loadImagesByTourId, loadCommentsByTourId,
+    findTourismById
 }

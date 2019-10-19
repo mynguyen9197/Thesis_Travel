@@ -2,70 +2,77 @@ const express = require('express')
 const router = express.Router()
 
 const Activity = require(global.appRoot + '/models/activity')
+const Tour = require(global.appRoot + '/models/tour')
 const { wrapAsync } = require(global.appRoot + '/utils')
 
 router.get('/', wrapAsync(async(req, res, next) => {
-    const activities = await Activity.find({thumbnail: { $ne: null }}, {comment: 0, review: 0, address: 0, images: 0}).sort({ rating: -1 })
+    const categories = await Activity.loadAllCategories()
+    const activities = await Activity.loadTop20ByRating()
     if ( activities === null ) {
         return res.status(404).send({error: 'No Activity Was Found'})
     }
-    return res.status(200).json(activities)
+    return res.status(200).json({categories, activities})
 }))
 
-router.get('/type=:type', wrapAsync(async(req, res, next) => {
-    const { type } = req.params
-    const activities = await Activity.find({type: type,thumbnail: { $ne: null }},{comment: 0, review: 0, address: 0, images: 0}).sort({ rating: -1 })
+router.get('/category/:category_id', wrapAsync(async(req, res, next) => {
+    const { category_id } = req.params
+    const activities = await Activity.loadActivitiesByCategoryId(category_id)
     if ( activities === null ) {
         return res.status(404).send({error: 'No Activity Was Found'})
     }
-    return res.status(200).json(activities)
+    const activity_ids = activities.map(x => x.id)
+    let events = {}
+    if(category_id != 1){
+        events = await Activity.loadPlacesByActivityId(activity_ids)
+    } else {
+        events = await Tour.loadTourByActivityId(activity_ids.join(','))
+    }
+    return res.status(200).json({ activities, events })
 }))
 
 router.get('/filter', wrapAsync(async(req, res, next) => {
-    const types = req.query.type
-    const activities = await Activity.find({type: {$in: types},thumbnail: { $ne: null }},{comment: 0, review: 0, address: 0, images: 0}).sort({ rating: -1 })
-    if ( activities === null ) {
-        return res.status(404).send({error: 'No Activity Was Found'})
+    const { category_id, activity_ids } = req.query
+    let events = {}
+    if(category_id != 1){
+        events = await Activity.loadPlacesByActivityId(activity_ids)
+    } else {
+        events = await Tour.loadTourByActivityId(activity_ids)
     }
-    const result = []
-    const map = new Map()
-    for(const item of activities){
-        if(!map.has(item.name)){
-            map.set(item.name, true)
-            result.push(item)
-        }
-    }
-    return res.status(200).json(result)
+    return res.status(200).json({ events, activity_ids })
 }))
 
-router.get('/search=:name/filter', wrapAsync(async(req, res, next) => {
-    const types = req.query.type
-    const { name } = req.params
-    console.log({name, types})
-    const activities = await Activity.find({type: {$in: types}, name: { $regex: name, $options: 'i' },thumbnail: { $ne: null }},{comment: 0, review: 0, address: 0, images: 0}).sort({ rating: -1 })
-    if ( activities === null ) {
+router.get('/place/filter', wrapAsync(async(req, res, next) => {
+    const { search, activity_ids } = req.query
+    let places = []
+    if (!activity_ids) {
+        places = await Activity.findPlaceByName(search)
+    } else {
+        console.log(activity_ids)
+        places = await Activity.findPlaceByNameAndActivity(search, activity_ids)
+    }
+    if(places === null){
         return res.status(404).send({error: 'No Activity Was Found'})
     }
-    const result = []
-    const map = new Map()
-    for(const item of activities){
-        if(!map.has(item.name)){
-            map.set(item.name, true)
-            result.push(item)
-        }
-    }
-    return res.status(200).json(result)
+    return res.status(200).json({places})
 }))
 
-router.get('/detail/:placeid', wrapAsync(async(req, res, next) => {
+router.get('/place_detail/:placeid', wrapAsync(async(req, res, next) => {
     const { placeid } = req.params
     const place_detail = await Activity.loadDetailById(placeid)
     const images = await Activity.loadImagesByPlaceId(placeid)
     const comments = await Activity.loadCommentsByPlaceId(placeid)
     const contact = await Activity.loadContactByPlaceId(placeid)
-    const review = await Activity.loadReviewByPlaceId(placeid)
     const kind = await Activity.loadKindOfActivityOfPlace(placeid)
-    return res.status(200).send({place_detail: place_detail, images: images, comments: comments, contact: contact, review:review, kind: kind})
+    return res.status(200).send({place_detail: place_detail, images: images, comments: comments, contact: contact, kind: kind})
+}))
+
+router.get('/tour_detail/:tour_id', wrapAsync(async(req, res, next) => {
+    const { tour_id } = req.params
+    const tour_detail = await Tour.findTourById(tour_id)
+    const images = await Tour.loadImagesByTourId(tour_id)
+    const comments = await Tour.loadCommentsByTourId(tour_id)
+    const tourism = await Tour.findTourismById(tour_detail[0].tourism_id)
+    return res.status(200).send({tour_detail, images, comments, tourism})
 }))
 
 module.exports = router
