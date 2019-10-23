@@ -47,7 +47,6 @@ router.get('/place/filter', wrapAsync(async(req, res, next) => {
     if (!activity_ids) {
         places = await Activity.findPlaceByName(search)
     } else {
-        console.log(activity_ids)
         places = await Activity.findPlaceByNameAndActivity(search, activity_ids)
     }
     if(places === null){

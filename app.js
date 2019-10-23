@@ -2,12 +2,20 @@ const express = require('express')
 const bodyParser = require('body-parser')
 const path = require('path')
 const cors = require('cors');
+const session = require('express-session');
 
 const app = express()
 
 global.appRoot = path.resolve(__dirname)
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: true }))
+
+app.use(session({
+  secret: 'keyboard cat',
+  resave: false,
+  saveUninitialized: true,
+  cookie: { maxAge: 60000 }
+}))
 
 app.use(cors());
 app.options('*', cors());

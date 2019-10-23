@@ -7,5 +7,6 @@ router.use('/restaurant', require('./restaurant'))
 router.use('/flight', require('./flight'))
 router.use('/activity', require('./activity'))
 router.use('/crawl', require('./crawl'))
+router.use('/user', require('./user'))
 
 module.exports = router
