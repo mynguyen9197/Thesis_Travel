@@ -61,7 +61,7 @@ const getDetail = async (url) => {
         })
         for(let i=0; i<comment.length;i++){
           if(comment[i] != null){
-            await activity.insertComment(comment[i], savedActivity.insertId)
+            await activity.insertComment(comment[i], savedActivity.insertId, null)
           }
         }
         

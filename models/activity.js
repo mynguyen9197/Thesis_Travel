@@ -16,8 +16,8 @@ const insertContact = (contact => {
     return save(sql)
 })
 
-const insertComment = ((comment, place_id) => {
-    const sql = `insert into comments(quote, content, place_id) values('${comment.quote}', '${comment.content}', ${place_id});`;
+const insertComment = ((comment, place_id, user_id) => {
+    const sql = `insert into comments(quote, content, place_id, user_id) values('${comment.quote}', '${comment.content}', ${place_id}, ${user_id});`;
     return save(sql)
 })
 
@@ -99,6 +99,11 @@ const findPlaceByNameAndActivity = ((name, act_ids) => {
     return load(query)
 })
 
+const updateReview = ((review, placeid) => {
+    const query =  `update place set review_detail='${review}' where id=${placeid};`
+    return save(query)
+})
+
 module.exports = {
     insertPlace,
     insertImage,
@@ -118,5 +123,6 @@ module.exports = {
     loadActivitiesByCategoryId,
     loadPlacesByActivityId,
     findPlaceByName,
-    findPlaceByNameAndActivity
+    findPlaceByNameAndActivity,
+    updateReview
 }

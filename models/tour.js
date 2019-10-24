@@ -16,8 +16,8 @@ const insertTourism = async(tourism_name) => {
     return save(sql)
 }
 
-const insertComment = async(comment, tourid) => {
-    const sql = `insert into comments(quote, content, tour_id) values('${comment.quote}', '${comment.content}', ${tourid});`;
+const insertComment = async(comment, tourid, userid) => {
+    const sql = `insert into comments(quote, content, tour_id, user_id) values('${comment.quote}', '${comment.content}', ${tourid}, ${userid});`;
     return save(sql)
 }
 
@@ -72,11 +72,16 @@ const loadCommentsByTourId = ((tour_id) => {
     return load(sql)
 })
 
+const updateReview = ((review, tour_id) => {
+    const query =  `update place set review_detail='${review}' where id=${tour_id};`
+    return save(query)
+})
+
 module.exports = {
     insertTour, insertTourKind, insertTourism,
     insertComment, loadAllTourism, insertImage,
     loadAllTours, findTourByName, findTourismByName,
     loadTourByActivityId, findTourById,
     loadImagesByTourId, loadCommentsByTourId,
-    findTourismById
+    findTourismById, updateReview
 }
