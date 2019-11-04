@@ -44,12 +44,16 @@ router.get('/filter', wrapAsync(async(req, res, next) => {
 router.get('/place/filter', wrapAsync(async(req, res, next) => {
     const { search, activity_ids } = req.query
     let places = []
-    if (!activity_ids) {
+    if (!activity_ids && search) {
         places = await Activity.findPlaceByName(search)
-    } else {
+    } else if(activity_ids && search) {
         places = await Activity.findPlaceByNameAndActivity(search, activity_ids)
+    } else if (activity_ids && !search) {
+        places = await Activity.loadPlacesByActivityId(activity_ids)
+    } else {
+        return res.status(500).send({error: 'Please add filter or search'})
     }
-    if(places === null){
+    if(places.length == 0){
         return res.status(404).send({error: 'No Activity Was Found'})
     }
     return res.status(200).json({places})
