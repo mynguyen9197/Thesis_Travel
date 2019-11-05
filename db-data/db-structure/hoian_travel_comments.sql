@@ -36,7 +36,7 @@ CREATE TABLE `comments` (
   CONSTRAINT `comments_ibfk_1` FOREIGN KEY (`place_id`) REFERENCES `place` (`id`),
   CONSTRAINT `comments_ibfk_2` FOREIGN KEY (`tour_id`) REFERENCES `tour` (`id`),
   CONSTRAINT `comments_ibfk_3` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=404 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 

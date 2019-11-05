@@ -8,10 +8,11 @@ const activity = require(global.appRoot + '/models/activity')
 const tour = require(global.appRoot + '/models/tour')
 
 const { wrapAsync } = require(global.appRoot + '/utils')
-router.post('/signin', wrapAsync(async(req, res, next) => {
+router.post('/signup', wrapAsync(async(req, res, next) => {
     const {user} = req.body;
     if(user && Object.keys(user).length){
         const new_user = {
+            name: user.name,
             username: user.username,
             password: bcrypt.hashSync(user.password, 10)
         }

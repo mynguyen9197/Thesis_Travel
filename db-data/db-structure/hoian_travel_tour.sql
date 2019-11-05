@@ -43,7 +43,7 @@ CREATE TABLE `tour` (
   UNIQUE KEY `name` (`name`),
   KEY `tourism_id` (`tourism_id`),
   CONSTRAINT `tour_ibfk_1` FOREIGN KEY (`tourism_id`) REFERENCES `tourism` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=58 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 

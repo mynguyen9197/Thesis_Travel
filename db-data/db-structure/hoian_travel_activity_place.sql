@@ -31,7 +31,7 @@ CREATE TABLE `activity_place` (
   KEY `place_id` (`place_id`),
   CONSTRAINT `activity_place_ibfk_1` FOREIGN KEY (`activity_id`) REFERENCES `activity` (`id`),
   CONSTRAINT `activity_place_ibfk_2` FOREIGN KEY (`place_id`) REFERENCES `place` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 

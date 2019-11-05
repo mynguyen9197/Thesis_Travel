@@ -32,7 +32,7 @@ CREATE TABLE `images` (
   KEY `tour_id` (`tour_id`),
   CONSTRAINT `images_ibfk_1` FOREIGN KEY (`place_id`) REFERENCES `place` (`id`),
   CONSTRAINT `images_ibfk_2` FOREIGN KEY (`tour_id`) REFERENCES `tour` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1099 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
