@@ -9,17 +9,20 @@ const tour = require(global.appRoot + '/models/tour')
 
 const { wrapAsync } = require(global.appRoot + '/utils')
 router.post('/signup', wrapAsync(async(req, res, next) => {
-    const {user} = req.body;
-    if(user && Object.keys(user).length){
-        const new_user = {
-            name: user.name,
-            username: user.username,
-            password: bcrypt.hashSync(user.password, 10)
+    try {
+        const {user} = req.body;
+        if(user && Object.keys(user).length){
+            const new_user = {
+                name: user.name,
+                username: user.username,
+                password: bcrypt.hashSync(user.password, 10)
+            }
+            const savedUser = await User.insertUser(new_user)
+            return res.status(200).json({id: savedUser.insertId})
         }
-        const savedUser = await User.insertUser(new_user)
-        return res.status(200).json({id: savedUser.insertId})
+    } catch (error) {
+        return res.status(500).json("duplicate username")
     }
-    return res.status(400).json("User does not exist")
 }))
 
 router.post('/login', wrapAsync(async(req, res, next) => {
