@@ -21,7 +21,7 @@ router.post('/signup', wrapAsync(async(req, res, next) => {
             return res.status(200).json({id: savedUser.insertId})
         }
     } catch (error) {
-        return res.status(500).json("duplicate username")
+        return res.status(500).json("This username has already been taken. Please try with another one!")
     }
 }))
 
@@ -32,16 +32,16 @@ router.post('/login', wrapAsync(async(req, res, next) => {
         if(savedUser.length){
             const match = await bcrypt.compare(user.password, savedUser[0].password)
             if(!match){
-                return res.status(401).send("Wrong password")
+                return res.status(401).send("Wrong password!")
             } else {
                 const token = jwt.sign({ id: savedUser[0].id }, 'RESTFULAPIs', { expiresIn: 60 * 60 * 24  })
                 return res.status(200).json({token: token})
             }
         } else {
-            return res.status(401).send("Wrong username")
+            return res.status(401).send("User does not exist!")
         }
     }
-    return res.status(400).json("User does not exist")
+    return res.status(400).json("User does not exist!")
 }))
 
 const verifyToken = ((req, res, next) => {
