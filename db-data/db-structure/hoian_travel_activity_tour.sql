@@ -29,7 +29,7 @@ CREATE TABLE `activity_tour` (
   PRIMARY KEY (`id`),
   KEY `activity_id` (`activity_id`),
   KEY `tour_id` (`tour_id`),
-  CONSTRAINT `activity_tour_ibfk_1` FOREIGN KEY (`activity_id`) REFERENCES `activity` (`id`),
+  CONSTRAINT `activity_tour_ibfk_1` FOREIGN KEY (`activity_id`) REFERENCES `activity_of_tour` (`id`),
   CONSTRAINT `activity_tour_ibfk_2` FOREIGN KEY (`tour_id`) REFERENCES `tour` (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;

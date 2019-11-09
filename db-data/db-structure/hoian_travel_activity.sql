@@ -19,10 +19,10 @@
 -- Table structure for table `activity`
 --
 
-DROP TABLE IF EXISTS `activity`;
+DROP TABLE IF EXISTS `place_activity`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
  SET character_set_client = utf8mb4 ;
-CREATE TABLE `activity` (
+CREATE TABLE `place_activity` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `name` varchar(255) NOT NULL,
   `category` int(11) DEFAULT NULL,
@@ -30,8 +30,8 @@ CREATE TABLE `activity` (
   PRIMARY KEY (`id`),
   KEY `category` (`category`),
   KEY `parent` (`parent`),
-  CONSTRAINT `activity_ibfk_1` FOREIGN KEY (`category`) REFERENCES `ttd_category` (`id`),
-  CONSTRAINT `activity_ibfk_2` FOREIGN KEY (`parent`) REFERENCES `activity` (`id`)
+  CONSTRAINT `activity_ibfk_1` FOREIGN KEY (`category`) REFERENCES `place_category` (`id`),
+  CONSTRAINT `activity_ibfk_2` FOREIGN KEY (`parent`) REFERENCES `place_activity` (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;

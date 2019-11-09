@@ -6,11 +6,6 @@ const insertTour = async(tour, tourism) => {
     return save(sql)
 }
 
-const insertTourKind = async(tourid, kind_id) => {
-    const sql = `insert into activity_tour(tour_id, activity_id) values(${tourid}, ${kind_id});`
-    return save(sql)
-}
-
 const insertTourism = async(tourism_name) => {
     const sql = `insert into tourism(name) values('${tourism_name}')`
     return save(sql)
@@ -21,10 +16,10 @@ const insertComment = async(comment, tourid, userid) => {
     return save(sql)
 }
 
-const insertImage = ((image, tour) => {
+const insertImage = async(image, tour) => {
     const sql = `insert into images(address, tour_id) values('${image}', ${tour});`;
     return save(sql)
-})
+}
 
 const loadAllTours = () => {
     const sql = `select name from tour ORDER BY id ASC;`
@@ -36,24 +31,29 @@ const loadAllTourism = () => {
     return load(sql)
 }
 
-const findTourByName = (name) => {
+const findTourByName = async(name) => {
     const sql = `select id from tour where name='${name}';`
     return load(sql)
 }
 
-const findTourismByName = (name) => {
+const findTourismByName = async(name) => {
     const sql = `select id from tourism where name='${name}';`
     return load(sql)
 }
 
-const findTourismById = (tourism_id) => {
+const findTourismById = async(tourism_id) => {
     const sql = `select * from tourism where id=${tourism_id};`
     return load(sql)
 }
 
-const loadTourByActivityId = ((act_ids) => {
+const loadTourByActivityId = async(act_ids) => {
     const query = `SELECT DISTINCT t.id, t.name, t.thumbnail, t.rating, t.price, t.review FROM tour t, activity_tour at WHERE t.id=at.tour_id and at.activity_id in (${act_ids}) ORDER BY rating DESC, 
     review DESC;`
+    return load(query)
+}
+
+const loadAllTourActivities = ((cat_id) => {
+    const query = `SELECT * FROM activity_of_tour;`
     return load(query)
 })
 
@@ -78,10 +78,10 @@ const updateReview = ((review, tour_id) => {
 })
 
 module.exports = {
-    insertTour, insertTourKind, insertTourism,
+    insertTour, insertTourism,
     insertComment, loadAllTourism, insertImage,
     loadAllTours, findTourByName, findTourismByName,
     loadTourByActivityId, findTourById,
     loadImagesByTourId, loadCommentsByTourId,
-    findTourismById, updateReview
+    findTourismById, updateReview, loadAllTourActivities
 }

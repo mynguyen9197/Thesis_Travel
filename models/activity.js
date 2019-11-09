@@ -26,11 +26,6 @@ const insertActivityPlace = ((activity_id, place_id) => {
     return save(sql)
 })
 
-const loadAllKinds = (() => {
-    const sql = `select name from activity;`
-    return load(sql)
-})
-
 const loadAllActivities = (() => {
     const sql = `select name from activity`
     return load(sql)
@@ -61,28 +56,23 @@ const loadReviewByPlaceId = ((placeid) => {
     return load(sql)
 })
 
-const loadKindOfActivityOfPlace = ((placeid) => {
-    const sql = `select a.* from activity_place ap, activity a where ap.place_id = ${placeid} and a.id=ap.activity_id;`
-    return load(sql)
-})
-
 const loadTop20ByRating = (() => {
     const query = 'SELECT id, name, thumbnail, rating, ranking, review FROM place ORDER BY rating DESC, ranking DESC, review DESC LIMIT 20;'
     return load(query)
 })  
 
 const loadAllCategories = (() => {
-    const query = 'SELECT * FROM ttd_category;'
+    const query = 'SELECT * FROM place_category;'
     return load(query)
 })
 
 const loadActivitiesByCategoryId = ((cat_id) => {
-    const query = `SELECT * FROM activity WHERE category=${cat_id};`
+    const query = `SELECT * FROM activity_of_place WHERE category=${cat_id};`
     return load(query)
 })
 
 const loadPlacesByActivityId = (([act_ids]) => {
-    const query = `SELECT DISTINCT p.id, p.name, p.thumbnail, p.rating, p.ranking, p.review FROM place p, activity_place ap, activity a WHERE p.id=ap.place_id and ap.activity_id in (${act_ids}) ORDER BY rating DESC, 
+    const query = `SELECT DISTINCT p.id, p.name, p.thumbnail, p.rating, p.ranking, p.review FROM place p, activity_place ap WHERE p.id=ap.place_id and ap.activity_id in (${act_ids}) ORDER BY rating DESC, 
     ranking DESC, review DESC;`
     return load(query)
 })
@@ -110,10 +100,8 @@ module.exports = {
     insertContact,   
     insertComment,
     insertActivityPlace,
-    loadAllKinds,
     loadAllActivities,
     loadDetailById,
-    loadKindOfActivityOfPlace,
     loadImagesByPlaceId,
     loadContactByPlaceId,
     loadCommentsByPlaceId,
