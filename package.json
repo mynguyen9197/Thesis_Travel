@@ -4,7 +4,7 @@
   "description": "A travel and restaurant website that shows hotel and restaurant reviews, accommodation bookings",
   "main": "app.js",
   "scripts": {
-    "start": "nodemon ./bin/www",
+    "start": "node ./bin/www",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "My&Hai",
