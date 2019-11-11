@@ -71,11 +71,11 @@ const loadActivitiesByCategoryId = ((cat_id) => {
     return load(query)
 })
 
-const loadPlacesByActivityId = (([act_ids]) => {
+const loadPlacesByActivityId = async(act_ids) => {
     const query = `SELECT DISTINCT p.id, p.name, p.thumbnail, p.rating, p.ranking, p.review FROM place p, activity_place ap WHERE p.id=ap.place_id and ap.activity_id in (${act_ids}) ORDER BY rating DESC, 
     ranking DESC, review DESC;`
     return load(query)
-})
+}
 
 const findPlaceByName = (name => {
     const query =  `SELECT id, name, thumbnail, rating, ranking, review FROM place WHERE name like '${name}' ORDER BY rating DESC, ranking DESC, review DESC; `
