@@ -48,13 +48,16 @@ router.get('/filter', wrapAsync(async(req, res, next) => {
 }))
 
 router.get('/place_detail/:placeid', wrapAsync(async(req, res, next) => {
-    const { placeid } = req.params
-    const place_detail = await Activity.loadDetailById(placeid)
-    const images = await Activity.loadImagesByPlaceId(placeid)
-    const comments = await Activity.loadCommentsByPlaceId(placeid)
-    const contact = await Activity.loadContactByPlaceId(placeid)
-    const kind = await Activity.loadKindOfActivityOfPlace(placeid)
-    return res.status(200).send({place_detail: place_detail, images: images, comments: comments, contact: contact, kind: kind})
+    try {
+        const { placeid } = req.params
+        const place_detail = await Activity.loadDetailById(placeid)
+        const images = await Activity.loadImagesByPlaceId(placeid)
+        const comments = await Activity.loadCommentsByPlaceId(placeid)
+        const contact = await Activity.loadContactByPlaceId(placeid)
+        return res.status(200).json({place_detail, images, comments, contact})
+    } catch (error) {
+        return res.status(500).send(error)
+    }
 }))
 
 module.exports = router
