@@ -80,32 +80,49 @@ router.post("/place/review", verifyToken, wrapAsync(async(req, res, next) => {
         const { placeid, date, rating } = req.body
         const decoded = jwt.verify(req.token, 'RESTFULAPIs')
         const review = await activity.loadReviewByPlaceId(placeid)
-        calculateRating(review)
-        /* const savedReview = await activity.updateReview(review, placeid)
+        const ratingList = calculateRating(review, rating)
+        const savedReview = await activity.updateReview(ratingList.join(';'), placeid)
         const info = {
             user_id: decoded.id,
-            date: date,
+            date: date.toString(),
             rating: rating,
-
+            rate_for: placeid,
+            kind: 1
         }
-        const saveRating = await userLog.insertRating()
-        res.status(200).json({id: savedReview.insertId}) */
+        const saveRating = await userLog.insertRating(info)
+        return res.status(200).json({id: saveRating.insertId, placeid: savedReview.insertId, message: 'insert successfully'})
     } catch (error) {
         console.log(error)
     }
 }))
 
 router.post("/tour/review", verifyToken, wrapAsync(async(req, res, next) => {
-    const { review, tourid } = req.body
-    const savedReview = await tour.updateReview(review, tourid)
+    try {
+        const { tourid, date, rating } = req.body
+        const decoded = jwt.verify(req.token, 'RESTFULAPIs')
+        const review = await tour.loadReviewByTourId(tourid)
+        const ratingList = calculateRating(review, rating)
+        const savedReview = await tour.updateReview(ratingList.join(';'), tourid)
+        const info = {
+            user_id: decoded.id,
+            date: date.toString(),
+            rating: rating,
+            rate_for: tourid,
+            kind: 2
+        }
+        const saveRating = await userLog.insertRating(info)
+        return res.status(200).json({logid: saveRating.insertId, tourid: savedReview.insertId, message: 'insert successfully'})
+    } catch (error) {
+        console.log(error)
+    }
     res.status(200).json({id: savedReview.insertId})
 }))
 
 function calculateRating(review, rating){
-    let ratingList = review ? review[0].review_detail.split(";") : null
-    console.log(ratingList)
-    ratingList[rating] = ratingList[rating] + 1
-    console.log(ratingList)
+    let ratingList = review ? review[0].review_detail.split(";") : Array(0, 0, 0, 0, 0)
+    ratingList[rating] = parseInt(ratingList[rating].replace(',', '')) + 1
+    ratingList[rating] = ratingList[rating].toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    return ratingList
 }
 
 module.exports = router

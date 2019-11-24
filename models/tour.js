@@ -72,8 +72,13 @@ const loadCommentsByTourId = ((tour_id) => {
     return load(sql)
 })
 
+const loadReviewByTourId = ((tourid) => {
+    const sql = `select review_detail from tour t where t.id=${tourid};`
+    return load(sql)
+})
+
 const updateReview = ((review, tour_id) => {
-    const query =  `update place set review_detail='${review}' where id=${tour_id};`
+    const query =  `update tour set review_detail='${review}' where id=${tour_id};`
     return save(query)
 })
 
@@ -83,5 +88,6 @@ module.exports = {
     loadAllTours, findTourByName, findTourismByName,
     loadTourByActivityId, findTourById,
     loadImagesByTourId, loadCommentsByTourId,
-    findTourismById, updateReview, loadAllTourActivities
+    findTourismById, updateReview, loadAllTourActivities,
+    loadReviewByTourId
 }
