@@ -6,6 +6,7 @@ const bcrypt = require('bcrypt')
 const User = require(global.appRoot + '/models/user')
 const activity = require(global.appRoot + '/models/activity')
 const tour = require(global.appRoot + '/models/tour')
+const userLog = require(global.appRoot + '/models/user-log')
 
 const { wrapAsync } = require(global.appRoot + '/utils')
 router.post('/signup', wrapAsync(async(req, res, next) => {
@@ -75,9 +76,23 @@ router.post("/tour/comment", verifyToken, wrapAsync(async(req, res, next) => {
 }))
 
 router.post("/place/review", verifyToken, wrapAsync(async(req, res, next) => {
-    const { review, placeid } = req.body
-    const savedReview = await activity.updateReview(review, placeid)
-    res.status(200).json({id: savedReview.insertId})
+    try {
+        const { placeid, date, rating } = req.body
+        const decoded = jwt.verify(req.token, 'RESTFULAPIs')
+        const review = await activity.loadReviewByPlaceId(placeid)
+        calculateRating(review)
+        /* const savedReview = await activity.updateReview(review, placeid)
+        const info = {
+            user_id: decoded.id,
+            date: date,
+            rating: rating,
+
+        }
+        const saveRating = await userLog.insertRating()
+        res.status(200).json({id: savedReview.insertId}) */
+    } catch (error) {
+        console.log(error)
+    }
 }))
 
 router.post("/tour/review", verifyToken, wrapAsync(async(req, res, next) => {
@@ -85,5 +100,12 @@ router.post("/tour/review", verifyToken, wrapAsync(async(req, res, next) => {
     const savedReview = await tour.updateReview(review, tourid)
     res.status(200).json({id: savedReview.insertId})
 }))
+
+function calculateRating(review, rating){
+    let ratingList = review ? review[0].review_detail.split(";") : null
+    console.log(ratingList)
+    ratingList[rating] = ratingList[rating] + 1
+    console.log(ratingList)
+}
 
 module.exports = router

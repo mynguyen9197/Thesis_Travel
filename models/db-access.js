@@ -3,9 +3,9 @@ const mysql = require('mysql');
 exports.load = sql => {
     return new Promise((resolve, reject) => {
         const cn = mysql.createConnection({
-            host: 'db4free.net',
+            host: 'localhost',
             port: '3306',
-            user: 'app_root',
+            user: 'root',
             password: 'mysql@12345678',
             database: 'hoian_travel'
         });
@@ -27,9 +27,9 @@ exports.load = sql => {
 exports.save = sql => {
     return new Promise((resolve, reject) => {
         const cn = mysql.createConnection({
-            host: 'db4free.net',
+            host: 'localhost',
             port: '3306',
-            user: 'app_root',
+            user: 'root',
             password: 'mysql@12345678',
             database: 'hoian_travel'
         });

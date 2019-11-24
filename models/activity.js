@@ -31,6 +31,11 @@ const loadAllActivities = (() => {
     return load(sql)
 })
 
+const loadAllIdAndNamePlaces = (() => {
+    const sql = `select id, name as content from place`
+    return load(sql)
+})
+
 const loadDetailById = ((placeid) => {
     const sql = `select * from place p where p.id=${placeid};`
     return load(sql)
@@ -47,12 +52,12 @@ const loadContactByPlaceId = ((placeid) => {
 })
 
 const loadCommentsByPlaceId = ((placeid) => {
-    const sql = `select * from Comments c where c.place_id=${placeid};`
+    const sql = `select * from comments c where c.place_id=${placeid};`
     return load(sql)
 })
 
 const loadReviewByPlaceId = ((placeid) => {
-    const sql = `select * from review_detail r where r.place_id=${placeid};`
+    const sql = `select review_detail from place p where p.id=${placeid};`
     return load(sql)
 })
 
@@ -77,6 +82,12 @@ const loadPlacesByActivityId = async(act_ids) => {
     return load(query)
 }
 
+const findPlacesById = async(place_ids) => {
+    const query = `SELECT * FROM place WHERE id in (${place_ids}) ORDER BY rating DESC, 
+    ranking DESC, review DESC;`
+    return load(query)
+}
+
 const findPlaceByName = (name => {
     const query =  `SELECT id, name, thumbnail, rating, ranking, review FROM place WHERE name like '${name}' ORDER BY rating DESC, ranking DESC, review DESC; `
     return load(query)
@@ -95,22 +106,14 @@ const updateReview = ((review, placeid) => {
 })
 
 module.exports = {
-    insertPlace,
-    insertImage,
-    insertContact,   
-    insertComment,
-    insertActivityPlace,
-    loadAllActivities,
-    loadDetailById,
-    loadImagesByPlaceId,
-    loadContactByPlaceId,
-    loadCommentsByPlaceId,
-    loadReviewByPlaceId,
-    loadTop20ByRating,
-    loadAllCategories,
-    loadActivitiesByCategoryId,
-    loadPlacesByActivityId,
-    findPlaceByName,
-    findPlaceByNameAndActivity,
-    updateReview
+    insertPlace, insertImage,
+    insertContact, insertComment,
+    insertActivityPlace, loadAllActivities,
+    loadDetailById, loadImagesByPlaceId,
+    loadContactByPlaceId, loadCommentsByPlaceId,
+    loadReviewByPlaceId, loadTop20ByRating,
+    loadAllCategories, loadActivitiesByCategoryId,
+    loadPlacesByActivityId, findPlaceByName,
+    findPlaceByNameAndActivity, updateReview, 
+    loadAllIdAndNamePlaces, findPlacesById
 }

@@ -68,7 +68,7 @@ const loadImagesByTourId = ((tour_id) => {
 })
 
 const loadCommentsByTourId = ((tour_id) => {
-    const sql = `select * from Comments c where c.tour_id=${tour_id};`
+    const sql = `select * from comments c where c.tour_id=${tour_id};`
     return load(sql)
 })
 
