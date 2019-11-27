@@ -31,7 +31,6 @@ router.get('/category/:category_id', wrapAsync(async(req, res, next) => {
 router.get('/filter', wrapAsync(async(req, res, next) => {
     const { search, activity_ids } = req.query
     let places = []
-    console.log(activity_ids)
     if (!activity_ids && search) {
         places = await Activity.findPlaceByName(search)
     } else if(activity_ids && search) {

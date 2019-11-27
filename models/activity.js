@@ -27,7 +27,7 @@ const insertActivityPlace = ((activity_id, place_id) => {
 })
 
 const loadAllActivities = (() => {
-    const sql = `select name from activity`
+    const sql = `select name from activity_of_place`
     return load(sql)
 })
 
@@ -52,7 +52,7 @@ const loadContactByPlaceId = ((placeid) => {
 })
 
 const loadCommentsByPlaceId = ((placeid) => {
-    const sql = `select * from comments c where c.place_id=${placeid};`
+    const sql = `select * from comments c, user u where c.place_id=${placeid} and c.user_id=u.id;`
     return load(sql)
 })
 
@@ -76,6 +76,11 @@ const loadActivitiesByCategoryId = ((cat_id) => {
     return load(query)
 })
 
+const loadActivityByName = ((name) => {
+    const query = `SELECT * FROM activity_of_place WHERE name='${name}';`
+    return load(query)
+})
+
 const loadPlacesByActivityId = async(act_ids) => {
     const query = `SELECT DISTINCT p.id, p.name, p.thumbnail, p.rating, p.ranking, p.review FROM place p, activity_place ap WHERE p.id=ap.place_id and ap.activity_id in (${act_ids}) ORDER BY rating DESC, 
     ranking DESC, review DESC;`
@@ -89,13 +94,13 @@ const findPlacesById = async(place_ids) => {
 }
 
 const findPlaceByName = (name => {
-    const query =  `SELECT id, name, thumbnail, rating, ranking, review FROM place WHERE name like '${name}' ORDER BY rating DESC, ranking DESC, review DESC; `
+    const query =  `SELECT id, name, thumbnail, rating, ranking, review FROM place WHERE LOWER(name) like LOWER('%${name}%') ORDER BY rating DESC, ranking DESC, review DESC; `
     return load(query)
 })
 
 const findPlaceByNameAndActivity = ((name, act_ids) => {
     const query = `SELECT DISTINCT p.id, p.name, p.thumbnail, p.rating, p.ranking, p.review FROM place p, activity_place ap
-    WHERE p.id=ap.place_id and ap.activity_id in (${act_ids}) and p.name like '${name}' ORDER BY rating DESC, 
+    WHERE p.id=ap.place_id and ap.activity_id in (${act_ids}) and LOWER(p.name) like LOWER('%${name}%') ORDER BY rating DESC, 
     ranking DESC, review DESC;`
     return load(query)
 })
@@ -115,5 +120,6 @@ module.exports = {
     loadAllCategories, loadActivitiesByCategoryId,
     loadPlacesByActivityId, findPlaceByName,
     findPlaceByNameAndActivity, updateReview, 
-    loadAllIdAndNamePlaces, findPlacesById
+    loadAllIdAndNamePlaces, findPlacesById,
+    loadActivityByName
 }

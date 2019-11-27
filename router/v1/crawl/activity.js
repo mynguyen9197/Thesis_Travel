@@ -38,18 +38,18 @@ const getDetail = async (url) => {
         const review_detail = await getDetailReview(review_detail_html)
         
         const detail = {
-          name: name,
+          name: name.replace(/'/g, "`"),
           thumbnail: thumbnail,
           rating: parseFloat(rating.split(" ")[0].replace(",", ".")),
           review: parseInt(review.split(" ")[0]),
           ranking: ranking, 
-          about: allAbout,
+          about: allAbout.replace(/'/g, "`"),
           review_detail: review_detail
         }
         const savedActivity= await activity.insertPlace(detail)
         
         const contact = {
-          address: address,
+          address: address.replace(/'/g, "`"),
           phone: phone,
           place_id: savedActivity.insertId
         }
@@ -77,12 +77,11 @@ const getDetail = async (url) => {
           }
         }
 
-        let listKinds = await activity.loadAllKinds()
-        listKinds = listKinds.map(x => x.name)
         for(let i=0;i<kind_of_place.length;i++){
-          const index = listKinds.indexOf(kind_of_place[i])
-          if(index != -1){
-            await activity.insertActivityPlace(index + 1, savedActivity.insertId)
+          const act = await activity.loadActivityByName(kind_of_place[i])
+          if(act[0]){
+            const index = act[0].id
+            await activity.insertActivityPlace(index, savedActivity.insertId)
           }
         }
       })
