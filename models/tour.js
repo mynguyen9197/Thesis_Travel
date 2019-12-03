@@ -1,8 +1,8 @@
 const { load, save } = require(global.appRoot + '/models/db-access')
 
 const insertTour = async(tour, tourism) => {
-    const sql = `insert into tour(name, rating, review, price, overview, highlight, wtd, important_info, additional, cancel_policy, key_detail, advantage, thumbnail, tourism_id) 
-    values('${tour.name}', ${tour.rating}, ${tour.review}, ${tour.price}, '${tour.overview}', '${tour.highlight}', '${tour.wtd}', '${tour.important_info}', '${tour.additional}', '${tour.cancel_policy}', '${tour.key_detail}', '${tour.advantage}', '${tour.thumbnail}', ${tourism});`;
+    const sql = `insert into tour(name, rating, review, price, overview, highlight, wtd, important_info, additional, cancel_policy, key_detail, advantage, thumbnail, tourism_id, duration, review_detail) 
+    values('${tour.name}', ${tour.rating}, ${tour.review}, ${tour.price}, '${tour.overview}', '${tour.highlight}', '${tour.wtd}', '${tour.important_info}', '${tour.additional}', '${tour.cancel_policy}', '${tour.key_detail}', '${tour.advantage}', '${tour.thumbnail}', ${tourism}, '${tour.duration}', '${tour.review_detail}');`;
     return save(sql)
 }
 
@@ -18,6 +18,11 @@ const insertComment = async(comment, tourid, userid) => {
 
 const insertImage = async(image, tour) => {
     const sql = `insert into images(address, tour_id) values('${image}', ${tour});`;
+    return save(sql)
+}
+
+const insertActivityTour = async(tour_id, activity_id) => {
+    const sql = `insert into activity_tour(activity_id, tour_id) values(${activity_id}, ${tour_id});`;
     return save(sql)
 }
 
@@ -89,5 +94,5 @@ module.exports = {
     loadTourByActivityId, findTourById,
     loadImagesByTourId, loadCommentsByTourId,
     findTourismById, updateReview, loadAllTourActivities,
-    loadReviewByTourId
+    loadReviewByTourId, insertActivityTour
 }
