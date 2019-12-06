@@ -39,12 +39,24 @@ const getActivityLinks = async (url_hoian) => {
   }
 }
 
+const getDetailReview = async(html) => {
+  const review_detail = []
+  const $ = cheerio.load(html) 
+  $('li').find('span').map((i, el) => {
+      const val =$(el).text()
+      if(!isNaN(val) && val != ''){
+        review_detail.push(val)
+      }
+  })
+  return review_detail.join(';')
+}
+
 const getReviews = async(html) => {  
   const $ = cheerio.load(html) 
   const review_comment = []
-  $('.review-container').map((i, el) => {
+  $('.location-review-review-list-parts-SingleReview__mainCol--1hApa').map((i, el) => {
     const quote = $(el).find('a').text()
-    const review_text = $(el).find('.partial_entry').text()
+    const review_text = $(el).find('span').text()
     const commet = {
       quote: quote.replace(/'/g, "`"),
       content: review_text.replace(/'/g, "`")
@@ -52,15 +64,6 @@ const getReviews = async(html) => {
     review_comment.push(commet)
   })
   return review_comment
-}
-
-const getDetailReview = async(html) => {
-    const review_detail = []
-    const $ = cheerio.load(html) 
-    $('.row_num').map((i, el) => {
-        review_detail.push($(el).text())
-    })
-    return review_detail.join(';')
 }
 
 module.exports = {

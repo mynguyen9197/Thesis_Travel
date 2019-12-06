@@ -11,54 +11,56 @@ const { getReviews, getDetailReview } = require('./utils')
 
 const getDetail = async (url) => {
   try {
-    const browser = await puppeteer.launch()
+    const browser = await puppeteer.launch({ignoreDefaultArgs: ['--disable-extensions']})
     const page = await browser.newPage()
     await page.goto(url + '#photos;aggregationId=&albumid=101&filter=7').then(async() => {
       page.content().then(async(content) =>{
         let $ = cheerio.load(content)
-        const name = $('#HEADING').text()
-        const thumbnail = $('.attractions_large').find('img').attr('src')
-        const rating = $('.ratingContainer').find('span').attr('alt')
-        const review = $('.ratingContainer').text()
-        const ranking = $('.popIndexContainer').text()
+        const name = $('.ui_header').first().text()
+        const foundName = await activity.loadByName(name)
+        if(foundName.length !== 0) return
+        let rating = $('.ui_header').first().next().find('span').attr('class').split('_')
+        rating = parseFloat(rating[rating.length - 1])/10
+        const review = $('.ui_header').first().next().find('span').eq(1).text().split(' ')[0]
+        const ranking = $('.ui_header').parent().next().find('span').first().text()
+        const kind_of_place = $('.ui_header').parent().next().find('span').eq(2).text()
+        const overview = $('.attractions-attraction-review-atf-overview-card-AttractionReviewATFOverviewCard__section--2uMTX').children('span').text()
+        let duration = $('.attractions-attraction-detail-about-card-AboutSection__sectionWrapper--3PMQg').text()
+        if(duration){
+          duration = duration.split(':')[1]
+        }
 
-        /*contact*/
-        const address = $('.address').text()
-        const phone = $('.phone').text()
+        let address = $('.attractions-attraction-review-atf-overview-card-Address__address_container--GORbF').text()
+        if(address){
+          address = address.split(':')[1]
+        }
+
+        let thumbnail = $('._1DZ3tIGJ').first().find('div').css('background-image')
+        thumbnail = thumbnail.replace('url(','').replace(')','').replace(/\"/gi, "")
         
-        /*about */
-        const allAbout = $('.attractions-attraction-detail-about-card-AttractionDetailAboutCard__section--1_Efg').text()
-
+        /*contact*/
+        const phone = $('.phone').first().text()
+        
         let comment = {}
         let images = {}
         
-        const kind_of_place = $('.attractionCategories').text().split(" More")[0].split(", ")
-        
-        const review_detail_html = $('.collapsibleContent').html()
-        const review_detail = await getDetailReview(review_detail_html)
+        const reviewdt = $('[data-test-target="reviews-tab"]').find('.location-review-review-list-parts-ReviewFilters__filters_wrap--y1t86').find('.ui_columns ').html()
+        const review_detail = await getDetailReview(reviewdt)
         
         const detail = {
           name: name.replace(/'/g, "`"),
-          thumbnail: thumbnail,
-          rating: parseFloat(rating.split(" ")[0].replace(",", ".")),
-          review: parseInt(review.split(" ")[0]),
+          rating, review,
           ranking: ranking, 
-          about: allAbout.replace(/'/g, "`"),
+          about: overview.replace(/'/g, "`"),
+          duration, address,
+          thumbnail, phone,
           review_detail: review_detail
         }
+        console.log(detail)
         const savedActivity= await activity.insertPlace(detail)
         
-        const contact = {
-          address: address.replace(/'/g, "`"),
-          phone: phone,
-          place_id: savedActivity.insertId
-        }
-        await activity.insertContact(contact)
-
-        const reviews_html = $('.listContainer').html()
-        await getReviews(reviews_html).then((result) => {
-          comment = result
-        })
+        const comments = await getReviews($('[data-test-target="reviews-tab"]').html())
+        console.log({review_detail, comments})
         for(let i=0; i<comment.length;i++){
           if(comment[i] != null){
             await activity.insertComment(comment[i], savedActivity.insertId, 5)
@@ -76,6 +78,7 @@ const getDetail = async (url) => {
             }
           }
         }
+        //console.log(images)
 
         for(let i=0;i<kind_of_place.length;i++){
           const act = await activity.loadActivityByName(kind_of_place[i])
