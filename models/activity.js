@@ -1,8 +1,8 @@
 const { load, save } = require(global.appRoot + '/models/db-access')
 
 const insertPlace = (async(place) => {
-    const sql = `insert into place(name, about, thumbnail, rating, review, ranking, open_hour, duration, review_detail) 
-    values('${place.name}', '${place.about}', '${place.thumbnail}', ${place.rating}, ${place.review}, '${place.ranking}', '${place.open_hour}', '${place.duration}', '${place.review_detail}');`;
+    const sql = `insert into place(name, about, thumbnail, rating, review, ranking, duration, review_detail, address, phone) 
+    values('${place.name}', '${place.about}', '${place.thumbnail}', ${place.rating}, ${place.review}, '${place.ranking}', '${place.open_hour}', '${place.duration}', '${place.review_detail}', '${place.address}', '${place.phone}');`;
     return save(sql)
 })
 
@@ -33,6 +33,11 @@ const loadAllActivities = (() => {
 
 const loadAllIdAndNamePlaces = (() => {
     const sql = `select id, name as content from place`
+    return load(sql)
+})
+
+const loadByName = ((name) => {
+    const sql = `select id, name from place where name='${name}';`
     return load(sql)
 })
 
@@ -121,5 +126,5 @@ module.exports = {
     loadPlacesByActivityId, findPlaceByName,
     findPlaceByNameAndActivity, updateReview, 
     loadAllIdAndNamePlaces, findPlacesById,
-    loadActivityByName
+    loadActivityByName, loadByName
 }

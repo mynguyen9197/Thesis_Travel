@@ -58,7 +58,7 @@ const getDetail = async (url, type) => {
             listAdvantage.push($(el).text())
           })
 
-          const reviewdt = $('[data-test-target="reviews-tab"]').find  ('.location-review-review-list-parts-ReviewFilters__filters_wrap--y1t86').find('.ui_columns ').html()
+          const reviewdt = $('[data-test-target="reviews-tab"]').find('.location-review-review-list-parts-ReviewFilters__filters_wrap--y1t86').find('.ui_columns ').html()
           const review_detail = await getDetailReview(reviewdt)
           
           const comments = await getReviews($('[data-test-target="reviews-tab"]').html())
