@@ -21,10 +21,12 @@ const getDetail = async (url) => {
         if(foundName.length !== 0) return
         let rating = $('.ui_header').first().next().find('span').attr('class').split('_')
         rating = parseFloat(rating[rating.length - 1])/10
+        console.log(rating)
         const review = $('.ui_header').first().next().find('span').eq(1).text().split(' ')[0]
         const ranking = $('.ui_header').parent().next().find('span').first().text()
-        const kind_of_place = $('.ui_header').parent().next().find('span').eq(2).text()
+        const kind_of_place = $('.ui_header').parent().next().find('span').eq(2).text().split(', ')
         const overview = $('.attractions-attraction-review-atf-overview-card-AttractionReviewATFOverviewCard__section--2uMTX').children('span').text()
+        console.log({review, ranking, kind_of_place, overview})
         let duration = $('.attractions-attraction-detail-about-card-AboutSection__sectionWrapper--3PMQg').text()
         if(duration){
           duration = duration.split(':')[1]
@@ -56,11 +58,10 @@ const getDetail = async (url) => {
           thumbnail, phone,
           review_detail: review_detail
         }
-        console.log(detail)
         const savedActivity= await activity.insertPlace(detail)
         
         const comments = await getReviews($('[data-test-target="reviews-tab"]').html())
-        console.log({review_detail, comments})
+        //console.log({review_detail, comments})
         for(let i=0; i<comment.length;i++){
           if(comment[i] != null){
             await activity.insertComment(comment[i], savedActivity.insertId, 5)
