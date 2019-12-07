@@ -2,7 +2,7 @@ const { load, save } = require(global.appRoot + '/models/db-access')
 
 const insertPlace = (async(place) => {
     const sql = `insert into place(name, about, thumbnail, rating, review, ranking, duration, review_detail, address, phone) 
-    values('${place.name}', '${place.about}', '${place.thumbnail}', ${place.rating}, ${place.review}, '${place.ranking}', '${place.open_hour}', '${place.duration}', '${place.review_detail}', '${place.address}', '${place.phone}');`;
+    values('${place.name}', '${place.about}', '${place.thumbnail}', ${place.rating}, ${place.review}, '${place.ranking}', '${place.duration}', '${place.review_detail}', '${place.address}', '${place.phone}');`;
     return save(sql)
 })
 
