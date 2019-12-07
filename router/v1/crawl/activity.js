@@ -11,7 +11,7 @@ const { getReviews, getDetailReview } = require('./utils')
 
 const getDetail = async (url) => {
   try {
-    const browser = await puppeteer.launch({ignoreDefaultArgs: ['--disable-extensions']})
+    const browser = await puppeteer.launch({ignoreDefaultArgs: ['--disable-extensions'], args: ['--no-sandbox']})
     const page = await browser.newPage()
     await page.goto(url + '#photos;aggregationId=&albumid=101&filter=7').then(async() => {
       page.content().then(async(content) =>{
@@ -90,6 +90,7 @@ const getDetail = async (url) => {
         }
       })
     })
+    browser.close();
   } catch (error) {
     console.error(error)
   }
