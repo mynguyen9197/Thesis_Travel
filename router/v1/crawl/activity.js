@@ -4,11 +4,13 @@ const axios = require('axios')
 const puppeteer = require('puppeteer')
 
 const router = express.Router()
-
+//xong cai dong link nay thi lay tu si_mon lay xuong
 const activity = require(global.appRoot + '/models/activity')
 const { wrapAsync } = require(global.appRoot + '/utils')
 const { getReviews, getDetailReview } = require('./utils')
-const activityLinks = ["https://www.tripadvisor.com//Attraction_Review-g298082-d12594260-Reviews-Escape_IQ_Hoi_An-Hoi_An_Quang_Nam_Province.html","https://www.tripadvisor.com//Attraction_Review-g298082-d19077328-Reviews-Writeyourjourney-Hoi_An_Quang_Nam_Province.html","https://www.tripadvisor.com//Attraction_Review-g298082-d17535969-Reviews-Sam_Sam_Cloth_Shop-Hoi_An_Quang_Nam_Province.html","https://www.tripadvisor.com//Attraction_Review-g298082-d19466381-Reviews-Art_Food_Culture-Hoi_An_Quang_Nam_Province.html","https://www.tripadvisor.com//Attraction_Review-g298082-d10085029-Reviews-Pottery_Tour-Hoi_An_Quang_Nam_Province.html","https://www.tripadvisor.com//Attraction_Review-g298082-d19432490-Reviews-ECO_NAIL_SPA-Hoi_An_Quang_Nam_Province.html","https://www.tripadvisor.com//Attraction_Review-g298082-d19513054-Reviews-Dung_Basket_Boat_Trip-Hoi_An_Quang_Nam_Province.html","https://www.tripadvisor.com//Attraction_Review-g298082-d15327510-Reviews-Phap_Gallery-Hoi_An_Quang_Nam_Province.html","https://www.tripadvisor.com//Attraction_Review-g298082-d19176104-Reviews-LIT_decor-Hoi_An_Quang_Nam_Province.html","https://www.tripadvisor.com//Attraction_Review-g298082-d17585414-Reviews-Bong_Tailor-Hoi_An_Quang_Nam_Province.html","https://www.tripadvisor.com//Attraction_Review-g298082-d14096778-Reviews-The_Amazing_Race_Hoi_An-Hoi_An_Quang_Nam_Province.html","https://www.tripadvisor.com//Attraction_Review-g298082-d17844886-Reviews-Lantern_Shop_Hoa_Mai-Hoi_An_Quang_Nam_Province.html","https://www.tripadvisor.com//Attraction_Review-g298082-d15214279-Reviews-Local_tour_guide_in_Hoian-Hoi_An_Quang_Nam_Province.html","https://www.tripadvisor.com//Attraction_Review-g298082-d5122325-Reviews-Hoi_An_Cinema-Hoi_An_Quang_Nam_Province.html","https://www.tripadvisor.com//Attraction_Review-g298082-d18849206-Reviews-Locked_Hoi_An_Escape_Room-Hoi_An_Quang_Nam_Province.html","https://www.tripadvisor.com//Attraction_Review-g298082-d8322524-Reviews-Titan_Cyber_Game_Internet_Cafe-Hoi_An_Quang_Nam_Province.html","https://www.tripadvisor.com//Attraction_Review-g298082-d19415295-Reviews-The_Little_GARDEN_Basket_boat_cooking_class-Hoi_An_Quang_Nam_Province.html","https://www.tripadvisor.com//Attraction_Review-g298082-d19683172-Reviews-SAPO_Natural_Handmade_Soap_Hoi_An-Hoi_An_Quang_Nam_Province.html","https://www.tripadvisor.com//Attraction_Review-g298082-d19492963-Reviews-Cherry_Spa-Hoi_An_Quang_Nam_Province.html","https://www.tripadvisor.com//Attraction_Review-g298082-d19445360-Reviews-Miu_Beauty_Salon_Spa-Hoi_An_Quang_Nam_Province.html","https://www.tripadvisor.com//Attraction_Review-g298082-d19346076-Reviews-Emerald_waters_spa-Hoi_An_Quang_Nam_Province.html","https://www.tripadvisor.com//Attraction_Review-g298082-d19274876-Reviews-Triem_Tay_Bamboo_Village_Tours-Hoi_An_Quang_Nam_Province.html","https://www.tripadvisor.com//Attraction_Review-g298082-d19209809-Reviews-XUA_studio-Hoi_An_Quang_Nam_Province.html","https://www.tripadvisor.com//Attraction_Review-g298082-d17736986-Reviews-Be_Homies_Tour-Hoi_An_Quang_Nam_Province.html","https://www.tripadvisor.com//Attraction_Review-g298082-d17735744-Reviews-Mr_Vien_Lam-Hoi_An_Quang_Nam_Province.html","https://www.tripadvisor.com//Attraction_Review-g298082-d14191676-Reviews-Murder_Mystery_Hoi_An-Hoi_An_Quang_Nam_Province.html"]
+var detailArray = []
+const imagesArray = []
+const activityLinks = []
 const getDetail = async (url) => {
   try {
     const browser = await puppeteer.launch({ignoreDefaultArgs: ['--disable-extensions'], args: ['--no-sandbox']})
@@ -18,7 +20,12 @@ const getDetail = async (url) => {
     await page.goto(url,{waitUntil: 'load',timeout:0}).then(async() => {
       page.content().then(async(content) =>{
         let $ = cheerio.load(content)
-      
+
+        const name = $('.ui_header').first().text()
+        var open_hour = ''
+        if($('.dayRange').html()!=null) {
+          open_hour = $('.dayRange').first().text() + '     ' + $('.timeRange').first().text()
+        }
         var rating = $('.overallRating').first().text()
         if(rating=='') {
           rating=$('.ui_bubble_rating').first().attr('class')
@@ -38,9 +45,9 @@ const getDetail = async (url) => {
           kind_of_place = $('.attractions-supplier-profile-SupplierCategories__headerDetail--2Fk4B').first().text()
         }
         
-        var overview = $('.attractions-attraction-detail-about-card-AttractionDetailAboutCard__section--1_Efg').eq(1).text()
-        if(overview == '') {
-          overview = $('.attractions-supplier-profile-SupplierDescription__description--lzIK9').first().text()
+        var about = $('.attractions-attraction-detail-about-card-AttractionDetailAboutCard__section--1_Efg').eq(1).text()
+        if(about == '') {
+          about = $('.attractions-supplier-profile-SupplierDescription__description--lzIK9').first().text()
         }
 
         let duration = $('.attractions-attraction-detail-about-card-AboutSection__sectionWrapper--3PMQg').last().text()
@@ -59,6 +66,27 @@ const getDetail = async (url) => {
       
        
         var images = {}
+        var thumbnail = {}
+        console.log({name, about, thumbnail, rating,review, ranking,open_hour, duration,review_detail, address, phone, kind_of_place, comments,images})
+        console.log(',')
+      })
+    })
+    //browser.close();
+  } catch (error) {
+    console.error(error)
+  }
+}
+
+const getImage = async (url) => {
+  try {
+    const browser = await puppeteer.launch({ignoreDefaultArgs: ['--disable-extensions'], args: ['--no-sandbox']})
+    const page = await browser.newPage()
+    await page.setDefaultNavigationTimeout(0)
+    await page.setDefaultTimeout(0)
+    await page.goto(url+'#photos;aggregationId=&albumid=101&filter=7',{waitUntil: 'load',timeout:0}).then(async() => {
+      page.content().then(async(content) =>{
+        let $ = cheerio.load(content)
+        var images = {}
         const images_html = $('.photoGridBox').html()
         if(images_html != null){
           if($('.albumGridItem').html() == null) {
@@ -71,12 +99,65 @@ const getDetail = async (url) => {
             })
           }
         }
-        console.log({rating,review, ranking, kind_of_place, overview,duration, address, phone,review_detail, comments,images})
+        console.log(images)
+        console.log(',')
       })
     })
     //browser.close();
   } catch (error) {
     console.error(error)
+  }
+}
+
+const joinImageandDetail = async(details, images) => { //viet lai ham nay cho no chuan ti, thuat toan long leo
+  if(details.length!=images.length) {
+    console.log({detailLength: details.length,imagesLenght: images.length})
+    return
+  }
+  for(let i=0;i<details.length;i++) {
+    details[i].thumbnail = images[i][0]
+    details[i].images = images[i]
+    savetoDB(details[i])
+  }
+}
+
+const savetoDB = async (item) => {
+  const detail = {
+    name: item.name.replace(/'/g, "`"),
+    rating: item.rating,
+    review: item.review,
+    ranking: item.ranking,
+    about: item.about.replace(/'/g, "`"),
+    duration: item.duration,
+    address: item.address.replace(/'/g, "`"),
+    thumbnail: item.thumbnail,
+    review_detail: item.review_detail,
+    open_hour: item.open_hour,
+    phone: item.phone
+  }
+  const saveActivity = await activity.insertPlace(detail)
+
+  for(let i=0;i<item.images.length;i++) {
+    if(item.images[i]!=null) {
+      await activity.insertImage(item.images[i],saveActivity.insertId)
+    }
+  }
+
+  for(let i=0;i<item.comments.length;i++) {
+    if(item.comments[i] != null){
+      await activity.insertComment(item.comments[i], saveActivity.insertId, 5)
+    }
+  }
+
+  const kindOfPlaceArray = item.kind_of_place.split(', ')
+ 
+  for(let i=0;i<kindOfPlaceArray.length;i++){
+   const act = await activity.loadActivityByName(kindOfPlaceArray[i])
+    
+    if(act[0]){
+      const index = act[0].id
+      await activity.insertActivityPlace(index, saveActivity.insertId)
+    }
   }
 }
 
