@@ -24,12 +24,12 @@ const getLinksPage = async (url_category) => {
   }
 }
 
-const getActivityLinks = async (url_hoian) => {
+const getLinksPerPage = async (url_hoian, clas) => {
   try {
     const listUrl = []
     const response = await axios.get(url_hoian)
     const $ = cheerio.load(response.data)
-    $('.attraction_element').map((i, el) => {
+    $(clas).map((i, el) => {
         const url_detail = $(el).find('a').attr('href')
         listUrl.push(url + url_detail.replace(/\n/g, ''))
     })
@@ -67,7 +67,7 @@ const getReviews = async(html) => {
 }
 
 module.exports = {
-    getActivityLinks, 
+    getLinksPerPage, 
     getLinksPage,
     getReviews,
     getDetailReview
