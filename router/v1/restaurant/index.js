@@ -15,22 +15,16 @@ router.get('/', wrapAsync(async(req, res, next) => {
     res.status(200).send({cuisines, features, foodTypes, meals, listRestaurants})
 }))
 
-router.get('/filter', wrapAsync(async(req, res, next) => {
-    const { search, cuisines, features, foodTypes, meals } = req.query
-    let restaurant = []
-    if (!activity_ids && search) {
-        restaurant = await Activity.findPlaceByName(search)
-    } else if(activity_ids && search) {
-        restaurant = await Activity.findPlaceByNameAndActivity(search, activity_ids)
-    } else if (activity_ids && !search) {
-        restaurant = await Activity.loadPlacesByActivityId(activity_ids)
-    } else {
-        return res.status(500).send({error: 'Please add filter or search'})
+router.get('/restaurant_detail/:id', wrapAsync(async(req, res, next) => {
+    try {
+        const { id } = req.params
+        const restaurant = await Restaurant.findRestaurantById(id)
+        const images = await Restaurant.loadImagesByRestaurantId(id)
+        const comments = await Restaurant.loadCommentsByRestaurantId(id)
+        return res.status(200).json({restaurant, images, comments})
+    } catch (error) {
+        return res.status(500).send(error)
     }
-    if(restaurant.length == 0){
-        return res.status(404).send({error: 'No Activity Was Found'})
-    }
-    return res.status(200).json({places: restaurant})
 }))
 
 module.exports = router

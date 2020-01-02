@@ -18,7 +18,7 @@ const getDetail = async (url) => {
                 const name = $('.h1').text().replace(/'/g, "`")
                 const existedRest = await Restaurant.findRestaurantByName(name)
                 if(existedRest.length > 0) {
-                  console.log('restaurant already exists')
+                  console.log(name + ' restaurant already exists')
                   return
                 }
                 let rating = $('.ratingContainer').find('span').first().attr('alt')
@@ -30,7 +30,11 @@ const getDetail = async (url) => {
                     reviewCount = reviewCount.split(" ")[0]
                 }
                 const ranking = $('.popIndexContainer').text()
-                const kindList = []
+                const type = $('.popIndexContainer').find('a').text().split(' in')[0]
+                let kindList = []
+                if(type){
+                  kindList.push(type)
+                }
                 $('.header_links').find('a').map((i, el) => {
                     kindList.push($(el).text())
                 })
@@ -52,7 +56,7 @@ const getDetail = async (url) => {
                   }
                 })
 
-                const about = $('.restaurants-details-card-DesktopView__desktopAboutText--1VvQH').text()
+                const about = $('.restaurants-details-card-DesktopView__desktopAboutText--1VvQH').text().replace(/'/g, "`")
 
                 let title_class = null, detail_class = null
                 if($('.restaurants-detail-overview-cards-DetailsSectionOverviewCard__categoryTitle--2RJP_').length > 0){
@@ -94,12 +98,19 @@ const getDetail = async (url) => {
                   from: price ? price.from : '', to: price ? price.to : '' , about, kind: kindList.join(', '), meals: meals ? meals.join(', ') : '', features: features ? features.join(', ') : ''
                 }
                 
+                if(info.diets){
+                  info.diets.map(x => {
+                    kindList.push(x)
+                  })
+                  kindList = kindList.filter(onlyUnique)
+                }
+
                 //saving zone
                 const savedRest = await Restaurant.insertRestaurant(restaurant)
                 
                 for(let i=0; i<comments.length;i++){
                   if(comments[i] != null){
-                    await Restaurant.insertComment(comments[i], savedRest.insertId, 1)
+                    await Restaurant.insertComment(comments[i], savedRest.insertId, Math.floor(Math.random() * 10) + 1)
                   }
                 }
 
@@ -223,19 +234,23 @@ const getDetails = async(titles, details) => {
   }
 }
 
+function onlyUnique(value, index, self) { 
+  return self.indexOf(value) === index;
+}
+
 router.post('/saveDetail', wrapAsync(async(req, res, next) => {
   const { link } = req.body
   const list = [
-    "https://www.tripadvisor.com//Restaurant_Review-g298082-d8327556-Reviews-The_Espresso_Station-Hoi_An_Quang_Nam_Province.html",
-        "https://www.tripadvisor.com//Restaurant_Review-g298082-d10768724-Reviews-Olivier_Coffee-Hoi_An_Quang_Nam_Province.html",
-        "https://www.tripadvisor.com//Restaurant_Review-g298082-d17375971-Reviews-Phin_Coffee_Japanese_Bridge-Hoi_An_Quang_Nam_Province.html",
-        "https://www.tripadvisor.com//Restaurant_Review-g298082-d12254323-Reviews-Phin_Coffee-Hoi_An_Quang_Nam_Province.html",
-        "https://www.tripadvisor.com//Restaurant_Review-g298082-d7086380-Reviews-11_Coffee-Hoi_An_Quang_Nam_Province.html",
-        "https://www.tripadvisor.com//Restaurant_Review-g298082-d14509377-Reviews-Avos_Mango-Hoi_An_Quang_Nam_Province.html",
-        "https://www.tripadvisor.com//Restaurant_Review-g298082-d15697047-Reviews-Nourish_Eatery-Hoi_An_Quang_Nam_Province.html",
-        "https://www.tripadvisor.com//Restaurant_Review-g298082-d10331162-Reviews-Rosie_s_cafe-Hoi_An_Quang_Nam_Province.html",
-        "https://www.tripadvisor.com//Restaurant_Review-g298082-d10696326-Reviews-Passion_Fruit_Coffee-Hoi_An_Quang_Nam_Province.html",
-        "https://www.tripadvisor.com//Restaurant_Review-g298082-d3844277-Reviews-Reaching_Out_Tea_House-Hoi_An_Quang_Nam_Province.html"
+    "https://www.tripadvisor.com//Restaurant_Review-g298082-d4100845-Reviews-Kumquat_BBQ_Restaurant-Hoi_An_Quang_Nam_Province.html",
+        "https://www.tripadvisor.com//Restaurant_Review-g298082-d2645497-Reviews-Hi_Restaurant-Hoi_An_Quang_Nam_Province.html",
+        "https://www.tripadvisor.com//Restaurant_Review-g298082-d9855125-Reviews-Green_Heaven_Restaurant_Bar-Hoi_An_Quang_Nam_Province.html",
+        "https://www.tripadvisor.com//Restaurant_Review-g298082-d8814820-Reviews-The_Hoian_Sincerity_Restaurant-Hoi_An_Quang_Nam_Province.html",
+        "https://www.tripadvisor.com//Restaurant_Review-g298082-d2180297-Reviews-Lantern_Town_Restaurant-Hoi_An_Quang_Nam_Province.html",
+        "https://www.tripadvisor.com//Restaurant_Review-g298082-d2409908-Reviews-Micasa_Restaurant-Hoi_An_Quang_Nam_Province.html",
+        "https://www.tripadvisor.com//Restaurant_Review-g298082-d10331100-Reviews-Mamma_s_Gourmet_Cooking_Class_Fine_Dining_in_Authentic_Garden_Restaurant-Hoi_An_.html",
+        "https://www.tripadvisor.com//Restaurant_Review-g298082-d13166606-Reviews-Old_Town_Bar_and_Bistro-Hoi_An_Quang_Nam_Province.html",
+        "https://www.tripadvisor.com//Restaurant_Review-g298082-d13083898-Reviews-Golden_Nut_Hoi_An_Restaurant-Hoi_An_Quang_Nam_Province.html",
+        "https://www.tripadvisor.com//Restaurant_Review-g298082-d1891091-Reviews-Bao_Han-Hoi_An_Quang_Nam_Province.html",
   ]
   for(let i=0; i<list.length; i++){
     await getDetail(list[i])

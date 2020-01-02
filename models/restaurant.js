@@ -95,6 +95,21 @@ const loadTop20ByRating = (async() => {
     return load(query)
 }) 
 
+const findRestaurantById = async(id) => {
+    const sql = `SELECT * FROM restaurant WHERE id=${id};`
+    return load(sql)
+}
+
+const loadImagesByRestaurantId = async(id) => {
+    const sql = `SELECT * FROM images_restaurant where res_id=${id};`
+    return load(sql)
+}
+
+const loadCommentsByRestaurantId = async(id) => {
+    const sql = `SELECT * FROM comments_restaurant where res_id=${id};`
+    return load(sql)
+}
+
 module.exports = {
     insertRestaurant, insertImage, insertComment,
     insertCuisine, findCuisineByName, insertCuisineRestaurant,
@@ -102,6 +117,7 @@ module.exports = {
     findRestaurantByName, findFoodTypeByName, findMealByName,
     findMealByName, findRestFeatureByName, insertFoodTypeRestaurant,
     loadAllCuisines, loadAllFeatures, loadAllFoodMeal, loadAllFoodType,
-    loadTop20ByRating
+    loadTop20ByRating, findRestaurantById, loadImagesByRestaurantId,
+    loadCommentsByRestaurantId
     
 }
