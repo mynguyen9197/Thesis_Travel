@@ -110,6 +110,41 @@ const loadCommentsByRestaurantId = async(id) => {
     return load(sql)
 }
 
+const findResByNameCuisines = ((name, cuisines_ids) => {
+    const query = `SELECT DISTINCT r.* from restaurant r, cuisine_restaurant cr
+    WHERE r.id=cr.res_id and cr.cuisine_id in (${cuisines_ids}) and LOWER(r.name) like LOWER('%${name}%') 
+    ORDER BY common_rating DESC, review_count DESC;`
+    return load(query)
+})
+
+const findResByNameFeatures = ((name, features_ids) => {
+    const query = `SELECT DISTINCT r.* from restaurant r, feature_restaurant fr
+    WHERE r.id=fr.res_id and fr.feature_id in (${features_ids}) and LOWER(r.name) like LOWER('%${name}%') 
+    ORDER BY common_rating DESC, review_count DESC;`
+    return load(query)
+})
+
+const findResByNameFoodTypes = ((name, types_ids) => {
+    const query = `SELECT DISTINCT r.* from restaurant r, foodtype_restaurant fr
+    WHERE r.id=fr.res_id and fr.type_id in (${types_ids}) and LOWER(r.name) like LOWER('%${name}%') 
+    ORDER BY common_rating DESC, review_count DESC;`
+    return load(query)
+})
+
+const findResByName = ((name) => {
+    const query = `SELECT DISTINCT * from restaurant r 
+    WHERE LOWER(r.name) like LOWER('%${name}%') 
+    ORDER BY common_rating DESC, review_count DESC;`
+    return load(query)
+})
+
+const findResByNameMeals = ((name, meals_ids) => {
+    const query = `SELECT DISTINCT r.* from restaurant r, meal_restaurant mr
+    WHERE r.id=mr.res_id and mr.meal_id in (${meals_ids}) and LOWER(r.name) like LOWER('%${name}%') 
+    ORDER BY common_rating DESC, review_count DESC;`
+    return load(query)
+})
+
 module.exports = {
     insertRestaurant, insertImage, insertComment,
     insertCuisine, findCuisineByName, insertCuisineRestaurant,
@@ -118,6 +153,7 @@ module.exports = {
     findMealByName, findRestFeatureByName, insertFoodTypeRestaurant,
     loadAllCuisines, loadAllFeatures, loadAllFoodMeal, loadAllFoodType,
     loadTop20ByRating, findRestaurantById, loadImagesByRestaurantId,
-    loadCommentsByRestaurantId
+    loadCommentsByRestaurantId, findResByNameCuisines, findResByNameFeatures,
+    findResByNameFoodTypes, findResByNameMeals, findResByName
     
 }
