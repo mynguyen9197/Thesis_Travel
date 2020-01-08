@@ -15,17 +15,22 @@ const getDetail = async (url, type) => {
     await page.goto(url).then(async() => {
       page.content().then(async(content) =>{
         let $ = cheerio.load(content)
-        const name = $('.h1').text()
+        const name = $('.IKwHbf8J').text()
+        let existedTour = await tour.findTourByActivityName(name, type)
+        if(existedTour.length > 0){
+          console.log(name + ' already existed')
+          return
+        }
         let listTours = await tour.findTourByName(name)
         listTours = listTours.map(x => x.id)
         let indexTour = 0
         if(listTours.length === 0){
-          const supporter_name = $('.attractions-product-info-SupplierLink__linkBlock--2iDNq').find('a').text().replace(/'/g, "`").split("By: ")[1]
-          let rating = $('.ui_poi_review_rating  ').length
-          rating = parseFloat(rating[rating.length - 1])/10
-          const review = $('.ui_poi_review_rating  ').find('a').text().split(' ')[0]
+          const supporter_name = $('._3Wn58Cpp').text()
+          let rating = $('.ui_poi_review_rating  ').length ? $('.ui_poi_review_rating  ').find('span').attr('class').split('_') : null
+          rating = rating ? parseFloat(rating[rating.length - 1])/10 : 0
+          const review = $('._82HNRypW').length ? $('._82HNRypW').text().split(' ')[0] : 0
           const price = parseFloat($('.attractions-northstar-tour-planner-desktop-Header__mainPrice--1P3Ou').text().substring(1).replace(/,/g, ""))
-          const overview = $('._2zqaS_NY').first().text().trim().replace(/'/g, "`")
+          const overview = $("div[data-tab='TABS_OVERVIEW']").text()
           const listImg = []
           $('.media-media-carousel-MediaCarousel__carouselImage--SYdol').map((i, ele) => {
             listImg.push($(ele).find('img').attr('src'))
@@ -37,8 +42,8 @@ const getDetail = async (url, type) => {
           })
           
           let tabs = []
-          $('.tab-bars-tab-button-tab-button__tab--3I-DQ').map((i, el) => {
-            const x =$(el).find('a').text()
+          $('._2H8zQEmE').find('.XIJ2_uUh').map((i, el) => {
+            const x =$(el).text()
             tabs.push(x)
           })
           
@@ -57,11 +62,12 @@ const getDetail = async (url, type) => {
           $('._1lrXOhKj').find('li').map((i, el) => {
             listAdvantage.push($(el).text())
           })
-
-          const reviewdt = $('[data-test-target="reviews-tab"]').find('.location-review-review-list-parts-ReviewFilters__filters_wrap--y1t86').find('.ui_columns ').html()
-          const review_detail = await getDetailReview(reviewdt)
           
-          const comments = await getReviews($('[data-test-target="reviews-tab"]').html())
+          const reviewhtml = $('[data-test-target="reviews-tab"]').length ? $('[data-test-target="reviews-tab"]').html() : null
+          const reviewdt = reviewhtml ? $('[data-test-target="reviews-tab"]').find('.location-review-review-list-parts-ReviewFilters__filters_wrap--y1t86').find('.ui_columns ').html() : null
+          const review_detail = reviewdt ? await getDetailReview(reviewdt) : ''
+          
+          const comments = reviewhtml ? await getReviews($('[data-test-target="reviews-tab"]').html()) : ''
           
           let highlight, wtd, important_info, additional, cancel_policy, tourInfo=''
           if(tabs.includes('Highlights')){
@@ -78,8 +84,8 @@ const getDetail = async (url, type) => {
             additional = await getAdditional(listInfo[3])
             cancel_policy = await getCancelPolicy(listInfo[4])
             tourInfo = { 
-              name, rating, review, price, overview, highlight: highlight.join("\n").replace(/'/g, "`"),
-              wtd, important_info, additional: additional.join("\n").replace(/'/g, "`"), cancel_policy, key_detail: listKey.join("\n").replace(/'/g, "`"), advantage: listAdvantage.join("\n").replace(/'/g, "`"), thumbnail: listImg[0], duration, review_detail
+              name, rating, review, price, overview: overview.replace(/'/g, "`"), highlight: highlight.join("\n").replace(/'/g, "`"),
+              wtd: wtd.replace(/'/g, "`"), important_info: important_info.replace(/'/g, "`"), additional: additional.join("\n").replace(/'/g, "`"), cancel_policy, key_detail: listKey.join("\n").replace(/'/g, "`"), advantage: listAdvantage.join("\n").replace(/'/g, "`"), thumbnail: listImg[0], duration, review_detail
             }
           } else {
             console.log('not invl')
@@ -89,11 +95,12 @@ const getDetail = async (url, type) => {
             cancel_policy = await getCancelPolicy(listInfo[3])
             
             tourInfo = { 
-              name, rating, review, price, overview, highlight: '',
-              wtd, important_info, additional: additional.join("\n").replace(/'/g, "`"), cancel_policy, key_detail: listKey.join("\n").replace(/'/g, "`"), advantage: listAdvantage.join("\n").replace(/'/g, "`"), thumbnail: listImg[0], duration, review_detail
+              name, rating, review, price, overview: overview.replace(/'/g, "`"), highlight: '',
+              wtd: wtd.replace(/'/g, "`"), important_info: important_info.replace(/'/g, "`"), additional: additional.join("\n").replace(/'/g, "`"), cancel_policy, key_detail: listKey.join("\n").replace(/'/g, "`"), advantage: listAdvantage.join("\n").replace(/'/g, "`"), thumbnail: listImg[0], duration, review_detail
             }
           }
-          console.log(tourInfo)
+          
+          /* save zone*/
           let listTourisms = await tour.findTourismByName(supporter_name)
           listTourisms = listTourisms.map(x => x.id)
           let index = 0
@@ -103,9 +110,10 @@ const getDetail = async (url, type) => {
           }else{
             index = listTourisms[0]
           }
-          console.log(index)
+
           const savedTour = await tour.insertTour(tourInfo, index)
           indexTour = savedTour.insertId
+
           for(let i=0; i<listImg.length;i++){
             if(listImg[i] != null){
               await tour.insertImage(listImg[i], savedTour.insertId)
@@ -113,7 +121,7 @@ const getDetail = async (url, type) => {
           }
           for(let i=0; i<comments.length;i++){
             if(comments[i] != null){
-              await tour.insertComment(comments[i], savedTour.insertId, null)
+              await tour.insertComment(comments[i], savedTour.insertId, Math.floor(Math.random() * 10) + 1)
             }
           }
         }else{
@@ -190,10 +198,18 @@ const getReviews = async(html) => {
 }
 
 router.post('/saveDetail', wrapAsync(async(req, res, next) => {
-  const { link, type } = req.body
-  await getDetail(link, type).then(() => {
-    return res.status(200).send("")
-  })
+  const { type } = req.body
+  const list = [
+    "https://www.tripadvisor.com//AttractionProductReview-g298082-d16749253-Sunset_photo_tour_with_the_farmers-Hoi_An_Quang_Nam_Province.html",
+        "https://www.tripadvisor.com//AttractionProductReview-g298082-d19099375-Traditional_Painting_Class-Hoi_An_Quang_Nam_Province.html",
+        "https://www.tripadvisor.com//AttractionProductReview-g298082-d17564319-Cooking_with_Jolie_in_Hoi_An_and_Lantern_making_class_JHA4-Hoi_An_Quang_Nam_Provin.html",
+        "https://www.tripadvisor.com//AttractionProductReview-g298082-d19075935-Experience_Taboo_Bamboo_Workshop-Hoi_An_Quang_Nam_Province.html",
+        "https://www.tripadvisor.com//AttractionProductReview-g298082-d19621598-DEP_CHI_U_The_Hoi_An_Traditional_Footstep_Straw_Flip_Flops_Made_By_You-Hoi_An_Quan.html",
+        "https://www.tripadvisor.com//AttractionProductReview-g298082-d11469518-Half_Day_Heritage_Painting_Tour_from_Hoi_An_City-Hoi_An_Quang_Nam_Province.html"
+  ]
+  for(let i=0; i<list.length; i++){
+    await getDetail(list[i], type)
+  }
 }))
 
 module.exports = router

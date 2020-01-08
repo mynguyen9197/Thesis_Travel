@@ -12,12 +12,12 @@ const insertTourism = async(tourism_name) => {
 }
 
 const insertComment = async(comment, tourid, userid) => {
-    const sql = `insert into comments(quote, content, tour_id, user_id) values('${comment.quote}', '${comment.content}', ${tourid}, ${userid});`;
+    const sql = `insert into comments_tour(quote, content, tour_id, user_id) values('${comment.quote}', '${comment.content}', ${tourid}, ${userid});`;
     return save(sql)
 }
 
 const insertImage = async(image, tour) => {
-    const sql = `insert into images(address, tour_id) values('${image}', ${tour});`;
+    const sql = `insert into images_tour(address, tour_id) values('${image}', ${tour});`;
     return save(sql)
 }
 
@@ -37,7 +37,12 @@ const loadAllTourism = () => {
 }
 
 const findTourByName = async(name) => {
-    const sql = `select id from tour where name='${name}';`
+    const sql = `SELECT * FROM tour where name = '${name}';`
+    return load(sql)
+}
+
+const findTourByActivityName = async(name, type) => {
+    const sql = `SELECT t.* FROM tour t, activity_tour at where t.name = '${name}' and t.id=at.tour_id and at.activity_id=${type};`
     return load(sql)
 }
 
@@ -68,12 +73,12 @@ const findTourById = (id) => {
 }
 
 const loadImagesByTourId = ((tour_id) => {
-    const sql = `select * from images i where i.tour_id=${tour_id};`
+    const sql = `select * from images_tour i where i.tour_id=${tour_id};`
     return load(sql)
 })
 
 const loadCommentsByTourId = ((tour_id) => {
-    const sql = `select * from comments c where c.tour_id=${tour_id};`
+    const sql = `select * from comments_tour c where c.tour_id=${tour_id};`
     return load(sql)
 })
 
@@ -94,5 +99,5 @@ module.exports = {
     loadTourByActivityId, findTourById,
     loadImagesByTourId, loadCommentsByTourId,
     findTourismById, updateReview, loadAllTourActivities,
-    loadReviewByTourId, insertActivityTour
+    loadReviewByTourId, insertActivityTour, findTourByActivityName
 }
