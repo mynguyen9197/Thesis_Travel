@@ -3,7 +3,7 @@ const express = require('express')
 const router = express.Router()
 
 const { wrapAsync } = require(global.appRoot + '/utils')
-const { getLinksPage, getActivityLinks } = require('./utils')
+const { getLinksPage, getActivityLinks, getLinksPerPage } = require('./utils')
 
 router.use('/activity', require('./activity'))
 router.use('/tour', require('./tour'))
