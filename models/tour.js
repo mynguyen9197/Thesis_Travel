@@ -12,7 +12,7 @@ const insertTourism = async(tourism_name) => {
 }
 
 const insertComment = async(comment, tourid, userid) => {
-    const sql = `insert into comments_tour(quote, content, tour_id, user_id) values('${comment.quote}', '${comment.content}', ${tourid}, ${userid});`;
+    const sql = `insert into comments_tour(review, date, quote, content, tour_id, user_id) values(${comment.review}, '${comment.date}', '${comment.quote}', '${comment.content}', ${tourid}, ${userid});`;
     return save(sql)
 }
 
@@ -78,7 +78,7 @@ const loadImagesByTourId = ((tour_id) => {
 })
 
 const loadCommentsByTourId = ((tour_id) => {
-    const sql = `select * from comments_tour c where c.tour_id=${tour_id};`
+    const sql = `select c.*, u.username from comments_tour c, user u where c.tour_id=${tour_id} and u.id=c.user_id;`
     return load(sql)
 })
 

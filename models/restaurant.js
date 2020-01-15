@@ -106,7 +106,7 @@ const loadImagesByRestaurantId = async(id) => {
 }
 
 const loadCommentsByRestaurantId = async(id) => {
-    const sql = `SELECT * FROM comments_restaurant where res_id=${id};`
+    const sql = `SELECT c.*, u.username FROM comments_restaurant c, user u where res_id=${id} and u.id=c.user_id;`
     return load(sql)
 }
 

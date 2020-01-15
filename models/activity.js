@@ -57,7 +57,7 @@ const loadContactByPlaceId = ((placeid) => {
 })
 
 const loadCommentsByPlaceId = ((placeid) => {
-    const sql = `select * from comments c, user u where c.place_id=${placeid} ;`
+    const sql = `select c.*, u.username from comments c, user u where c.place_id=${placeid} and u.id=c.user_id;`
     return load(sql)
 })
 
