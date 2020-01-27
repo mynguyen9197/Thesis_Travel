@@ -12,7 +12,7 @@ const insertTourism = async(tourism_name) => {
 }
 
 const insertComment = async(comment, tourid, userid) => {
-    const sql = `insert into comments_tour(quote, content, tour_id, user_id) values('${comment.quote}', '${comment.content}', ${tourid}, ${userid});`;
+    const sql = `insert into comments_tour(review, date, quote, content, tour_id, user_id) values(${comment.review}, '${comment.date}', '${comment.quote}', '${comment.content}', ${tourid}, ${userid});`;
     return save(sql)
 }
 
@@ -78,7 +78,7 @@ const loadImagesByTourId = ((tour_id) => {
 })
 
 const loadCommentsByTourId = ((tour_id) => {
-    const sql = `select * from comments_tour c where c.tour_id=${tour_id};`
+    const sql = `select c.*, u.username from comments_tour c, user u where c.tour_id=${tour_id} and u.id=c.user_id;`
     return load(sql)
 })
 
@@ -92,6 +92,21 @@ const updateReview = ((review, tour_id) => {
     return save(query)
 })
 
+const checkIfUserAlreadyReview = ((tour_id, user_id) => {
+    const query = `select * from rating_tour where tour_id=${tour_id} and user_id=${user_id};`
+    return load(query)
+})
+
+const insertRating = ((info) => {
+    const query = `insert into rating_tour(rating, tour_id, user_id) values(${info.rating}, ${info.tour_id}, ${info.user_id});`;
+    return save(query)
+})
+
+const updateRating = ((info) => {
+    const query = `update rating_tour set rating = ${info.rating} where tour_id=${info.tour_id} and user_id=${info.user_id};`;
+    return save(query)
+})
+
 module.exports = {
     insertTour, insertTourism,
     insertComment, loadAllTourism, insertImage,
@@ -99,5 +114,6 @@ module.exports = {
     loadTourByActivityId, findTourById,
     loadImagesByTourId, loadCommentsByTourId,
     findTourismById, updateReview, loadAllTourActivities,
-    loadReviewByTourId, insertActivityTour, findTourByActivityName
+    loadReviewByTourId, insertActivityTour, findTourByActivityName,
+    checkIfUserAlreadyReview, insertRating, updateRating
 }

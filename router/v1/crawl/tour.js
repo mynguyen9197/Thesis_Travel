@@ -72,11 +72,9 @@ const getDetail = async (url, type) => {
           let highlight, wtd, important_info, additional, cancel_policy, tourInfo=''
           if(tabs.includes('Highlights')){
             if(tabs[1] == 'Highlights'){
-              console.log('clu1')
               highlight = await getHighLight(listInfo[0])
               wtd = await getWhatToDo(listInfo[1])
             } else {
-              console.log('clu2')
               wtd = await getWhatToDo(listInfo[0])
               highlight = await getHighLight(listInfo[1])
             }
@@ -88,7 +86,6 @@ const getDetail = async (url, type) => {
               wtd: wtd.replace(/'/g, "`"), important_info: important_info.replace(/'/g, "`"), additional: additional.join("\n").replace(/'/g, "`"), cancel_policy, key_detail: listKey.join("\n").replace(/'/g, "`"), advantage: listAdvantage.join("\n").replace(/'/g, "`"), thumbnail: listImg[0], duration, review_detail
             }
           } else {
-            console.log('not invl')
             wtd = await getWhatToDo(listInfo[0])
             important_info = await getImportantInfo(listInfo[1])
             additional = await getAdditional(listInfo[2])
@@ -186,11 +183,13 @@ const getReviews = async(html) => {
   const $ = cheerio.load(html) 
   const review_comment = []
   $('.location-review-review-list-parts-SingleReview__mainCol--1hApa').map((i, el) => {
+    const review = parseFloat($(el).find('span').first().attr('class').split('_')[3])/10
     const quote = $(el).find('a').text()
-    const review_text = $(el).find('span').text()
+    const review_text = $(el).find('q').find('span').text()
     const commet = {
-      quote: quote.replace(/'/g, "`"),
-      content: review_text.replace(/'/g, "`")
+      quote: quote.replace(/[^a-zA-Z0-9 ]/g,"").replace(/'/g, "`"),
+      content: review_text.replace(/[^a-zA-Z0-9 ]/g,"").replace(/'/g, "`"),
+      review, date: new Date().toISOString().split('T')[0]
     }
     review_comment.push(commet)
   })
@@ -200,15 +199,16 @@ const getReviews = async(html) => {
 router.post('/saveDetail', wrapAsync(async(req, res, next) => {
   const { type } = req.body
   const list = [
-    "https://www.tripadvisor.com//AttractionProductReview-g298082-d16749253-Sunset_photo_tour_with_the_farmers-Hoi_An_Quang_Nam_Province.html",
-        "https://www.tripadvisor.com//AttractionProductReview-g298082-d19099375-Traditional_Painting_Class-Hoi_An_Quang_Nam_Province.html",
+    "https://www.tripadvisor.com//AttractionProductReview-g298082-d13822775-Lantern_Making_Class-Hoi_An_Quang_Nam_Province.html",
+        "https://www.tripadvisor.com//AttractionProductReview-g298082-d19057625-Lantern_Making_and_Cooking_Class_Market_Lantern_Cooking_Class_Foot_massage-Hoi_An_.html",
         "https://www.tripadvisor.com//AttractionProductReview-g298082-d17564319-Cooking_with_Jolie_in_Hoi_An_and_Lantern_making_class_JHA4-Hoi_An_Quang_Nam_Provin.html",
-        "https://www.tripadvisor.com//AttractionProductReview-g298082-d19075935-Experience_Taboo_Bamboo_Workshop-Hoi_An_Quang_Nam_Province.html",
-        "https://www.tripadvisor.com//AttractionProductReview-g298082-d19621598-DEP_CHI_U_The_Hoi_An_Traditional_Footstep_Straw_Flip_Flops_Made_By_You-Hoi_An_Quan.html",
-        "https://www.tripadvisor.com//AttractionProductReview-g298082-d11469518-Half_Day_Heritage_Painting_Tour_from_Hoi_An_City-Hoi_An_Quang_Nam_Province.html"
+        "https://www.tripadvisor.com//AttractionProductReview-g298082-d19099375-Traditional_Painting_Class-Hoi_An_Quang_Nam_Province.html",
+        "https://www.tripadvisor.com//AttractionProductReview-g298082-d11469518-Half_Day_Heritage_Painting_Tour_from_Hoi_An_City-Hoi_An_Quang_Nam_Province.html",
+        "https://www.tripadvisor.com//AttractionProductReview-g298082-d19621598-DEP_CHI_U_The_Hoi_An_Traditional_Footstep_Straw_Flip_Flops_Made_By_You-Hoi_An_Quan.html"
   ]
   for(let i=0; i<list.length; i++){
     await getDetail(list[i], type)
+    console.log(i+1)
   }
 }))
 

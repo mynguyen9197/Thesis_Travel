@@ -57,7 +57,7 @@ const loadContactByPlaceId = ((placeid) => {
 })
 
 const loadCommentsByPlaceId = ((placeid) => {
-    const sql = `select * from comments c, user u where c.place_id=${placeid} ;`
+    const sql = `select c.*, u.username from comments c, user u where c.place_id=${placeid} and u.id=c.user_id;`
     return load(sql)
 })
 
@@ -115,6 +115,21 @@ const updateReview = ((review, placeid) => {
     return save(query)
 })
 
+const checkIfUserAlreadyReview = ((placeid, user_id) => {
+    const query = `select * from rating_place where place_id=${placeid} and user_id=${user_id};`
+    return load(query)
+})
+
+const updateRating = ((info) => {
+    const query = `update rating_place set rating = ${info.rating} where place_id=${info.place_id} and user_id=${info.user_id};`;
+    return save(query)
+})
+
+const insertRating = ((info) => {
+    const query = `insert into rating_place(rating, place_id, user_id) values(${info.rating}, ${info.place_id}, ${info.user_id});`;
+    return save(query)
+})
+
 module.exports = {
     insertPlace, insertImage,
     insertContact, insertComment,
@@ -126,5 +141,7 @@ module.exports = {
     loadPlacesByActivityId, findPlaceByName,
     findPlaceByNameAndActivity, updateReview, 
     loadAllIdAndNamePlaces, findPlacesById,
-    loadActivityByName, loadByName
+    loadActivityByName, loadByName,
+    checkIfUserAlreadyReview, updateRating,
+    insertRating
 }

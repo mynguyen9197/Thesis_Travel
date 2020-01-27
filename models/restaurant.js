@@ -106,7 +106,7 @@ const loadImagesByRestaurantId = async(id) => {
 }
 
 const loadCommentsByRestaurantId = async(id) => {
-    const sql = `SELECT * FROM comments_restaurant where res_id=${id};`
+    const sql = `SELECT c.*, u.username FROM comments_restaurant c, user u where res_id=${id} and u.id=c.user_id;`
     return load(sql)
 }
 
@@ -145,6 +145,31 @@ const findResByNameMeals = ((name, meals_ids) => {
     return load(query)
 })
 
+const checkIfUserAlreadyReview = ((res_id, user_id) => {
+    const query = `select * from rating_restaurant where res_id=${res_id} and user_id=${user_id};`
+    return load(query)
+})
+
+const insertRating = ((info) => {
+    const query = `insert into rating_restaurant(rating, res_id, user_id) values(${info.rating}, ${info.res_id}, ${info.user_id});`;
+    return save(query)
+})
+
+const updateRating = ((info) => {
+    const query = `update rating_restaurant set rating = ${info.rating} where res_id=${info.res_id} and user_id=${info.user_id};`;
+    return save(query)
+})
+
+const loadReviewByResId = ((resid) => {
+    const sql = `select review_detail from restaurant t where t.id=${resid};`
+    return load(sql)
+})
+
+const updateReview = ((review, res_id) => {
+    const query =  `update restaurant set review_detail='${review}' where id=${res_id};`
+    return save(query)
+})
+
 module.exports = {
     insertRestaurant, insertImage, insertComment,
     insertCuisine, findCuisineByName, insertCuisineRestaurant,
@@ -154,6 +179,8 @@ module.exports = {
     loadAllCuisines, loadAllFeatures, loadAllFoodMeal, loadAllFoodType,
     loadTop20ByRating, findRestaurantById, loadImagesByRestaurantId,
     loadCommentsByRestaurantId, findResByNameCuisines, findResByNameFeatures,
-    findResByNameFoodTypes, findResByNameMeals, findResByName
+    findResByNameFoodTypes, findResByNameMeals, findResByName,
+    checkIfUserAlreadyReview, insertRating, updateRating, 
+    loadReviewByResId, updateReview
     
 }
