@@ -92,6 +92,21 @@ const updateReview = ((review, tour_id) => {
     return save(query)
 })
 
+const checkIfUserAlreadyReview = ((tour_id, user_id) => {
+    const query = `select * from rating_tour where tour_id=${tour_id} and user_id=${user_id};`
+    return load(query)
+})
+
+const insertRating = ((info) => {
+    const query = `insert into rating_tour(rating, tour_id, user_id) values(${info.rating}, ${info.tour_id}, ${info.user_id});`;
+    return save(query)
+})
+
+const updateRating = ((info) => {
+    const query = `update rating_tour set rating = ${info.rating} where tour_id=${info.tour_id} and user_id=${info.user_id};`;
+    return save(query)
+})
+
 module.exports = {
     insertTour, insertTourism,
     insertComment, loadAllTourism, insertImage,
@@ -99,5 +114,6 @@ module.exports = {
     loadTourByActivityId, findTourById,
     loadImagesByTourId, loadCommentsByTourId,
     findTourismById, updateReview, loadAllTourActivities,
-    loadReviewByTourId, insertActivityTour, findTourByActivityName
+    loadReviewByTourId, insertActivityTour, findTourByActivityName,
+    checkIfUserAlreadyReview, insertRating, updateRating
 }
