@@ -72,6 +72,12 @@ const findTourById = (id) => {
     return load(sql)
 }
 
+const loadTourByListId = async(tour_ids) => {
+    const query = `SELECT DISTINCT id, name, thumbnail, rating, price, review FROM tour where id in (${tour_ids}) ORDER BY rating DESC, 
+    review DESC;`
+    return load(query)
+}
+
 const loadImagesByTourId = ((tour_id) => {
     const sql = `select * from images_tour i where i.tour_id=${tour_id};`
     return load(sql)
@@ -107,6 +113,11 @@ const updateRating = ((info) => {
     return save(query)
 })
 
+const loadAllIdAndNameTours = (() => {
+    const sql = `select id, name as content from tour`
+    return load(sql)
+})
+
 module.exports = {
     insertTour, insertTourism,
     insertComment, loadAllTourism, insertImage,
@@ -115,5 +126,6 @@ module.exports = {
     loadImagesByTourId, loadCommentsByTourId,
     findTourismById, updateReview, loadAllTourActivities,
     loadReviewByTourId, insertActivityTour, findTourByActivityName,
-    checkIfUserAlreadyReview, insertRating, updateRating
+    checkIfUserAlreadyReview, insertRating, updateRating,
+    loadAllIdAndNameTours, loadTourByListId
 }
