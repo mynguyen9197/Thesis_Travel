@@ -36,6 +36,16 @@ const loadAllIdAndNamePlaces = (() => {
     return load(sql)
 })
 
+const loadAllIdAndAboutPlaces = (() => {
+    const sql = `select id, about as content from place`
+    return load(sql)
+})
+
+const loadIdAndNamePlaceById = ((id) => {
+    const sql = `select id, name as content from place where id=${id}`
+    return load(sql)
+})
+
 const loadByName = ((name) => {
     const sql = `select id, name from place where name='${name}';`
     return load(sql)
@@ -143,5 +153,6 @@ module.exports = {
     loadAllIdAndNamePlaces, findPlacesById,
     loadActivityByName, loadByName,
     checkIfUserAlreadyReview, updateRating,
-    insertRating
+    insertRating, loadAllIdAndAboutPlaces,
+    loadIdAndNamePlaceById
 }

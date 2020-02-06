@@ -131,6 +131,11 @@ const findResByNameFoodTypes = ((name, types_ids) => {
     return load(query)
 })
 
+const findResByRestIds = ((rest_ids) => {
+    const query = `SELECT id, name, thumbnail, common_rating, ranking, review_count FROM restaurant where id in (${rest_ids}) ORDER BY common_rating DESC, review_count DESC;`
+    return load(query)
+})
+
 const findResByName = ((name) => {
     const query = `SELECT DISTINCT * from restaurant r 
     WHERE LOWER(r.name) like LOWER('%${name}%') 
@@ -181,6 +186,6 @@ module.exports = {
     loadCommentsByRestaurantId, findResByNameCuisines, findResByNameFeatures,
     findResByNameFoodTypes, findResByNameMeals, findResByName,
     checkIfUserAlreadyReview, insertRating, updateRating, 
-    loadReviewByResId, updateReview
+    loadReviewByResId, updateReview, findResByRestIds
     
 }
