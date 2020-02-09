@@ -4,12 +4,8 @@ const jwt = require('jsonwebtoken')
 const bcrypt = require('bcrypt')
 
 const User = require(global.appRoot + '/models/user')
-const activity = require(global.appRoot + '/models/activity')
-const tour = require(global.appRoot + '/models/tour')
-const restaurant = require(global.appRoot + '/models/restaurant')
-const userLog = require(global.appRoot + '/models/user-log')
 
-const { wrapAsync } = require(global.appRoot + '/utils')
+const { wrapAsync, verifyToken } = require(global.appRoot + '/utils')
 router.post('/signup', wrapAsync(async(req, res, next) => {
     try {
         const {user} = req.body;
@@ -36,7 +32,7 @@ router.post('/login', wrapAsync(async(req, res, next) => {
             if(!match){
                 return res.status(401).send("Wrong password!")
             } else {
-                const token = jwt.sign({ id: savedUser[0].id }, 'RESTFULAPIs', { expiresIn: 60 * 60 * 24  })
+                const token = jwt.sign({ id: savedUser[0].id, role: savedUser[0].role }, 'RESTFULAPIs', { expiresIn: 60 * 60 * 24  })
                 return res.status(200).json({token: token})
             }
         } else {
@@ -46,153 +42,8 @@ router.post('/login', wrapAsync(async(req, res, next) => {
     return res.status(400).json("User does not exist!")
 }))
 
-const verifyToken = ((req, res, next) => {
-    const bearerHeader = req.headers['authorization']
-    if(bearerHeader){
-        const token = bearerHeader.split(' ')[1]
-        if(token){
-            req.token = token
-            const decoded = jwt.verify(token, 'RESTFULAPIs')
-            if(decoded){
-                next()
-                return
-            }
-        }
-    } 
-    return res.status(403).send("Do not have permission")
-}) 
-
-router.post("/place/comment", verifyToken, wrapAsync(async(req, res, next) => {
-    const { comment, placeid } = req.body
-    const decoded = jwt.verify(req.token, 'RESTFULAPIs')
-    const savedComment = await activity.insertComment(comment, placeid, decoded.id)
-    res.status(200).json({id: savedComment.insertId})
-}))
-
-router.post("/tour/comment", verifyToken, wrapAsync(async(req, res, next) => {
-    const { comment, tourid } = req.body
-    const decoded = jwt.verify(req.token, 'RESTFULAPIs')
-    const savedComment = await tour.insertComment(comment, tourid, decoded.id)
-    res.status(200).json({id: savedComment.insertId})
-}))
-
-router.post("/restaurant/comment", verifyToken, wrapAsync(async(req, res, next) => {
-    const { comment, restid } = req.body
-    const decoded = jwt.verify(req.token, 'RESTFULAPIs')
-    const savedComment = await restaurant.insertComment(comment, restid, decoded.id)
-    res.status(200).json({id: savedComment.insertId})
-}))
-
-router.post("/place/review", verifyToken, wrapAsync(async(req, res, next) => {
-    try {
-        const { placeid, date, rating } = req.body
-        const decoded = jwt.verify(req.token, 'RESTFULAPIs')
-        const review = await activity.loadReviewByPlaceId(placeid)
-        const alreadyReviewed = await activity.checkIfUserAlreadyReview(placeid, decoded.id)
-        const info = {
-            user_id: decoded.id,
-            date: date.toString(),
-            rating: rating + 1,
-            place_id: placeid
-        }
-        let savedId = decoded.id
-        let action = ''
-        let ratingList = []
-        if(alreadyReviewed.length){
-            await activity.updateRating(info)
-            action = 'update'
-            ratingList = calculateRating(review, 4-rating, 5-alreadyReviewed[0].rating)
-        } else {
-            const saveRating = await activity.insertRating(info)
-            action = 'insert'
-            savedId = saveRating.insertId
-            ratingList = calculateRating(review, 4-rating, 0)
-        }
-        await activity.updateReview(ratingList.join(';'), placeid)
-        return res.status(200).json({savedId, placeid, message: action})
-    } catch (error) {
-        console.log(error)
-    }
-}))
-
-router.post("/tour/review", verifyToken, wrapAsync(async(req, res, next) => {
-    try {
-        const { tourid, date, rating } = req.body
-        const decoded = jwt.verify(req.token, 'RESTFULAPIs')
-        const review = await tour.loadReviewByTourId(tourid)
-        const alreadyReviewed = await tour.checkIfUserAlreadyReview(tourid, decoded.id)
-        const info = {
-            user_id: decoded.id,
-            date: date.toString(),
-            rating: rating + 1,
-            tour_id: tourid,
-        }
-        let savedId = decoded.id
-        let action = ''
-        let ratingList = []
-        if(alreadyReviewed.length){
-            await tour.updateRating(info)
-            action = 'update'
-            ratingList = calculateRating(review, 4-rating, 5-alreadyReviewed[0].rating)
-        } else {
-            const saveRating = await tour.insertRating(info)
-            action = 'insert'
-            savedId = saveRating.insertId
-            ratingList = calculateRating(review, 4-rating, 0)
-        }
-        await tour.updateReview(ratingList.join(';'), tourid)
-        return res.status(200).json({savedId, tourid, message: action})
-    } catch (error) {
-        console.log(error)
-    }
-}))
-
-router.post("/restaurant/review", verifyToken, wrapAsync(async(req, res, next) => {
-    try {
-        const { restid, date, rating } = req.body
-        const decoded = jwt.verify(req.token, 'RESTFULAPIs')
-        const review = await restaurant.loadReviewByResId(restid)
-        const alreadyReviewed = await restaurant.checkIfUserAlreadyReview(restid, decoded.id)
-        const info = {
-            user_id: decoded.id,
-            date: date.toString(),
-            rating: rating + 1,
-            res_id: restid,
-        }
-        let savedId = decoded.id
-        let action = ''
-        let ratingList = []
-        if(alreadyReviewed.length){
-            saveRating = await restaurant.updateRating(info)
-            action = 'update'
-            ratingList = calculateRating(review, 4-rating, 5-alreadyReviewed[0].rating)
-        } else {
-            const saveRating = await restaurant.insertRating(info)
-            action = 'insert'
-            savedId = saveRating.insertId
-            ratingList = calculateRating(review, 4-rating, 0)
-        }
-        await restaurant.updateReview(ratingList.join(';'), restid)
-        return res.status(200).json({savedId, restid,  message: action})
-    } catch (error) {
-        console.log(error)
-    }
-}))
-
-function calculateRating(review, rating, ratedRating){
-    let ratingList = Array(0, 0, 0, 0, 0)
-    if(review[0].review_detail){
-        ratingList = review[0].review_detail.split(";")
-        ratingList[rating] = parseInt(ratingList[rating].replace(',', '')) + 1
-        ratingList[rating] = ratingList[rating].toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")
-        if(ratedRating > 0){
-            ratingList[ratedRating] = parseInt(ratingList[ratedRating].replace(',', '')) - 1
-            ratingList[ratedRating] = ratingList[ratedRating].toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")
-        }
-    } else {
-        ratingList[rating] = 1
-    }
-    return ratingList
-}
+router.use('/place', verifyToken, require('./place'))
+router.use('/tour', verifyToken, require('./tour'))
+router.use('/restaurant', verifyToken, require('./restaurant'))
 
 module.exports = router

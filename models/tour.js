@@ -62,6 +62,11 @@ const loadTourByActivityId = async(act_ids) => {
     return load(query)
 }
 
+const loadInfoAllTours = async() => {
+    const query = `SELECT t.id, t.name, t.thumbnail, t.rating, t.price, t.review from tour t;`
+    return load(query)
+}
+
 const loadAllTourActivities = ((cat_id) => {
     const query = `SELECT * FROM activity_of_tour;`
     return load(query)
@@ -79,12 +84,12 @@ const loadTourByListId = async(tour_ids) => {
 }
 
 const loadImagesByTourId = ((tour_id) => {
-    const sql = `select * from images_tour i where i.tour_id=${tour_id};`
+    const sql = `select * from images_tour i where i.tour_id=${tour_id} order by i.id DESC;`
     return load(sql)
 })
 
 const loadCommentsByTourId = ((tour_id) => {
-    const sql = `select c.*, u.username from comments_tour c, user u where c.tour_id=${tour_id} and u.id=c.user_id;`
+    const sql = `select c.*, u.username from comments_tour c, user u where c.tour_id=${tour_id} and u.id=c.user_id order by c.id DESC;`
     return load(sql)
 })
 
@@ -118,6 +123,34 @@ const loadAllIdAndNameTours = (() => {
     return load(sql)
 })
 
+const insertUserLog = async(tourid, userid, last_update) => {
+    const sql = `insert into tour_user_log (tour_id, user_id, times, last_update) values(${tourid}, ${userid}, 1, '${last_update}');`
+    return save(sql)
+}
+
+const updateUserLog = async(tourid, userid, times, last_update) => {
+    const sql = `update tour_user_log set tour_id=${tourid}, user_id=${userid}, times=${times}, last_update='${last_update}';`
+    return save(sql)
+}
+
+const findUserLog = async(tourid, userid) => {
+    const sql = `select * from tour_user_log where tour_id=${tourid} and user_id=${userid};`
+    return load(sql)
+}
+
+const findOtherTourInGroup = async(tourid) => {
+    const sql = `SELECT DISTINCT p.id as id, p.name as content from tour p, activity_tour ap WHERE p.id=ap.tour_id and ap.activity_id in 
+    (SELECT activity_id FROM activity_tour WHERE tour_id=${tourid});`
+    return load(sql)
+}
+const updateTour = async(tour, tourism) => {
+    const sql = `update tour set name='${tour.name}', rating=${tour.rating}, review=${tour.review}, price=${tour.price}, overview='${tour.overview}',
+     highlight='${tour.highlight}', wtd='${tour.wtd}', important_info='${tour.important_info}', additional='${tour.additional}',
+     cancel_policy='${tour.cancel_policy}', key_detail='${tour.key_detail}', advantage='${tour.advantage}', thumbnail='${tour.thumbnail}',
+      tourism_id=${tourism}, duration='${tour.duration}', review_detail='${tour.review_detail}' where id=${tour.id};`;
+    return save(sql)
+}
+
 module.exports = {
     insertTour, insertTourism,
     insertComment, loadAllTourism, insertImage,
@@ -127,5 +160,7 @@ module.exports = {
     findTourismById, updateReview, loadAllTourActivities,
     loadReviewByTourId, insertActivityTour, findTourByActivityName,
     checkIfUserAlreadyReview, insertRating, updateRating,
-    loadAllIdAndNameTours, loadTourByListId
+    loadAllIdAndNameTours, loadTourByListId,
+    insertUserLog, updateUserLog, findUserLog,
+    findOtherTourInGroup, updateTour, loadInfoAllTours
 }
