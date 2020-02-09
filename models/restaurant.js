@@ -95,18 +95,23 @@ const loadTop20ByRating = (async() => {
     return load(query)
 }) 
 
+const loadAllRestaurant = (async() => {
+    const query = 'SELECT id, name, thumbnail, common_rating, ranking, review_count FROM restaurant;'
+    return load(query)
+}) 
+
 const findRestaurantById = async(id) => {
     const sql = `SELECT * FROM restaurant WHERE id=${id};`
     return load(sql)
 }
 
 const loadImagesByRestaurantId = async(id) => {
-    const sql = `SELECT * FROM images_restaurant where res_id=${id};`
+    const sql = `SELECT * FROM images_restaurant where res_id=${id} order by id DESC;`
     return load(sql)
 }
 
 const loadCommentsByRestaurantId = async(id) => {
-    const sql = `SELECT c.*, u.username FROM comments_restaurant c, user u where res_id=${id} and u.id=c.user_id;`
+    const sql = `SELECT c.*, u.username FROM comments_restaurant c, user u where res_id=${id} and u.id=c.user_id order by c.id DESC;`
     return load(sql)
 }
 
@@ -175,6 +180,53 @@ const updateReview = ((review, res_id) => {
     return save(query)
 })
 
+const insertUserLog = async(restid, userid, last_update) => {
+    const sql = `insert into restaurant_user_log (rest_id, user_id, times, last_update) values(${restid}, ${userid}, 1, '${last_update}');`
+    return save(sql)
+}
+
+const updateUserLog = async(restid, userid, times, last_update) => {
+    const sql = `update restaurant_user_log set rest_id=${restid}, user_id=${userid}, times=${times}, last_update='${last_update}';`
+    return save(sql)
+}
+
+const findUserLog = async(restid, userid) => {
+    const sql = `select * from restaurant_user_log where rest_id=${restid} and user_id=${userid};`
+    return load(sql)
+}
+
+const findOtherRestInCuisineGroup = async(restid) => {
+    const sql = `SELECT DISTINCT p.id, CONCAT(p.kind, ' ',p.meals, ' ',p.features) as content from restaurant p, cuisine_restaurant ap WHERE p.id=ap.res_id and ap.cuisine_id in 
+    (SELECT cuisine_id FROM cuisine_restaurant WHERE res_id=${restid});`
+    return load(sql)
+}
+
+const findOtherRestInFeatureGroup = async(restid) => {
+    const sql = `SELECT DISTINCT p.id as id, p.name as content from restaurant p, feature_restaurant ap WHERE p.id=ap.res_id and ap.feature_id in 
+    (SELECT feature_id FROM feature_restaurant WHERE res_id=${restid});`
+    return load(sql)
+}
+
+const findOtherRestInFoodTypeGroup = async(restid) => {
+    const sql = `SELECT DISTINCT p.id as id, p.name as content from restaurant p, foodtype_restaurant ap WHERE p.id=ap.res_id and ap.type_id in 
+    (SELECT type_id FROM foodtype_restaurant WHERE res_id=${restid});`
+    return load(sql)
+}
+
+const findOtherRestInMealGroup = async(restid) => {
+    const sql = `SELECT DISTINCT p.id as id, p.name as content from restaurant p, meal_restaurant ap WHERE p.id=ap.res_id and ap.meal_id in 
+    (SELECT meal_id FROM meal_restaurant WHERE res_id=${restid});`
+    return load(sql)
+}
+const updateRestaurant = (async(restaurant) => {
+    const sql = `update restaurant set name='${restaurant.name}', about='${restaurant.about}', thumbnail='${restaurant.thumbnail}',
+    common_rating=${restaurant.common_rating}, open_hour='${restaurant.open_hour}', common_review='${restaurant.common_review}',
+    review_count=${restaurant.review_count}, ranking='${restaurant.ranking}', address='${restaurant.address}', 
+    phone='${restaurant.phone}', rating_detail='${restaurant.rating_detail}', price_from='${restaurant.from}', price_to='${restaurant.to}',
+    kind='${restaurant.kind}', meals='${restaurant.meals}', features='${restaurant.features}' where id=${restaurant.id};`;
+    return save(sql)
+})
+
 module.exports = {
     insertRestaurant, insertImage, insertComment,
     insertCuisine, findCuisineByName, insertCuisineRestaurant,
@@ -186,6 +238,9 @@ module.exports = {
     loadCommentsByRestaurantId, findResByNameCuisines, findResByNameFeatures,
     findResByNameFoodTypes, findResByNameMeals, findResByName,
     checkIfUserAlreadyReview, insertRating, updateRating, 
-    loadReviewByResId, updateReview, findResByRestIds
+    loadReviewByResId, updateReview, findResByRestIds,
+    insertUserLog, findUserLog, updateUserLog,
+    findOtherRestInCuisineGroup, findOtherRestInFoodTypeGroup, findOtherRestInMealGroup,
+    findOtherRestInFeatureGroup, updateRestaurant, loadAllRestaurant
     
 }
