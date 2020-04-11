@@ -5,7 +5,6 @@ const jwt = require('jsonwebtoken')
 const router = express.Router()
 
 const Activity = require(global.appRoot + '/models/activity')
-const restaurant = require(global.appRoot + '/models/restaurant')
 const { wrapAsync } = require(global.appRoot + '/utils')
 
 const url = 'http://recommender-travel-app.herokuapp.com/place/'
