@@ -3,7 +3,7 @@ const jwt = require('jsonwebtoken')
 const router = express.Router()
 
 const tour = require(global.appRoot + '/models/tour')
-const userLog = require(global.appRoot + '/models/user-log')
+const userTourLog = require(global.appRoot + '/models/user_log/tour')
 
 const { wrapAsync } = require(global.appRoot + '/utils')
 const { calculateRating } = require('./util')
@@ -47,18 +47,29 @@ router.post("/review", wrapAsync(async(req, res, next) => {
     }
 }))
 
-router.post("/tracking", wrapAsync(async(req, res, next) => {
+router.post("/viewdetail", wrapAsync(async(req, res, next) => {
     try {
         const { tourid } = req.body
         const decoded = jwt.verify(req.token, 'RESTFULAPIs')
-        const existingLog = await tour.findUserLog(tourid, decoded.id)
-        const lastUpdate = new Date().toISOString().slice(0, 19).replace('T', ' ')
-        if(existingLog.length == 0){
-            const savedLog = await tour.insertUserLog(tourid, decoded.id, lastUpdate)
-            return res.status(200).json({id: savedLog.insertId, message: 'insert'})
-        }
-        await tour.updateUserLog(tourid, decoded.id, existingLog[0].times + 1, lastUpdate)
-        return res.status(200).json({id: existingLog[0].id, message: 'update'})
+        const tzoffset = new Date().getTimezoneOffset() * 60000;
+        const lastUpdate = new Date(Date.now() - tzoffset).toISOString().slice(0, 19).replace('T', ' ')
+        const savedLog = await userTourLog.insertUserLog(tourid, decoded.id, lastUpdate, 'VIEW_DETAIL')
+        return res.status(200).json({id: savedLog.insertId})
+    } catch (error) {
+        console.log(error)
+        return res.status(500).json(error)
+    }
+}))
+
+router.post("/filter", wrapAsync(async(req, res, next) => {
+    try {
+        const { category } = req.body
+        const event_type = 'FILTER: ' + category
+        const decoded = jwt.verify(req.token, 'RESTFULAPIs')
+        const tzoffset = new Date().getTimezoneOffset() * 60000;
+        const lastUpdate = new Date(Date.now() - tzoffset).toISOString().slice(0, 19).replace('T', ' ')
+        const savedLog = await userTourLog.insertUserLog(null, decoded.id, lastUpdate, event_type)
+        return res.status(200).json({id: savedLog.insertId})
     } catch (error) {
         console.log(error)
         return res.status(500).json(error)

@@ -123,21 +123,6 @@ const loadAllIdAndNameTours = (() => {
     return load(sql)
 })
 
-const insertUserLog = async(tourid, userid, last_update) => {
-    const sql = `insert into tour_user_log (tour_id, user_id, times, last_update) values(${tourid}, ${userid}, 1, '${last_update}');`
-    return save(sql)
-}
-
-const updateUserLog = async(tourid, userid, times, last_update) => {
-    const sql = `update tour_user_log set tour_id=${tourid}, user_id=${userid}, times=${times}, last_update='${last_update}';`
-    return save(sql)
-}
-
-const findUserLog = async(tourid, userid) => {
-    const sql = `select * from tour_user_log where tour_id=${tourid} and user_id=${userid};`
-    return load(sql)
-}
-
 const findOtherTourInGroup = async(tourid) => {
     const sql = `SELECT DISTINCT p.id as id, p.name as content from tour p, activity_tour ap WHERE p.id=ap.tour_id and ap.activity_id in 
     (SELECT activity_id FROM activity_tour WHERE tour_id=${tourid});`
@@ -161,6 +146,5 @@ module.exports = {
     loadReviewByTourId, insertActivityTour, findTourByActivityName,
     checkIfUserAlreadyReview, insertRating, updateRating,
     loadAllIdAndNameTours, loadTourByListId,
-    insertUserLog, updateUserLog, findUserLog,
     findOtherTourInGroup, updateTour, loadInfoAllTours
 }

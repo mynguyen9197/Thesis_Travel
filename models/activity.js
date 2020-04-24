@@ -161,21 +161,6 @@ const insertRating = ((info) => {
     return save(query)
 })
 
-const insertUserLog = async(placeid, userid, last_update) => {
-    const sql = `insert into place_user_log (place_id, user_id, times, last_update) values(${placeid}, ${userid}, 1, '${last_update}');`
-    return save(sql)
-}
-
-const updateUserLog = async(placeid, userid, times, last_update) => {
-    const sql = `update place_user_log set place_id=${placeid}, user_id=${userid}, times=${times}, last_update='${last_update}';`
-    return save(sql)
-}
-
-const findUserLog = async(placeid, userid) => {
-    const sql = `select * from place_user_log where place_id=${placeid} and user_id=${userid};`
-    return load(sql)
-}
-
 const findOtherPlaceInGroup = async(placeid) => {
     const sql = `SELECT DISTINCT p.id as id, p.name as content from place p, activity_place ap WHERE p.id=ap.place_id and ap.activity_id in 
     (SELECT activity_id FROM activity_place WHERE place_id=${placeid});`
@@ -204,8 +189,7 @@ module.exports = {
     checkIfUserAlreadyReview, updateRating,
     insertRating, loadAllIdAndAboutPlaces,
     loadIdAndNamePlaceById, findRatedPlaceByUser,
-    loadPlacesByPlaceIds, insertUserLog,
-    updateUserLog, findUserLog,
+    loadPlacesByPlaceIds,
     findOtherPlaceInGroup, loadAllIdNameAndAboutPlaces,
     updatePlace, loadAllPlaces
 }
