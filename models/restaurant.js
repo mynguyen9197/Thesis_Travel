@@ -180,21 +180,6 @@ const updateReview = ((review, res_id) => {
     return save(query)
 })
 
-const insertUserLog = async(restid, userid, last_update) => {
-    const sql = `insert into restaurant_user_log (rest_id, user_id, times, last_update) values(${restid}, ${userid}, 1, '${last_update}');`
-    return save(sql)
-}
-
-const updateUserLog = async(restid, userid, times, last_update) => {
-    const sql = `update restaurant_user_log set rest_id=${restid}, user_id=${userid}, times=${times}, last_update='${last_update}';`
-    return save(sql)
-}
-
-const findUserLog = async(restid, userid) => {
-    const sql = `select * from restaurant_user_log where rest_id=${restid} and user_id=${userid};`
-    return load(sql)
-}
-
 const findOtherRestInCuisineGroup = async(restid) => {
     const sql = `SELECT DISTINCT p.id, CONCAT(p.kind, ' ',p.meals, ' ',p.features) as content from restaurant p, cuisine_restaurant ap WHERE p.id=ap.res_id and ap.cuisine_id in 
     (SELECT cuisine_id FROM cuisine_restaurant WHERE res_id=${restid});`
@@ -239,7 +224,6 @@ module.exports = {
     findResByNameFoodTypes, findResByNameMeals, findResByName,
     checkIfUserAlreadyReview, insertRating, updateRating, 
     loadReviewByResId, updateReview, findResByRestIds,
-    insertUserLog, findUserLog, updateUserLog,
     findOtherRestInCuisineGroup, findOtherRestInFoodTypeGroup, findOtherRestInMealGroup,
     findOtherRestInFeatureGroup, updateRestaurant, loadAllRestaurant
     
