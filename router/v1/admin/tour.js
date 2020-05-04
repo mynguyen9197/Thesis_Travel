@@ -41,7 +41,8 @@ router.post('/', wrapAsync(async(req, res, next) => {
                 }
             }
         }
-        const type = newTour.kind_of_tour
+        let type = newTour.kind_of_tour
+        type = type.filter((value, index) => type.indexOf(value) == index)
         for(let i=0;i<type.length;i++){
             if(type[i] != 0){
                 await tour.insertActivityTour(savedTour.insertId, type[i])

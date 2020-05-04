@@ -53,28 +53,32 @@ router.post('/', wrapAsync(async(req, res, next) => {
             }
         }
         
-        const cuisines = newRestaurant.cuisines.map(x => x.id)
+        let cuisines = newRestaurant.cuisines.map(x => x.id)
+        cuisines = cuisines.filter((value, index) => cuisines.indexOf(value) == index)
         for(let i=0;i<cuisines.length;i++){
             if(cuisines[i] > 0){
                 await restaurant.insertCuisineRestaurant(cuisines[i], savedRestaurant.insertId)
             }
         }
         
-        const foodTypes = newRestaurant.foodTypes.map(x => x.id)
+        let foodTypes = newRestaurant.foodTypes.map(x => x.id)
+        foodTypes = foodTypes.filter((value, index) => foodTypes.indexOf(value) == index)
         for(let i=0;i<foodTypes.length;i++){
             if(foodTypes[i] > 0){
                 await restaurant.insertFoodTypeRestaurant(foodTypes[i], savedRestaurant.insertId)
             }
         }
             
-        const meals = newRestaurant.meals.map(x => x.id)
+        let meals = newRestaurant.meals.map(x => x.id)
+        meals = meals.filter((value, index) => meals.indexOf(value) == index)
         for(let i=0;i<meals.length;i++){
             if(meals[i] > 0){
                 await restaurant.insertMealRestaurant(meals[i], savedRestaurant.insertId)
             }
         }
             
-        const features = newRestaurant.features.map(x => x.id)
+        let features = newRestaurant.features.map(x => x.id)
+        features = features.filter((value, index) => features.indexOf(value) == index)
         for(let i=0;i<features.length;i++){
             if(features[i] > 0){
                 await restaurant.insertFeatureRestaurant(features[i], savedRestaurant.insertId)
