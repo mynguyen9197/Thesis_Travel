@@ -1,7 +1,6 @@
 
 const cheerio = require('cheerio')
 const axios = require('axios')
-const puppeteer = require('puppeteer')
 
 const url = 'https://www.tripadvisor.com/'
 const getLinksPage = async (url_category) => {

@@ -106,7 +106,7 @@ const findRestaurantById = async(id) => {
 }
 
 const loadImagesByRestaurantId = async(id) => {
-    const sql = `SELECT * FROM images_restaurant where res_id=${id} order by id DESC;`
+    const sql = `SELECT * FROM images_restaurant where res_id=${id} and status=1 order by id DESC;`
     return load(sql)
 }
 
@@ -204,12 +204,55 @@ const findOtherRestInMealGroup = async(restid) => {
     return load(sql)
 }
 const updateRestaurant = (async(restaurant) => {
-    const sql = `update restaurant set name='${restaurant.name}', about='${restaurant.about}', thumbnail='${restaurant.thumbnail}',
-    common_rating=${restaurant.common_rating}, open_hour='${restaurant.open_hour}', common_review='${restaurant.common_review}',
-    review_count=${restaurant.review_count}, ranking='${restaurant.ranking}', address='${restaurant.address}', 
-    phone='${restaurant.phone}', rating_detail='${restaurant.rating_detail}', price_from='${restaurant.from}', price_to='${restaurant.to}',
+    const sql = `update restaurant set name='${restaurant.name}', about='${restaurant.about}', thumbnail='${restaurant.thumbnail}', 
+    open_hour='${restaurant.open_hour}', address='${restaurant.address}', 
+    phone='${restaurant.phone}', price_from='${restaurant.from}', price_to='${restaurant.to}',
     kind='${restaurant.kind}', meals='${restaurant.meals}', features='${restaurant.features}' where id=${restaurant.id};`;
     return save(sql)
+})
+
+const deactivateRestaurant = async(rest_id) => {
+    const sql = `update restaurant set is_active=0 where id in (${rest_id});`
+    return save(sql)
+}
+
+const activateRestaurant = async(rest_id) => {
+    const sql = `update restaurant set is_active=1 where id in (${rest_id});`
+    return save(sql)
+}
+
+const insertNewRestaurant = async(restaurant) => {
+    const sql = `insert into restaurant(name, about, thumbnail, open_hour, address, phone, price_from, price_to, 
+        kind, meals, features) 
+    values('${restaurant.name}', '${restaurant.about}', '${restaurant.thumbnail}', 
+    '${restaurant.open_hour}', '${restaurant.address}', '${restaurant.phone}', '${restaurant.from}', '${restaurant.to}',
+    '${restaurant.kind}', '${restaurant.meals}', '${restaurant.features}');`;
+    return save(sql)
+}
+
+const deactivateImage = ((imageids) => {
+    const sql = `update images_restaurant set status=0 where id in (${imageids});`;
+    return save(sql)
+})
+
+const loadCuisineByRestId = ((restid) => {
+    const query = `SELECT * FROM cuisine_restaurant WHERE res_id =${restid} and stt=1;`
+    return load(query)
+})
+
+const loadFoodTypeByRestId = ((restid) => {
+    const query = `SELECT * FROM foodtype_restaurant WHERE res_id =${restid} and stt=1;`
+    return load(query)
+})
+
+const loadMealByRestId = ((restid) => {
+    const query = `SELECT * FROM meal_restaurant WHERE res_id =${restid} and stt=1;`
+    return load(query)
+})
+
+const loadFeatureByRestId = ((restid) => {
+    const query = `SELECT * FROM feature_restaurant WHERE res_id =${restid} and stt=1;`
+    return load(query)
 })
 
 module.exports = {
@@ -225,6 +268,8 @@ module.exports = {
     checkIfUserAlreadyReview, insertRating, updateRating, 
     loadReviewByResId, updateReview, findResByRestIds,
     findOtherRestInCuisineGroup, findOtherRestInFoodTypeGroup, findOtherRestInMealGroup,
-    findOtherRestInFeatureGroup, updateRestaurant, loadAllRestaurant
-    
+    findOtherRestInFeatureGroup, updateRestaurant, loadAllRestaurant,
+    deactivateRestaurant, activateRestaurant, insertNewRestaurant,
+    deactivateImage, loadCuisineByRestId, loadFoodTypeByRestId,
+    loadMealByRestId, loadFeatureByRestId
 }
