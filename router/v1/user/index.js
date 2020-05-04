@@ -4,6 +4,9 @@ const jwt = require('jsonwebtoken')
 const bcrypt = require('bcrypt')
 
 const User = require(global.appRoot + '/models/user')
+const Place = require(global.appRoot + '/models/user_log/place')
+const Tour = require(global.appRoot + '/models/user_log/tour')
+const Restaurant = require(global.appRoot + '/models/user_log/restaurant')
 
 const { wrapAsync, verifyToken } = require(global.appRoot + '/utils')
 router.post('/signup', wrapAsync(async(req, res, next) => {
@@ -40,6 +43,14 @@ router.post('/login', wrapAsync(async(req, res, next) => {
         }
     }
     return res.status(400).json("User does not exist!")
+}))
+
+router.get('/history', verifyToken, wrapAsync(async(req, res, next) => {
+    const decoded = jwt.verify(req.token, 'RESTFULAPIs')
+    const recentPlaces = await Place.getRecentActivities(decoded.id)
+    const recentTours = await Tour.getRecentActivities(decoded.id)
+    const recentRestaurants = await Restaurant.getRecentActivities(decoded.id)
+    return res.status(200).json({places: recentPlaces, tours: recentTours, restaurants: recentRestaurants})
 }))
 
 router.use('/place', verifyToken, require('./place'))

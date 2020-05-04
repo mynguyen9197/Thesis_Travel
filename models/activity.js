@@ -11,6 +11,16 @@ const insertImage = ((image, place) => {
     return save(sql)
 })
 
+const deactivateImage = ((imageids) => {
+    const sql = `update images set status=0 where id in (${imageids});`;
+    return save(sql)
+})
+
+const deactivateKindOfPlace = ((ids) => {
+    const sql = `update activity_place set stt=0 where id in (${ids});`;
+    return save(sql)
+})
+
 const insertContact = (contact => {
     const sql = `insert into contact(phone, address, place_id) values('${contact.phone}', '${contact.address}', ${contact.place_id});`;
     return save(sql)
@@ -62,7 +72,7 @@ const loadDetailById = ((placeid) => {
 })
 
 const loadImagesByPlaceId = ((placeid) => {
-    const sql = `select * from images i where i.place_id=${placeid} order by i.id DESC;`
+    const sql = `select * from images i where i.place_id=${placeid} and i.status=1 order by i.id DESC;`
     return load(sql)
 })
 
@@ -103,6 +113,11 @@ const loadActivitiesByCategoryId = ((cat_id) => {
 
 const loadActivityByName = ((name) => {
     const query = `SELECT * FROM activity_of_place WHERE name='${name}';`
+    return load(query)
+})
+
+const loadActivityByPlaceId = ((placeid) => {
+    const query = `SELECT * FROM activity_place WHERE place_id =${placeid} and stt=1;`
     return load(query)
 })
 
@@ -168,9 +183,30 @@ const findOtherPlaceInGroup = async(placeid) => {
 }
 
 const updatePlace = (async(place) => {
-    const sql = `update place set name='${place.name}', about='${place.about}', thumbnail='${place.thumbnail}', rating=${place.rating},
-     review=${place.review}, ranking='${place.ranking}', duration='${place.duration}', review_detail='${place.review_detail}', 
+    const sql = `update place set name='${place.name}', about='${place.about}', thumbnail='${place.thumbnail}',
+     open_hour='${place.open_hour}', duration='${place.duration}', 
      address='${place.address}', phone='${place.phone}' where id=${place.id};`
+    return save(sql)
+})
+
+const deactivatePlace = async(place_id) => {
+    const sql = `update place set is_active=0 where id in (${place_id});`
+    return save(sql)
+}
+
+const activatePlace = async(place_id) => {
+    const sql = `update place set is_active=1 where id in (${place_id});`
+    return save(sql)
+}
+
+const loadChildCategoriesOnly = (() => {
+    const query = `SELECT * FROM activity_of_place WHERE id not in (SELECT distinct a1.id FROM activity_of_place a1, activity_of_place a2 WHERE a1.id = a2.parent);`
+    return load(query)
+})
+
+const addNewPlace = (async(place) => {
+    const sql = `insert into place(name, about, thumbnail, open_hour, duration, address, phone) 
+    values('${place.name}', '${place.about}', '${place.thumbnail}', '${place.open_hour}', '${place.duration}', '${place.address}', '${place.phone}');`;
     return save(sql)
 })
 
@@ -191,5 +227,9 @@ module.exports = {
     loadIdAndNamePlaceById, findRatedPlaceByUser,
     loadPlacesByPlaceIds,
     findOtherPlaceInGroup, loadAllIdNameAndAboutPlaces,
-    updatePlace, loadAllPlaces
+    updatePlace, loadAllPlaces,
+    deactivatePlace, activatePlace,
+    loadChildCategoriesOnly, deactivateImage,
+    loadActivityByPlaceId, deactivateKindOfPlace,
+    addNewPlace
 }

@@ -84,7 +84,7 @@ const loadTourByListId = async(tour_ids) => {
 }
 
 const loadImagesByTourId = ((tour_id) => {
-    const sql = `select * from images_tour i where i.tour_id=${tour_id} order by i.id DESC;`
+    const sql = `select * from images_tour i where i.tour_id=${tour_id} and i.status=1 order by i.id DESC;`
     return load(sql)
 })
 
@@ -128,13 +128,45 @@ const findOtherTourInGroup = async(tourid) => {
     (SELECT activity_id FROM activity_tour WHERE tour_id=${tourid});`
     return load(sql)
 }
-const updateTour = async(tour, tourism) => {
-    const sql = `update tour set name='${tour.name}', rating=${tour.rating}, review=${tour.review}, price=${tour.price}, overview='${tour.overview}',
-     highlight='${tour.highlight}', wtd='${tour.wtd}', important_info='${tour.important_info}', additional='${tour.additional}',
-     cancel_policy='${tour.cancel_policy}', key_detail='${tour.key_detail}', advantage='${tour.advantage}', thumbnail='${tour.thumbnail}',
-      tourism_id=${tourism}, duration='${tour.duration}', review_detail='${tour.review_detail}' where id=${tour.id};`;
+
+const deactivateTour = async(tour_id) => {
+    const sql = `update tour set is_active=0 where id in (${tour_id});`
     return save(sql)
 }
+
+const activateTour = async(tour_id) => {
+    const sql = `update tour set is_active=1 where id in (${tour_id});`
+    return save(sql)
+}
+
+const insertNewTour = async(tour) => {
+    const sql = `insert into tour(name, price, highlight, wtd, important_info, additional, cancel_policy, key_detail, advantage, thumbnail, tourism_id, duration)
+    values('${tour.name}', ${tour.price}, '${tour.highlight}', '${tour.wtd}', '${tour.important_info}', '${tour.additional}', '${tour.cancel_policy}',
+    '${tour.key_detail}', '${tour.advantage}', '${tour.thumbnail}', ${tour.tourism_id}, '${tour.duration}');`
+    return save(sql)
+}
+
+const updateTour = (async(tour) => {
+    const sql = `update tour set name='${tour.name}', price=${tour.price}, highlight='${tour.highlight}', wtd='${tour.wtd}', important_info='${tour.important_info}', additional='${tour.additional}', 
+    cancel_policy='${tour.cancel_policy}', key_detail='${tour.key_detail}', advantage='${tour.advantage}', thumbnail='${tour.thumbnail}', 
+    tourism_id=${tour.tourism_id}, duration='${tour.duration}' where id=${tour.id};`
+    return save(sql)
+})
+
+const deactivateImage = ((imageids) => {
+    const sql = `update images_tour set status=0 where id in (${imageids});`;
+    return save(sql)
+})
+
+const loadActivityByTourId = ((tourid) => {
+    const query = `SELECT * FROM activity_tour WHERE tour_id =${tourid} and stt=1;`
+    return load(query)
+})
+
+const deactivateKindOfTour = ((ids) => {
+    const sql = `update activity_tour set stt=0 where id in (${ids});`;
+    return save(sql)
+})
 
 module.exports = {
     insertTour, insertTourism,
@@ -146,5 +178,8 @@ module.exports = {
     loadReviewByTourId, insertActivityTour, findTourByActivityName,
     checkIfUserAlreadyReview, insertRating, updateRating,
     loadAllIdAndNameTours, loadTourByListId,
-    findOtherTourInGroup, updateTour, loadInfoAllTours
+    findOtherTourInGroup, loadInfoAllTours,
+    deactivateTour, activateTour,
+    insertNewTour, updateTour, deactivateImage,
+    loadActivityByTourId, deactivateKindOfTour
 }
