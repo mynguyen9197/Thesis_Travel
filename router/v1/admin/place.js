@@ -42,7 +42,8 @@ router.post('/', wrapAsync(async(req, res, next) => {
                 }
             }
         }
-        const kind_of_place = newPlace.kind_of_place
+        let kind_of_place = newPlace.kind_of_place
+        kind_of_place = kind_of_place.filter((value, index) => kind_of_place.indexOf(value) == index)
         for(let i=0;i<kind_of_place.length;i++){
             if(kind_of_place[i] != 0){
               await place.insertActivityPlace(kind_of_place[i], savedPlace.insertId)
