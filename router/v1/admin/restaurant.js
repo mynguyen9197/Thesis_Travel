@@ -20,6 +20,20 @@ router.get('/', wrapAsync(async(req, res, next) => {
     }
 }))
 
+router.get('/addnew', wrapAsync(async(req, res, next) => {
+    try {
+        const cuisines = await restaurant.loadAllCuisines()
+        const features = await restaurant.loadAllFeatures()
+        const foodTypes = await restaurant.loadAllFoodType()
+        const meals = await restaurant.loadAllFoodMeal()
+
+        return res.status(200).json({cuisines, features, foodTypes, meals})
+    } catch (error) {
+        console.log(error)
+        return res.status(500).json({error})
+    }
+}))
+
 router.get('/:restid', wrapAsync(async(req, res, next) => {
     try {
         const { restid } = req.params

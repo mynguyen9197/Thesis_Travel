@@ -16,6 +16,16 @@ router.get('/', wrapAsync(async(req, res, next) => {
     }
 }))
 
+router.get('/addnew', wrapAsync(async(req, res, next) => {
+    try {
+        const activities = await tour.loadAllTourActivities()
+        return res.status(200).json({activities})
+    } catch (error) {
+        console.log(error)
+        return res.status(500).json(error)
+    }
+}))
+
 router.get('/:tourid', wrapAsync(async(req, res, next) => {
     try {
         const { tourid } = req.params

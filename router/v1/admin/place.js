@@ -17,6 +17,17 @@ router.get('/', wrapAsync(async(req, res, next) => {
     }
 }))
 
+router.get('/addnew', wrapAsync(async(req, res, next) => {
+    try {
+        const categories = await place.loadAllCategories()
+        const activities = await place.loadAllActivities()
+        return res.status(200).json({categories, activities})
+    } catch (error) {
+        console.log(error)
+        return res.status(500).json({error})
+    }
+}))
+
 router.get('/:placeid', wrapAsync(async(req, res, next) => {
     try {
         const { placeid } = req.params
