@@ -8,8 +8,9 @@ const { removeExistedImages } = require('./utils')
 router.get('/', wrapAsync(async(req, res, next) => {
     try {
         const categories = await place.loadAllCategories()
+        const activities = await place.loadAllActivities()
         const places = await place.loadAllPlaces()
-        return res.status(200).json({categories, places})
+        return res.status(200).json({categories, activities, places})
     } catch (error) {
         console.log(error)
         return res.status(500).json({error})

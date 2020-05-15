@@ -37,7 +37,7 @@ const insertActivityPlace = ((activity_id, place_id) => {
 })
 
 const loadAllActivities = (() => {
-    const sql = `select name from activity_of_place`
+    const sql = `select * from activity_of_place`
     return load(sql)
 })
 
