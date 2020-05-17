@@ -10,7 +10,6 @@ router.use('/flight', require('./flight'))
 router.use('/activity', require('./activity'))
 router.use('/crawl', require('./crawl'))
 router.use('/user', require('./user'))
-router.use('/recommender', require('./recommend'))
 router.use('/admin', verifyAdminToken, require('./admin'))
 
 module.exports = router
