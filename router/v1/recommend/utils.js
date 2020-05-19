@@ -1,6 +1,6 @@
 const axios = require('axios')
 
-const backend_server = 'https://hoian-travel.herokuapp.com'
+const backend_server = 'https://hoian-travel.herokuapp.com/'
 const recommend_server = 'http://recommender-travel-app.herokuapp.com/'
 const backend_local = 'http://localhost:5000/'
 const recommend_local = 'http://localhost:8080/'
