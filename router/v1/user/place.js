@@ -63,13 +63,20 @@ router.post("/viewdetail", wrapAsync(async(req, res, next) => {
 
 router.post("/filter", wrapAsync(async(req, res, next) => {
     try {
-        const { category } = req.body
-        const event_type = 'FILTER: ' + category
-        const decoded = jwt.verify(req.token, 'RESTFULAPIs')
+        const { categories } = req.body
+        if(categories.length == 0){
+            return res.status(404).json('no category was found')
+        }
         const tzoffset = new Date().getTimezoneOffset() * 60000;
         const lastUpdate = new Date(Date.now() - tzoffset).toISOString().slice(0, 19).replace('T', ' ')
-        const savedLog = await userPlaceLog.insertUserLog(null, decoded.id, lastUpdate, event_type)
-        return res.status(200).json({id: savedLog.insertId})
+        const decoded = jwt.verify(req.token, 'RESTFULAPIs')
+        var list_ids = []
+        categories.forEach(async(category) => {
+            const event_type = 'FILTER: ' + category
+            const savedLog = await userPlaceLog.insertUserLog(null, decoded.id, lastUpdate, event_type)
+            console.log('inserted: ' + savedLog.insertId)
+        })
+        return res.status(200).json(list_ids)
     } catch (error) {
         console.log(error)
         return res.status(500).json(error)
