@@ -52,8 +52,7 @@ router.get('/place_detail/:placeid', wrapAsync(async(req, res, next) => {
         const place_detail = await Activity.loadDetailById(placeid)
         const images = await Activity.loadImagesByPlaceId(placeid)
         const comments = await Activity.loadCommentsByPlaceId(placeid)
-        const contact = await Activity.loadContactByPlaceId(placeid)
-        return res.status(200).json({place_detail, images, comments, contact})
+        return res.status(200).json({place_detail, images, comments})
     } catch (error) {
         return res.status(500).send(error)
     }
