@@ -63,13 +63,35 @@ router.post("/viewdetail", wrapAsync(async(req, res, next) => {
 
 router.post("/filter", wrapAsync(async(req, res, next) => {
     try {
-        const { category } = req.body
-        const event_type = 'FILTER: ' + category
+        const { cuisine, features, meals, foodtypes } = req.body.categories
+        if(cuisine.length == 0 && features.length == 0 && meals.length == 0 && foodtypes.length == 0){
+            return res.status(404).json('no category was found')
+        }
         const decoded = jwt.verify(req.token, 'RESTFULAPIs')
         const tzoffset = new Date().getTimezoneOffset() * 60000;
         const lastUpdate = new Date(Date.now() - tzoffset).toISOString().slice(0, 19).replace('T', ' ')
+        let cat_as_list = []
+        cuisine.map(category => {
+            const cuisine = 'c_' + category
+            cat_as_list.push(cuisine)
+        })
+        features.map(category => {
+            const feature = 'f_' + category
+            cat_as_list.push(feature)
+        })
+        meals.map(category => {
+            const meal = 'm_' + category
+            cat_as_list.push(meal)
+        })
+        foodtypes.map(foodtype => {
+            const event_type = 't_' + foodtype
+            cat_as_list.push(event_type)
+        })
+        const cat_as_tring = cat_as_list.join(' ')
+        console.log(cat_as_tring)
+        const event_type = 'FILTER: ' + cat_as_tring
         const savedLog = await userRestaurantLog.insertUserLog(null, decoded.id, lastUpdate, event_type)
-        return res.status(200).json({id: savedLog.insertId})
+        return res.status(200).json({id: savedLog.id})
     } catch (error) {
         console.log(error)
         return res.status(500).json(error)
