@@ -70,11 +70,14 @@ router.post("/filter", wrapAsync(async(req, res, next) => {
         const decoded = jwt.verify(req.token, 'RESTFULAPIs')
         const tzoffset = new Date().getTimezoneOffset() * 60000;
         const lastUpdate = new Date(Date.now() - tzoffset).toISOString().slice(0, 19).replace('T', ' ')
-        categories.forEach(async(category) => {
-            const event_type = 'FILTER: ' + category
-            const savedLog = await userTourLog.insertUserLog(null, decoded.id, lastUpdate, event_type)
-            console.log('inserted: ' + savedLog.insertId)
+        let cat_as_list = []
+        categories.map(category => {
+            cat_as_list.push(category)
         })
+        const cat_as_tring = cat_as_list.join(' ')
+        const event_type = 'FILTER: ' + cat_as_tring
+        const savedLog = await userTourLog.insertUserLog(null, decoded.id, lastUpdate, event_type)
+        console.log('inserted: ' + savedLog.insertId)
         return res.status(200).json({})
     } catch (error) {
         console.log(error)
