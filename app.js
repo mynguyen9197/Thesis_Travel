@@ -8,10 +8,11 @@ const app = express()
 
 global.appRoot = path.resolve(__dirname)
 app.use(bodyParser.json())
-app.use(bodyParser.urlencoded({ extended: true }))
+app.use(bodyParser.urlencoded({ extended: false }))
+app.use('/user_upload', express.static('user_upload'))
 
 app.use(session({
-  secret: 'keyboard cat',
+  secret: 'keyboard cat', 
   resave: false,
   saveUninitialized: true,
   cookie: { maxAge: 60000 }

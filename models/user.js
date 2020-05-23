@@ -5,11 +5,21 @@ const insertUser = (user => {
     return save(sql)
 })
 
+const updateAvatar = (async(avatar, user_id) => {
+    const sql = `update user set avatar='${avatar}' where id=${user_id};`
+    return save(sql)
+})
+
 const findByUsername = (user => {
     const sql = `select * from user where username='${user.username}';`
     return load(sql)
 })
 
+const updateProfile = (async(user) => {
+    const sql = `update user set name='${user.name}', password='${user.password}', avatar='${user.avatar}' where id=${user.id};`
+    return load(sql)
+})
+
 module.exports = {
-    insertUser, findByUsername
+    insertUser, findByUsername, updateAvatar, updateProfile
 }
