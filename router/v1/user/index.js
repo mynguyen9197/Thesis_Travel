@@ -22,7 +22,8 @@ router.post('/signup', wrapAsync(async(req, res, next) => {
             return res.status(200).json({id: savedUser.insertId})
         }
     } catch (error) {
-        return res.status(500).json("This username has already been taken. Please try with another one!")
+        console.log(error)
+        return res.status(500).json("Something went wrong! Please try again")
     }
 }))
 
@@ -56,5 +57,6 @@ router.get('/history', verifyToken, wrapAsync(async(req, res, next) => {
 router.use('/place', verifyToken, require('./place'))
 router.use('/tour', verifyToken, require('./tour'))
 router.use('/restaurant', verifyToken, require('./restaurant'))
+router.use('/profile', verifyToken, require('./profile'))
 
 module.exports = router
