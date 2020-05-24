@@ -65,3 +65,5 @@ typings/
 .db-data/*
 
 .models/db-access.js
+
+.user_upload/*
