@@ -64,7 +64,7 @@ router.put('/update-profile', upload.single('avatar'), wrapAsync(async(req, res,
             console.log(user)
             return res.status(200).json({name: user.name, avatar: user.avatar})
         } else {
-            return res.status(401).send("User does not exist!")
+            return res.status(401).json("User does not exist!")
         }
     } catch (error) {
         console.log(error)
@@ -76,20 +76,20 @@ router.put('/update-password', wrapAsync(async(req, res, next) =>{
     try {
         const { prepass, password } = req.body
         const decoded = jwt.verify(req.token, 'RESTFULAPIs')
-        const savedUser = await User.findById(decoded.id)
+        const savedUser = await User.findById(decoded.id) 
         if(savedUser.length){
             const match = await bcrypt.compare(prepass, savedUser[0].password)
             if(!match){
-                return res.status(401).send("Wrong password!")
+                return res.status(401).json("Wrong password!")
             }
             const user = {
                 id: decoded.id,
                 password: bcrypt.hashSync(password, 10)
             }
             await User.updatePassword(user)
-            return res.status(200).send('update password completed')
+            return res.status(200).json('update password completed')
         } else {
-            return res.status(401).send("User does not exist!")
+            return res.status(401).json("User does not exist!")
         }
     } catch (error) {
         console.log(error)
