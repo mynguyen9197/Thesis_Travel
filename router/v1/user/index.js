@@ -37,7 +37,7 @@ router.post('/login', wrapAsync(async(req, res, next) => {
                 return res.status(401).send("Wrong password!")
             } else {
                 const token = jwt.sign({ id: savedUser[0].id, role: savedUser[0].role }, 'RESTFULAPIs', { expiresIn: 60 * 60 * 24  })
-                return res.status(200).json({token: token, role: savedUser[0].role})
+                return res.status(200).json({token: token, role: savedUser[0].role, name: savedUser[0].name, avatar: savedUser[0].avatar})
             }
         } else {
             return res.status(401).send("User does not exist!")

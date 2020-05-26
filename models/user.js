@@ -21,11 +21,16 @@ const findById = (id => {
 })
 
 const updateProfile = (async(user) => {
-    const sql = `update user set name='${user.name}', password='${user.password}' where id=${user.id};`
+    const sql = `update user set name='${user.name}', avatar='${user.avatar}' where id=${user.id};`
+    return save(sql)
+})
+
+const updatePassword = (async(user) => {
+    const sql = `update user set password='${user.password}' where id=${user.id};`
     return save(sql)
 })
 
 module.exports = {
     insertUser, findByUsername, updateAvatar, updateProfile,
-    findById
+    findById, updatePassword
 }
