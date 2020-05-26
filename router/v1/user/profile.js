@@ -36,18 +36,45 @@ const upload = multer({
 router.post('/upload-avatar', upload.single('avatar'), wrapAsync(async(req, res, next) =>{
     try {
         const decoded = jwt.verify(req.token, 'RESTFULAPIs')
-        const path = req.file.path
-        await User.updateAvatar(path.substr(0, 11) + '\\' + path.substr(11), decoded.id)
-        return res.status(200).send('upload avatar completed')
+        const path = req.file ? req.file.path : null
+        if(path){
+            await User.updateAvatar(path.substr(0, 11) + '\\' + path.substr(11), decoded.id)
+            return res.status(200).json(path.substr(0, 11) + '\\' + path.substr(11))
+        }
+        return res.status(500).json('No avatar was found')
     } catch (error) {
         console.log(error)
         return res.status(500).json("There was something wrong")
     }
 }))
 
-router.put('/update-profile', wrapAsync(async(req, res, next) =>{
+router.put('/update-profile', upload.single('avatar'), wrapAsync(async(req, res, next) =>{
     try {
-        const { name, prepass, password } = req.body
+        const { name } = req.body
+        const decoded = jwt.verify(req.token, 'RESTFULAPIs')
+        const savedUser = await User.findById(decoded.id)
+        if(savedUser.length){
+            const path = req.file ? req.file.path : null
+            const user = {
+                id: decoded.id,
+                name: name,
+                avatar: path ? path.substr(0, 11) + '\\' + path.substr(11) : savedUser[0].avatar
+            }
+            await User.updateProfile(user)
+            console.log(user)
+            return res.status(200).json({name: user.name, avatar: user.avatar})
+        } else {
+            return res.status(401).send("User does not exist!")
+        }
+    } catch (error) {
+        console.log(error)
+        return res.status(500).json("There was something wrong")
+    }
+}))
+
+router.put('/update-password', wrapAsync(async(req, res, next) =>{
+    try {
+        const { prepass, password } = req.body
         const decoded = jwt.verify(req.token, 'RESTFULAPIs')
         const savedUser = await User.findById(decoded.id)
         if(savedUser.length){
@@ -57,11 +84,10 @@ router.put('/update-profile', wrapAsync(async(req, res, next) =>{
             }
             const user = {
                 id: decoded.id,
-                name: name,
                 password: bcrypt.hashSync(password, 10)
             }
-            await User.updateProfile(user)
-            return res.status(200).send('update user completed')
+            await User.updatePassword(user)
+            return res.status(200).send('update password completed')
         } else {
             return res.status(401).send("User does not exist!")
         }
