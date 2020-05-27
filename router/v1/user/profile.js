@@ -4,7 +4,7 @@ const multer = require('multer')
 const bcrypt = require('bcrypt')
 
 const User = require(global.appRoot + '/models/user')
-const { wrapAsync, verifyToken } = require(global.appRoot + '/utils')
+const { wrapAsync } = require(global.appRoot + '/utils')
 
 const router = express.Router()
 
@@ -38,8 +38,10 @@ router.post('/upload-avatar', upload.single('avatar'), wrapAsync(async(req, res,
         const decoded = jwt.verify(req.token, 'RESTFULAPIs')
         const path = req.file ? req.file.path : null
         if(path){
-            await User.updateAvatar(path.substr(0, 11) + '\\' + path.substr(11), decoded.id)
-            return res.status(200).json(path.substr(0, 11) + '\\' + path.substr(11))
+            const url_img = path.substr(0, 11) + '\\' + path.substr(11)
+            const request_url = req.protocol + '://' + req.get('host')
+            await User.updateAvatar(url_img, decoded.id)
+            return res.status(200).json(request_url + '/' + url_img)
         }
         return res.status(500).json('No avatar was found')
     } catch (error) {
@@ -61,8 +63,9 @@ router.put('/update-profile', upload.single('avatar'), wrapAsync(async(req, res,
                 avatar: path ? path.substr(0, 11) + '\\' + path.substr(11) : savedUser[0].avatar
             }
             await User.updateProfile(user)
+            const request_url = req.protocol + '://' + req.get('host')
             console.log(user)
-            return res.status(200).json({name: user.name, avatar: user.avatar})
+            return res.status(200).json({name: user.name, avatar: request_url + '/' + user.avatar})
         } else {
             return res.status(401).json("User does not exist!")
         }
