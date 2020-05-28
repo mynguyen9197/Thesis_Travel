@@ -58,6 +58,20 @@ router.get('/restaurant_detail/:id', wrapAsync(async(req, res, next) => {
     }
 }))
 
+router.get('/most-viewed', wrapAsync(async(req, res, next) => {
+    try{
+        const tzoffset = new Date().getTimezoneOffset() * 60000;
+        const today = new Date(Date.now() - tzoffset)
+        let last30days = new Date(Date.now() - tzoffset)
+        last30days.setDate(new Date(today.getDate() - 30))
+        const mostViewRestaurants = await Restaurant.loadMostViewRestaurants(last30days.toISOString().split('T')[0], today.toISOString().split('T')[0])
+        console.log({last30days: last30days.toISOString().split('T')[0], lastUpdate: today.toISOString().split('T')[0]})
+        return res.status(200).json(mostViewRestaurants)
+    } catch {
+        return res.status(500).json(error)
+    }
+}))
+
 function disListRestaurant(rests1, rests2){
     let result = []
     if(rests1.length == 0) {

@@ -168,6 +168,12 @@ const deactivateKindOfTour = ((ids) => {
     return save(sql)
 })
 
+const loadMostViewTours = ((from, to) => {
+    const query = `SELECT b.*, count(a.id) as times from tour_user_log a, tour b 
+    where a.tour_id=b.id and log_time between '${from}' and '${to}' group by tour_id order by times desc;`
+    return load(query)
+})
+
 module.exports = {
     insertTour, insertTourism,
     insertComment, loadAllTourism, insertImage,
@@ -181,5 +187,6 @@ module.exports = {
     findOtherTourInGroup, loadInfoAllTours,
     deactivateTour, activateTour,
     insertNewTour, updateTour, deactivateImage,
-    loadActivityByTourId, deactivateKindOfTour
+    loadActivityByTourId, deactivateKindOfTour,
+    loadMostViewTours
 }

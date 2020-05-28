@@ -34,4 +34,18 @@ router.get('/tour_detail/:tour_id', wrapAsync(async(req, res, next) => {
     return res.status(200).send({tour_detail, images, comments, tourism})
 }))
 
+router.get('/most-viewed', wrapAsync(async(req, res, next) => {
+    try{
+        const tzoffset = new Date().getTimezoneOffset() * 60000;
+        const today = new Date(Date.now() - tzoffset)
+        let last30days = new Date(Date.now() - tzoffset)
+        last30days.setDate(new Date(today.getDate() - 30))
+        const mostViewTours = await Tour.loadMostViewTours(last30days.toISOString().split('T')[0], today.toISOString().split('T')[0])
+        console.log({last30days: last30days.toISOString().split('T')[0], lastUpdate: today.toISOString().split('T')[0]})
+        return res.status(200).json(mostViewTours)
+    } catch {
+        return res.status(500).json(error)
+    }
+}))
+
 module.exports = router

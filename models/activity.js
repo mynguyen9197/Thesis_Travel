@@ -204,6 +204,12 @@ const loadChildCategoriesOnly = (() => {
     return load(query)
 })
 
+const loadMostViewPlaces = ((from, to) => {
+    const query = `SELECT b.*, count(a.id) as times FROM place_user_log a, place b 
+    where a.place_id=b.id and log_time between '${from}' and '${to}' group by place_id order by times desc;`
+    return load(query)
+})
+
 const addNewPlace = (async(place) => {
     const sql = `insert into place(name, about, thumbnail, open_hour, duration, address, phone) 
     values('${place.name}', '${place.about}', '${place.thumbnail}', '${place.open_hour}', '${place.duration}', '${place.address}', '${place.phone}');`;
@@ -231,5 +237,5 @@ module.exports = {
     deactivatePlace, activatePlace,
     loadChildCategoriesOnly, deactivateImage,
     loadActivityByPlaceId, deactivateKindOfPlace,
-    addNewPlace
+    addNewPlace, loadMostViewPlaces
 }

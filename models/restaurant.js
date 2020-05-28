@@ -255,6 +255,12 @@ const loadFeatureByRestId = ((restid) => {
     return load(query)
 })
 
+const loadMostViewRestaurants = ((from, to) => {
+    const query = `SELECT b.*, count(a.id) as times from restaurant_user_log a, restaurant b 
+    where a.rest_id=b.id and log_time between '${from}' and '${to}' group by rest_id order by times desc;`
+    return load(query)
+})
+
 module.exports = {
     insertRestaurant, insertImage, insertComment,
     insertCuisine, findCuisineByName, insertCuisineRestaurant,
@@ -271,5 +277,5 @@ module.exports = {
     findOtherRestInFeatureGroup, updateRestaurant, loadAllRestaurant,
     deactivateRestaurant, activateRestaurant, insertNewRestaurant,
     deactivateImage, loadCuisineByRestId, loadFoodTypeByRestId,
-    loadMealByRestId, loadFeatureByRestId
+    loadMealByRestId, loadFeatureByRestId,loadMostViewRestaurants
 }
