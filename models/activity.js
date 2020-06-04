@@ -156,8 +156,8 @@ const findPlaceByNameAndActivity = ((name, act_ids) => {
     return load(query)
 })
 
-const updateReview = ((review, placeid) => {
-    const query =  `update place set review_detail='${review}' where id=${placeid};`
+const updateReview = ((review, average, placeid) => {
+    const query =  `update place set review_detail='${review}', rating=${average} where id=${placeid};`
     return save(query)
 })
 

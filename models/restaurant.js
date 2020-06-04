@@ -175,8 +175,8 @@ const loadReviewByResId = ((resid) => {
     return load(sql)
 })
 
-const updateReview = ((review, res_id) => {
-    const query =  `update restaurant set review_detail='${review}' where id=${res_id};`
+const updateReview = ((review, average, res_id) => {
+    const query =  `update restaurant set review_detail='${review}', common_rating=${average} where id=${res_id};`
     return save(query)
 })
 
