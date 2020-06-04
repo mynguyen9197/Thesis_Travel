@@ -98,8 +98,8 @@ const loadReviewByTourId = ((tourid) => {
     return load(sql)
 })
 
-const updateReview = ((review, tour_id) => {
-    const query =  `update tour set review_detail='${review}' where id=${tour_id};`
+const updateReview = ((review, average, tour_id) => {
+    const query =  `update tour set review_detail='${review}', rating=${average} where id=${tour_id};`
     return save(query)
 })
 
