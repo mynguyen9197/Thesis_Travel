@@ -8,7 +8,7 @@ const Place = require(global.appRoot + '/models/user_log/place')
 const Tour = require(global.appRoot + '/models/user_log/tour')
 const Restaurant = require(global.appRoot + '/models/user_log/restaurant')
 
-const { wrapAsync, verifyToken } = require(global.appRoot + '/utils')
+const { wrapAsync, verifyToken, getImageUrlAsLink } = require(global.appRoot + '/utils')
 router.post('/signup', wrapAsync(async(req, res, next) => {
     try {
         const {user} = req.body;
@@ -38,7 +38,8 @@ router.post('/login', wrapAsync(async(req, res, next) => {
             } else {
                 const request_url = req.protocol + '://' + req.get('host')
                 const token = jwt.sign({ id: savedUser[0].id, role: savedUser[0].role }, 'RESTFULAPIs', { expiresIn: 60 * 60 * 24  })
-                return res.status(200).json({token: token, role: savedUser[0].role, name: savedUser[0].name, avatar: savedUser[0].avatar != 'null' ? request_url + '/' + savedUser[0].avatar : null})
+                const avatar = getImageUrlAsLink(request_url+'/', savedUser[0].avatar)
+                return res.status(200).json({token: token, role: savedUser[0].role, name: savedUser[0].name, avatar: avatar})
             }
         } else {
             return res.status(401).send("User does not exist!")
