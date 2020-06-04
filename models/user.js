@@ -10,6 +10,11 @@ const updateAvatar = (async(avatar, user_id) => {
     return save(sql)
 })
 
+const findUsersMissingAvatar = (async() => {
+    const sql = `select id from user where avatar='null' or avatar is null;`
+    return load(sql)
+})
+
 const findByUsername = (user => {
     const sql = `select * from user where username='${user.username}';`
     return load(sql)
@@ -32,5 +37,5 @@ const updatePassword = (async(user) => {
 
 module.exports = {
     insertUser, findByUsername, updateAvatar, updateProfile,
-    findById, updatePassword
+    findById, updatePassword, findUsersMissingAvatar
 }

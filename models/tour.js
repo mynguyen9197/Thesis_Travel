@@ -89,7 +89,7 @@ const loadImagesByTourId = ((tour_id) => {
 })
 
 const loadCommentsByTourId = ((tour_id) => {
-    const sql = `select c.*, u.username from comments_tour c, user u where c.tour_id=${tour_id} and u.id=c.user_id order by c.id DESC;`
+    const sql = `select c.*, u.username as username, u.name as name, u.avatar as avatar from comments_tour c, user u where c.tour_id=${tour_id} and u.id=c.user_id order by c.id DESC;`
     return load(sql)
 })
 

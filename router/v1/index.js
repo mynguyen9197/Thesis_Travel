@@ -10,6 +10,7 @@ router.use('/flight', require('./flight'))
 router.use('/activity', require('./activity'))
 router.use('/crawl', require('./crawl'))
 router.use('/user', require('./user'))
+router.use('/fake', require('./fake_data'))
 router.use('/recommend', verifyToken, require('./recommend'))
 router.use('/admin', verifyAdminToken, require('./admin'))
 

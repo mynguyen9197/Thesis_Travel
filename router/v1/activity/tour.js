@@ -2,7 +2,7 @@ const express = require('express')
 const router = express.Router()
 
 const Tour = require(global.appRoot + '/models/tour')
-const { wrapAsync } = require(global.appRoot + '/utils')
+const { wrapAsync, getImageUrlAsObject, getAvatarUrlAsObject } = require(global.appRoot + '/utils')
 
 router.get('/', wrapAsync(async(req, res, next) => {
     try {
@@ -26,12 +26,20 @@ router.get('/filter', wrapAsync(async(req, res, next) => {
 }))
 
 router.get('/tour_detail/:tour_id', wrapAsync(async(req, res, next) => {
-    const { tour_id } = req.params
-    const tour_detail = await Tour.findTourById(tour_id)
-    const images = await Tour.loadImagesByTourId(tour_id)
-    const comments = await Tour.loadCommentsByTourId(tour_id)
-    const tourism = await Tour.findTourismById(tour_detail[0].tourism_id)
-    return res.status(200).send({tour_detail, images, comments, tourism})
+    try {
+        const { tour_id } = req.params
+        const request_url = req.protocol + '://' + req.get('host')
+        const tour_detail = await Tour.findTourById(tour_id)
+        let images = await Tour.loadImagesByTourId(tour_id)
+        images.map(image => getImageUrlAsObject(request_url, image))
+        const comments = await Tour.loadCommentsByTourId(tour_id)
+        comments.map(comment => getAvatarUrlAsObject(request_url, comment))
+        const tourism = await Tour.findTourismById(tour_detail[0].tourism_id)
+        return res.status(200).send({tour_detail, images, comments, tourism})
+    } catch (error) {
+        console.log(error)
+        return res.status(500).json(error)
+    }
 }))
 
 router.get('/most-viewed', wrapAsync(async(req, res, next) => {

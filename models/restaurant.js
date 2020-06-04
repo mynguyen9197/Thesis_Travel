@@ -111,7 +111,7 @@ const loadImagesByRestaurantId = async(id) => {
 }
 
 const loadCommentsByRestaurantId = async(id) => {
-    const sql = `SELECT c.*, u.username FROM comments_restaurant c, user u where res_id=${id} and u.id=c.user_id order by c.id DESC;`
+    const sql = `SELECT c.*, u.username as username, u.name as name, u.avatar as avatar FROM comments_restaurant c, user u where res_id=${id} and u.id=c.user_id order by c.id DESC;`
     return load(sql)
 }
 

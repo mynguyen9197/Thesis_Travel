@@ -82,7 +82,7 @@ const loadContactByPlaceId = ((placeid) => {
 })
 
 const loadCommentsByPlaceId = ((placeid) => {
-    const sql = `select c.*, u.username from comments c, user u where c.place_id=${placeid} and u.id=c.user_id order by c.id DESC;`
+    const sql = `select c.*, u.username as username, u.name as name, u.avatar as avatar from comments c, user u where c.place_id=${placeid} and u.id=c.user_id order by c.id DESC;`
     return load(sql)
 })
 
