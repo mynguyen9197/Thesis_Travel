@@ -38,7 +38,7 @@ router.post('/login', wrapAsync(async(req, res, next) => {
             } else {
                 const request_url = req.protocol + '://' + req.get('host')
                 const token = jwt.sign({ id: savedUser[0].id, role: savedUser[0].role }, 'RESTFULAPIs', { expiresIn: 60 * 60 * 24  })
-                const avatar = getImageUrlAsLink(request_url+'/', savedUser[0].avatar)
+                const avatar = getImageUrlAsLink(request_url, savedUser[0].avatar)
                 return res.status(200).json({token: token, role: savedUser[0].role, name: savedUser[0].name, avatar: avatar})
             }
         } else {
