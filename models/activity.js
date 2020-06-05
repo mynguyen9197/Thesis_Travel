@@ -42,32 +42,32 @@ const loadAllActivities = (() => {
 })
 
 const loadAllIdAndNamePlaces = (() => {
-    const sql = `select id, name as content from place`
+    const sql = `select id, name as content from place where is_active=1`
     return load(sql)
 })
 
 const loadAllIdAndAboutPlaces = (async() => {
-    const sql = `select id, about as content from place`
+    const sql = `select id, about as content from place where is_active=1`
     return load(sql)
 })
 
 const loadAllIdNameAndAboutPlaces = (async() => {
-    const sql = `select id, about, name from place`
+    const sql = `select id, about, name from place where is_active=1`
     return load(sql)
 })
 
 const loadIdAndNamePlaceById = ((id) => {
-    const sql = `select id, name as content from place where id=${id}`
+    const sql = `select id, name as content from place where id=${id} and is_active=1`
     return load(sql)
 })
 
 const loadByName = ((name) => {
-    const sql = `select id, name from place where name='${name}';`
+    const sql = `select id, name from place where name='${name}' and is_active=1;`
     return load(sql)
 })
 
 const loadDetailById = ((placeid) => {
-    const sql = `select * from place p where p.id=${placeid};`
+    const sql = `select * from place p where p.id=${placeid} and is_active=1;`
     return load(sql)
 })
 
@@ -87,17 +87,22 @@ const loadCommentsByPlaceId = ((placeid) => {
 })
 
 const loadReviewByPlaceId = ((placeid) => {
-    const sql = `select review_detail from place p where p.id=${placeid};`
+    const sql = `select review_detail from place p where p.id=${placeid} and p.is_active=1;`
     return load(sql)
 })
 
 const loadTop20ByRating = (() => {
-    const query = 'SELECT id, name, thumbnail, rating, ranking, review FROM place ORDER BY rating DESC, ranking DESC, review DESC LIMIT 20;'
+    const query = 'SELECT id, name, thumbnail, rating, ranking, review FROM place where is_active=1 ORDER BY rating DESC, ranking DESC, review DESC LIMIT 20;'
+    return load(query)
+})  
+
+const loadTopRating = (() => {
+    const query = 'SELECT id, name, thumbnail, rating, ranking, review FROM place where is_active=1 ORDER BY rating DESC, ranking DESC, review DESC;'
     return load(query)
 })  
 
 const loadAllPlaces = (() => {
-    const query = 'SELECT id, name, thumbnail, rating, ranking, review FROM place;'
+    const query = 'SELECT id, name, thumbnail, rating, ranking, review FROM place where is_active=1;'
     return load(query)
 })  
 
@@ -122,25 +127,25 @@ const loadActivityByPlaceId = ((placeid) => {
 })
 
 const loadPlacesByActivityId = async(act_ids) => {
-    const query = `SELECT DISTINCT p.id, p.name, p.thumbnail, p.rating, p.ranking, p.review FROM place p, activity_place ap WHERE p.id=ap.place_id and ap.activity_id in (${act_ids}) ORDER BY rating DESC, 
+    const query = `SELECT DISTINCT p.id, p.name, p.thumbnail, p.rating, p.ranking, p.review FROM place p, activity_place ap WHERE p.id=ap.place_id and p.is_active=1 and ap.activity_id in (${act_ids}) ORDER BY rating DESC, 
     ranking DESC, review DESC;`
     return load(query)
 }
 
 const loadPlacesByPlaceIds = async(place_ids) => {
-    const query = `SELECT DISTINCT p.id, p.name, p.thumbnail, p.rating, p.ranking, p.review FROM place p WHERE p.id in (${place_ids}) ORDER BY rating DESC, 
+    const query = `SELECT DISTINCT p.id, p.name, p.thumbnail, p.rating, p.ranking, p.review FROM place p WHERE p.id in (${place_ids}) and p.is_active=1 ORDER BY rating DESC, 
     ranking DESC, review DESC;`
     return load(query)
 }
 
 const findPlacesById = async(place_ids) => {
-    const query = `SELECT * FROM place WHERE id in (${place_ids}) ORDER BY rating DESC, 
+    const query = `SELECT * FROM place WHERE id in (${place_ids}) and is_active=1 ORDER BY rating DESC, 
     ranking DESC, review DESC;`
     return load(query)
 }
 
 const findPlaceByName = (name => {
-    const query =  `SELECT id, name, thumbnail, rating, ranking, review FROM place WHERE LOWER(name) like LOWER('%${name}%') ORDER BY rating DESC, ranking DESC, review DESC; `
+    const query =  `SELECT id, name, thumbnail, rating, ranking, review FROM place WHERE LOWER(name) like LOWER('%${name}%') and is_active=1 ORDER BY rating DESC, ranking DESC, review DESC; `
     return load(query)
 })
 
@@ -151,7 +156,7 @@ const findRatedPlaceByUser = async(userid) => {
 
 const findPlaceByNameAndActivity = ((name, act_ids) => {
     const query = `SELECT DISTINCT p.id, p.name, p.thumbnail, p.rating, p.ranking, p.review FROM place p, activity_place ap
-    WHERE p.id=ap.place_id and ap.activity_id in (${act_ids}) and LOWER(p.name) like LOWER('%${name}%') ORDER BY rating DESC, 
+    WHERE p.id=ap.place_id and p.is_active=1 and ap.activity_id in (${act_ids}) and LOWER(p.name) like LOWER('%${name}%') ORDER BY rating DESC, 
     ranking DESC, review DESC;`
     return load(query)
 })
@@ -177,7 +182,7 @@ const insertRating = ((info) => {
 })
 
 const findOtherPlaceInGroup = async(placeid) => {
-    const sql = `SELECT DISTINCT p.id as id, p.name as content from place p, activity_place ap WHERE p.id=ap.place_id and ap.activity_id in 
+    const sql = `SELECT DISTINCT p.id as id, p.name as content from place p, activity_place ap WHERE p.id=ap.place_id and p.is_active=1 and ap.activity_id in 
     (SELECT activity_id FROM activity_place WHERE place_id=${placeid});`
     return load(sql)
 }
@@ -237,5 +242,5 @@ module.exports = {
     deactivatePlace, activatePlace,
     loadChildCategoriesOnly, deactivateImage,
     loadActivityByPlaceId, deactivateKindOfPlace,
-    addNewPlace, loadMostViewPlaces
+    addNewPlace, loadMostViewPlaces, loadTopRating
 }

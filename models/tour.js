@@ -83,6 +83,24 @@ const loadTourByListId = async(tour_ids) => {
     return load(query)
 }
 
+const loadTopRating = async() => {
+    const query = `SELECT DISTINCT id, name, thumbnail, rating, price, review FROM tour where is_active=1 ORDER BY rating DESC, 
+    review DESC;`
+    return load(query)
+}
+
+const loadTopCheapest = async() => {
+    const query = `SELECT DISTINCT id, name, thumbnail, rating, price, review FROM tour where is_active=1 
+    ORDER BY price, rating DESC, review DESC;`
+    return load(query)
+}
+
+const loadTopMostExpensive = async() => {
+    const query = `SELECT DISTINCT id, name, thumbnail, rating, price, review FROM tour where is_active=1 
+    ORDER BY price DESC, rating DESC, review DESC;`
+    return load(query)
+}
+
 const loadImagesByTourId = ((tour_id) => {
     const sql = `select * from images_tour i where i.tour_id=${tour_id} and i.status=1 order by i.id DESC;`
     return load(sql)
@@ -188,5 +206,5 @@ module.exports = {
     deactivateTour, activateTour,
     insertNewTour, updateTour, deactivateImage,
     loadActivityByTourId, deactivateKindOfTour,
-    loadMostViewTours
+    loadMostViewTours, loadTopRating, loadTopCheapest, loadTopMostExpensive
 }

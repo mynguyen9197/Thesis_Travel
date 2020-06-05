@@ -27,6 +27,7 @@ router.get('/category/:category_id', wrapAsync(async(req, res, next) => {
         const events = await Activity.loadPlacesByActivityId(activity_ids)
         return res.status(200).json({ activities, events })
     } catch (error) {
+        console.log(error)
         return res.status(500).send(error.sqlMessage)
     }
 }))
@@ -61,7 +62,7 @@ router.get('/place_detail/:placeid', wrapAsync(async(req, res, next) => {
         return res.status(200).json({place_detail, images, comments})
     } catch (error) {
         console.log(error)
-        return res.status(500).json(error)
+        return res.status(500).json({error: error.sqlMessage})
     }
 }))
 
@@ -74,8 +75,20 @@ router.get('/most-viewed', wrapAsync(async(req, res, next) => {
         const mostViewPlaces = await Activity.loadMostViewPlaces(last30days.toISOString().split('T')[0], today.toISOString().split('T')[0])
         console.log({last30days: last30days.toISOString().split('T')[0], lastUpdate: today.toISOString().split('T')[0]})
         return res.status(200).json(mostViewPlaces)
-    } catch {
-        return res.status(500).json(error)
+    } catch(error) {
+        console.log(error)
+        return res.status(500).json({error: error.sqlMessage})
+    }
+}))
+
+router.get('/highest-rating', wrapAsync(async(req, res, next) => {
+    try{
+        const activities = await Activity.loadTopRating()
+        console.log({activities})
+        return res.status(200).json(activities)
+    } catch(error) {
+        console.log(error)
+        return res.status(500).json({error: error.sqlMessage})
     }
 }))
 

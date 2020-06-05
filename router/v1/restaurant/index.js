@@ -72,7 +72,19 @@ router.get('/most-viewed', wrapAsync(async(req, res, next) => {
         console.log({last30days: last30days.toISOString().split('T')[0], lastUpdate: today.toISOString().split('T')[0]})
         return res.status(200).json(mostViewRestaurants)
     } catch {
-        return res.status(500).json(error)
+        console.log(error)
+        return res.status(500).json({error: error.sqlMessage})
+    }
+}))
+
+router.get('/highest-rating', wrapAsync(async(req, res, next) => {
+    try{
+        const listRestaurants = await Restaurant.loadTopRating()
+        console.log({listRestaurants})
+        return res.status(200).json(listRestaurants)
+    } catch(error) {
+        console.log(error)
+        return res.status(500).json({error: error.sqlMessage})
     }
 }))
 

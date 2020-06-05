@@ -95,6 +95,11 @@ const loadTop20ByRating = (async() => {
     return load(query)
 }) 
 
+const loadTopRating = (async() => {
+    const query = 'SELECT id, name, thumbnail, common_rating, ranking, review_count FROM restaurant where is_active=1 ORDER BY common_rating DESC, review_count DESC;'
+    return load(query)
+}) 
+
 const loadAllRestaurant = (async() => {
     const query = 'SELECT id, name, thumbnail, common_rating, ranking, review_count FROM restaurant;'
     return load(query)
@@ -277,5 +282,6 @@ module.exports = {
     findOtherRestInFeatureGroup, updateRestaurant, loadAllRestaurant,
     deactivateRestaurant, activateRestaurant, insertNewRestaurant,
     deactivateImage, loadCuisineByRestId, loadFoodTypeByRestId,
-    loadMealByRestId, loadFeatureByRestId,loadMostViewRestaurants
+    loadMealByRestId, loadFeatureByRestId,loadMostViewRestaurants,
+    loadTopRating
 }

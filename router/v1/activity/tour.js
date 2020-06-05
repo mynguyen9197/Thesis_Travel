@@ -14,6 +14,7 @@ router.get('/', wrapAsync(async(req, res, next) => {
         const tours = await Tour.loadTourByActivityId(activity_ids)
         return res.status(200).json({ activities, tours: tours })
     } catch (error) {
+        console.log(error)
         return res.status(500).send(error.sqlMessage)
     }
 }))
@@ -51,7 +52,41 @@ router.get('/most-viewed', wrapAsync(async(req, res, next) => {
         const mostViewTours = await Tour.loadMostViewTours(last30days.toISOString().split('T')[0], today.toISOString().split('T')[0])
         console.log({last30days: last30days.toISOString().split('T')[0], lastUpdate: today.toISOString().split('T')[0]})
         return res.status(200).json(mostViewTours)
-    } catch {
+    } catch(error) {
+        console.log(error)
+        return res.status(500).json(error)
+    }
+}))
+
+router.get('/highest-rating', wrapAsync(async(req, res, next) => {
+    try{
+        const tours = await Tour.loadTopRating()
+        console.log({tours})
+        return res.status(200).json(tours)
+    } catch(error) {
+        console.log(error)
+        return res.status(500).json(error)
+    }
+}))
+
+router.get('/cheapest', wrapAsync(async(req, res, next) => {
+    try{
+        const tours = await Tour.loadTopCheapest()
+        console.log({tours})
+        return res.status(200).json(tours)
+    } catch (error){
+        console.log(error)
+        return res.status(500).json(error)
+    }
+}))
+
+router.get('/most-expensive', wrapAsync(async(req, res, next) => {
+    try{
+        const tours = await Tour.loadTopMostExpensive()
+        console.log({tours})
+        return res.status(200).json(tours)
+    } catch(error) {
+        console.log(error)
         return res.status(500).json(error)
     }
 }))
