@@ -61,7 +61,6 @@ router.get('/most-viewed', wrapAsync(async(req, res, next) => {
 router.get('/highest-rating', wrapAsync(async(req, res, next) => {
     try{
         const tours = await Tour.loadTopRating()
-        console.log({tours})
         return res.status(200).json(tours)
     } catch(error) {
         console.log(error)
@@ -72,7 +71,6 @@ router.get('/highest-rating', wrapAsync(async(req, res, next) => {
 router.get('/cheapest', wrapAsync(async(req, res, next) => {
     try{
         const tours = await Tour.loadTopCheapest()
-        console.log({tours})
         return res.status(200).json(tours)
     } catch (error){
         console.log(error)
@@ -83,7 +81,6 @@ router.get('/cheapest', wrapAsync(async(req, res, next) => {
 router.get('/most-expensive', wrapAsync(async(req, res, next) => {
     try{
         const tours = await Tour.loadTopMostExpensive()
-        console.log({tours})
         return res.status(200).json(tours)
     } catch(error) {
         console.log(error)

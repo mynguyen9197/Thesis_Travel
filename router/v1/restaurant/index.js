@@ -80,7 +80,6 @@ router.get('/most-viewed', wrapAsync(async(req, res, next) => {
 router.get('/highest-rating', wrapAsync(async(req, res, next) => {
     try{
         const listRestaurants = await Restaurant.loadTopRating()
-        console.log({listRestaurants})
         return res.status(200).json(listRestaurants)
     } catch(error) {
         console.log(error)
