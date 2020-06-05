@@ -21,6 +21,9 @@ router.get('/category/:category_id', wrapAsync(async(req, res, next) => {
             return res.status(404).send({error: 'No Activity Was Found'})
         }
         const activity_ids = activities.map(x => x.id)
+        if(activity_ids.length === 0){
+            return res.status(400).send("No Activity Was Found")
+        }
         const events = await Activity.loadPlacesByActivityId(activity_ids)
         return res.status(200).json({ activities, events })
     } catch (error) {
