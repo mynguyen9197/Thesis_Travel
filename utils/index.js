@@ -1,6 +1,11 @@
 const express = require('express')
 const jwt = require('jsonwebtoken')
 
+const backend_server = 'https://hoian-travel.herokuapp.com'
+const gui_server = 'https://hoiantravel-8e5d1.web.app'
+const backend_local = 'http://localhost:5000'
+const gui_local = 'http://localhost:4200'
+
 const verifyToken = ((req, res, next) => {
     const bearerHeader = req.headers['authorization']
     if(bearerHeader){
@@ -56,7 +61,16 @@ function getImageUrlAsLink(request_url, address){
     return address
 }
 
+async function getGuiUrl(request_url){
+    if (request_url.startsWith(backend_local)){
+        return gui_local
+    } else if(request_url.startsWith(backend_server)){
+        return gui_server
+    }
+}
+
 module.exports = {
     wrapAsync: fn => (req, res, next) => fn(req, res, next).catch(next),
-    verifyToken, verifyAdminToken, getImageUrlAsObject, getImageUrlAsLink, getAvatarUrlAsObject
+    verifyToken, verifyAdminToken, getImageUrlAsObject, getImageUrlAsLink, getAvatarUrlAsObject,
+    getGuiUrl
 }

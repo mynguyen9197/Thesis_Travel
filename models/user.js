@@ -1,8 +1,18 @@
 const { load, save } = require(global.appRoot + '/models/db-access')
 
 const insertUser = (user => {
-    const sql = `insert into user(name, username, password) values ('${user.name}', '${user.username}', '${user.password}');`
+    const sql = `insert into user(name, username, password, activate) values ('${user.name}', '${user.username}', '${user.password}', ${user.activate});`
     return save(sql)
+})
+
+const activeAccount = (id => {
+    const sql = `update user set activate=true where id=${id};`
+    return save(sql)
+})
+
+const checkActiveAccount = (id => {
+    const sql = `select activate from user where id=${id};`
+    return load(sql)
 })
 
 const updateAvatar = (async(avatar, user_id) => {
@@ -37,5 +47,6 @@ const updatePassword = (async(user) => {
 
 module.exports = {
     insertUser, findByUsername, updateAvatar, updateProfile,
-    findById, updatePassword, findUsersMissingAvatar
+    findById, updatePassword, findUsersMissingAvatar, activeAccount,
+    checkActiveAccount
 }
