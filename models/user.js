@@ -1,7 +1,7 @@
 const { load, save } = require(global.appRoot + '/models/db-access')
 
 const insertUser = (user => {
-    const sql = `insert into user(name, username, password, activate) values ('${user.name}', '${user.username}', '${user.password}', ${user.activate});`
+    const sql = `insert into user(name, username, password, email, activate) values ('${user.name}', '${user.username}', '${user.password}', '${user.email}', ${user.activate});`
     return save(sql)
 })
 
