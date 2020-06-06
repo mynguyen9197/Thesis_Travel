@@ -1,7 +1,7 @@
 const express = require('express')
 const jwt = require('jsonwebtoken')
 
-const backend_server = 'https://hoian-travel.herokuapp.com'
+const backend_server = 'http://hoian-travel.herokuapp.com'
 const gui_server = 'https://hoiantravel-8e5d1.web.app'
 const backend_local = 'http://localhost:5000'
 const gui_local = 'http://localhost:4200'
