@@ -55,7 +55,7 @@ function getAvatarUrlAsObject(request_url, img){
 }
 
 function getImageUrlAsLink(request_url, address){
-    if (!address.startsWith('http')){
+    if (address && address != "undefined" && !address.startsWith('http')){
         address = request_url + '/' + address
     }
     return address
