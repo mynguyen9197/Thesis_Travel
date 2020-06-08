@@ -49,27 +49,32 @@ router.get('/confirmation/:token', wrapAsync(async(req, res, next) => {
 }))
 
 router.post('/login', wrapAsync(async(req, res, next) => {
-    const {user} = req.body;
-    if(user && Object.keys(user).length){
-        const savedUser = await User.findByUsername(user)
-        if(savedUser.length){
-            const match = await bcrypt.compare(user.password, savedUser[0].password)
-            if(!match){
-                return res.status(401).send("Wrong password!")
-            } else {
-                if(!savedUser[0].activate){
-                    return res.status(401).json("Your account has not been activated.")
+    try {
+        const {user} = req.body;
+        if(user && Object.keys(user).length){
+            const savedUser = await User.findByUsername(user)
+            if(savedUser.length){
+                const match = await bcrypt.compare(user.password, savedUser[0].password)
+                if(!match){
+                    return res.status(401).send("Wrong password!")
+                } else {
+                    if(!savedUser[0].activate){
+                        return res.status(401).json("Your account has not been activated.")
+                    }
+                    const request_url = req.protocol + '://' + req.get('host')
+                    const token = jwt.sign({ id: savedUser[0].id, role: savedUser[0].role }, 'RESTFULAPIs', { expiresIn: 60 * 60 * 24  })
+                    const avatar = getImageUrlAsLink(request_url, savedUser[0].avatar)
+                    return res.status(200).json({token: token, role: savedUser[0].role, name: savedUser[0].name, avatar: avatar})
                 }
-                const request_url = req.protocol + '://' + req.get('host')
-                const token = jwt.sign({ id: savedUser[0].id, role: savedUser[0].role }, 'RESTFULAPIs', { expiresIn: 60 * 60 * 24  })
-                const avatar = getImageUrlAsLink(request_url, savedUser[0].avatar)
-                return res.status(200).json({token: token, role: savedUser[0].role, name: savedUser[0].name, avatar: avatar})
+            } else {
+                return res.status(401).send("User does not exist!")
             }
-        } else {
-            return res.status(401).send("User does not exist!")
         }
+        return res.status(400).json("User does not exist!")
+    } catch(error){
+        console.log(error)
+        return res.status(500).json(error)
     }
-    return res.status(400).json("User does not exist!")
 }))
 
 router.get('/history', verifyToken, wrapAsync(async(req, res, next) => {
