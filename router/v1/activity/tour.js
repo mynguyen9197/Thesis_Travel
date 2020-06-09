@@ -2,7 +2,7 @@ const express = require('express')
 const router = express.Router()
 
 const Tour = require(global.appRoot + '/models/tour')
-const { wrapAsync, getImageUrlAsObject, getAvatarUrlAsObject } = require(global.appRoot + '/utils')
+const { wrapAsync, getImageUrlAsLink } = require(global.appRoot + '/utils')
 
 router.get('/', wrapAsync(async(req, res, next) => {
     try {
@@ -32,9 +32,13 @@ router.get('/tour_detail/:tour_id', wrapAsync(async(req, res, next) => {
         const request_url = req.protocol + '://' + req.get('host')
         const tour_detail = await Tour.findTourById(tour_id)
         let images = await Tour.loadImagesByTourId(tour_id)
-        images.map(image => getImageUrlAsObject(request_url, image))
+        images.map(image => {
+            image.address = getImageUrlAsLink(request_url, image.address)
+        })
         const comments = await Tour.loadCommentsByTourId(tour_id)
-        comments.map(comment => getAvatarUrlAsObject(request_url, comment))
+        comments.map(comment => {
+            comment.avatar = getImageUrlAsLink(request_url, comment.avatar)
+        })
         const tourism = await Tour.findTourismById(tour_detail[0].tourism_id)
         return res.status(200).send({tour_detail, images, comments, tourism})
     } catch (error) {

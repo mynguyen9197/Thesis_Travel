@@ -2,7 +2,7 @@ const express = require('express')
 const router = express.Router()
 
 const Activity = require(global.appRoot + '/models/activity')
-const { wrapAsync, getImageUrlAsObject, getAvatarUrlAsObject } = require(global.appRoot + '/utils')
+const { wrapAsync, getImageUrlAsLink } = require(global.appRoot + '/utils')
 
 router.get('/', wrapAsync(async(req, res, next) => {
     const categories = await Activity.loadAllCategories()
@@ -56,9 +56,13 @@ router.get('/place_detail/:placeid', wrapAsync(async(req, res, next) => {
         const request_url = req.protocol + '://' + req.get('host')
         const place_detail = await Activity.loadDetailById(placeid)
         const images = await Activity.loadImagesByPlaceId(placeid)
-        images.map(image => getImageUrlAsObject(request_url, image))
+        images.map(image => {
+            image.address = getImageUrlAsLink(request_url, image.address)
+        })
         const comments = await Activity.loadCommentsByPlaceId(placeid)
-        comments.map(comment => getAvatarUrlAsObject(request_url, comment))
+        comments.map(comment => {
+            comment.avatar = getImageUrlAsLink(request_url, comment.avatar)
+        })
         return res.status(200).json({place_detail, images, comments})
     } catch (error) {
         console.log(error)

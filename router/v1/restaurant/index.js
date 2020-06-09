@@ -1,7 +1,7 @@
 const express = require('express')
 const router = express.Router()
 
-const { wrapAsync, getImageUrlAsObject, getAvatarUrlAsObject } = require(global.appRoot + '/utils')
+const { wrapAsync, getImageUrlAsLink } = require(global.appRoot + '/utils')
 const Restaurant = require(global.appRoot + '/models/restaurant')
 
 router.get('/', wrapAsync(async(req, res, next) => {
@@ -52,9 +52,13 @@ router.get('/restaurant_detail/:id', wrapAsync(async(req, res, next) => {
         const request_url = req.protocol + '://' + req.get('host')
         const restaurant = await Restaurant.findRestaurantById(id)
         const images = await Restaurant.loadImagesByRestaurantId(id)
-        images.map(image => getImageUrlAsObject(request_url, image))
+        images.map(image => {
+            image.address = getImageUrlAsLink(request_url, image.address)
+        })
         const comments = await Restaurant.loadCommentsByRestaurantId(id)
-        comments.map(comment => getAvatarUrlAsObject(request_url, comment))
+        comments.map(comment => {
+            comment.avatar = getImageUrlAsLink(request_url, comment.avatar)
+        })
         return res.status(200).json({restaurant, images, comments})
     } catch (error) {
         console.log(error)
