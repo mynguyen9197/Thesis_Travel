@@ -1,15 +1,46 @@
 const express = require('express')
+const multer = require('multer')
+
 const router = express.Router()
 
 const place = require(global.appRoot + '/models/activity')
-const { wrapAsync } = require(global.appRoot + '/utils')
+const { wrapAsync, getImageUrlAsLink } = require(global.appRoot + '/utils')
 const { removeExistedImages } = require('./utils')
+
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+      cb(null, './place_images')
+    },
+    filename: function (req, file, cb) {
+      cb(null, file.fieldname + '-' + Date.now()  + '-' + file.originalname)
+    }
+})
+
+const fileFilter = (req, file, cb) => {
+    if(file.mimetype === 'image/jpeg' || file.mimetype === 'image/png'){
+        cb(null, true)
+    } else{
+        cb(null, flase)
+    }
+}
+
+const upload = multer({ 
+    storage: storage,
+    limits : {
+        fileSize: 1024 * 1024 * 5
+    },
+    fileFilter: fileFilter
+})
 
 router.get('/', wrapAsync(async(req, res, next) => {
     try {
         const categories = await place.loadAllCategories()
         const activities = await place.loadAllActivities()
         const places = await place.loadAllPlaces()
+        const request_url = req.protocol + '://' + req.get('host')
+        places.map(place => {
+            place.thumbnail = getImageUrlAsLink(request_url, place.thumbnail)
+        })
         return res.status(200).json({categories, activities, places})
     } catch (error) {
         console.log(error)
@@ -32,8 +63,17 @@ router.get('/:placeid', wrapAsync(async(req, res, next) => {
     try {
         const { placeid } = req.params
         const activities = await place.loadAllActivities()
-        const selectedPlace = await place.loadDetailById(placeid)
+        const request_url = req.protocol + '://' + req.get('host')
+        let selectedPlace = await place.loadDetailById(placeid)
+        if(!selectedPlace.length){
+            return res.status(404).json("Place is not found")
+        }
+        selectedPlace = selectedPlace[0]
+        selectedPlace.thumbnail = await getImageUrlAsLink(request_url, selectedPlace.thumbnail)
         const images = await place.loadImagesByPlaceId(placeid)
+        images.map(async(image) => {
+            image.address = await getImageUrlAsLink(request_url, image.address)
+        })
         const kind_of_place = await place.loadActivityByPlaceId(placeid)
         return res.status(200).json({activities, selectedPlace, images, kind_of_place})
     } catch (error) {
@@ -42,19 +82,25 @@ router.get('/:placeid', wrapAsync(async(req, res, next) => {
     }
 }))
 
-router.post('/', wrapAsync(async(req, res, next) => {
+router.post('/', upload.fields([{ name: 'images' }, { name: 'thumbnail', maxCount: 1 }]), wrapAsync(async(req, res, next) => {
     try {
-        const { newPlace } = req.body
+        const { name, about, duration, open_hour, address, phone } = req.body
+        const thumbnail = req.files['thumbnail'] ? req.files['thumbnail'][0].path : null
+        let images = req.files['images'] ? req.files['images'].map(image => image.path) : null
+        const newPlace = {
+            name, about, duration, open_hour, address, thumbnail: thumbnail? thumbnail.substr(0, 12) + '\\' + thumbnail.substr(12): '', phone
+        }
         const savedPlace = await place.addNewPlace(newPlace)
-        const images = newPlace.images
+        console.log("inserted place: " + savedPlace.insertId)
         if(images != null){
             for(let i=0; i<images.length;i++){
                 if(images[i] != null){
+                    images[i] = images[i].substr(0, 12) + '\\' + images[i].substr(12)
                   await place.insertImage(images[i], savedPlace.insertId)
                 }
             }
         }
-        let kind_of_place = newPlace.kind_of_place
+        let kind_of_place = req.body.kind_of_place ? req.body.kind_of_place : []
         kind_of_place = kind_of_place.filter((value, index) => kind_of_place.indexOf(value) == index)
         for(let i=0;i<kind_of_place.length;i++){
             if(kind_of_place[i] != 0){
@@ -68,30 +114,21 @@ router.post('/', wrapAsync(async(req, res, next) => {
     }
 }))
 
-router.put('/', wrapAsync(async(req, res, next) => {
+router.put('/', upload.single('thumbnail'), wrapAsync(async(req, res, next) => {
     try {
-        const { editedPlace } = req.body
-        await place.updatePlace(editedPlace)
-        const newImages = editedPlace.images
-        if(newImages != null){
-            const existedImages = await place.loadImagesByPlaceId(editedPlace.id)
-            const {previousImages, images} = await removeExistedImages(existedImages, newImages)
-            if(images != null){
-                for(let i=0; i<images.length;i++){
-                    if(images[i] != null){
-                      await place.insertImage(images[i], editedPlace.id)
-                    }
-                }
-            }
-            if(previousImages.length > 0){
-                const ids = previousImages.map(x => x.id)
-                await place.deactivateImage(ids)
-            }
+        const { id, name, about, duration, open_hour, address, phone } = req.body
+        const selectedPlace = await place.loadDetailById(id)
+        if(!selectedPlace.length){
+            return res.status(404).json("Place is not found")
         }
-        const kind_of_place = editedPlace.kind_of_place
-        if(kind_of_place != null){
+        const thumbnail = req.file ? req.file.path : null
+        const editedPlace = { 
+            id, name, about, duration, open_hour, address, phone, 
+            thumbnail: thumbnail? thumbnail.substr(0, 12) + '\\' + thumbnail.substr(12): selectedPlace[0].thumbnail }
+        await place.updatePlace(editedPlace)
+        let kind_of_place = req.body.kind_of_place
+        if(kind_of_place != null && kind_of_place.length){
             let previousKinds = await place.loadActivityByPlaceId(editedPlace.id)
-            console.log(previousKinds)
             for(let i =0;i<previousKinds.length;i++){
                 let isExisted = false;
                 for(let j=0;j<kind_of_place.length;j++){
@@ -108,7 +145,6 @@ router.put('/', wrapAsync(async(req, res, next) => {
             }
             if(previousKinds.length > 0){
                 const ids = previousKinds.map(x => x.id)
-                console.log({ids, kind_of_place})
                 await place.deactivateKindOfPlace(ids)
             }
             for(let i=0;i<kind_of_place.length;i++){

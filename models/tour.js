@@ -36,6 +36,11 @@ const loadAllTourism = () => {
     return load(sql)
 }
 
+const getAllTourisms = () => {
+    const sql = `select * from tourism;`
+    return load(sql)
+}
+
 const findTourByName = async(name) => {
     const sql = `SELECT * FROM tour where name = '${name}';`
     return load(sql)
@@ -157,10 +162,10 @@ const activateTour = async(tour_id) => {
     return save(sql)
 }
 
-const insertNewTour = async(tour) => {
+const insertNewTour = async(tour, tourism_id) => {
     const sql = `insert into tour(name, price, highlight, wtd, important_info, additional, cancel_policy, key_detail, advantage, thumbnail, tourism_id, duration)
     values('${tour.name}', ${tour.price}, '${tour.highlight}', '${tour.wtd}', '${tour.important_info}', '${tour.additional}', '${tour.cancel_policy}',
-    '${tour.key_detail}', '${tour.advantage}', '${tour.thumbnail}', ${tour.tourism_id}, '${tour.duration}');`
+    '${tour.key_detail}', '${tour.advantage}', '${tour.thumbnail}', ${tourism_id}, '${tour.duration}');`
     return save(sql)
 }
 
@@ -182,7 +187,7 @@ const loadActivityByTourId = ((tourid) => {
 })
 
 const deactivateKindOfTour = ((ids) => {
-    const sql = `update activity_tour set stt=0 where id in (${ids});`;
+    const sql = `delete from activity_tour where id in (${ids});`;
     return save(sql)
 })
 
@@ -206,5 +211,6 @@ module.exports = {
     deactivateTour, activateTour,
     insertNewTour, updateTour, deactivateImage,
     loadActivityByTourId, deactivateKindOfTour,
-    loadMostViewTours, loadTopRating, loadTopCheapest, loadTopMostExpensive
+    loadMostViewTours, loadTopRating, loadTopCheapest, loadTopMostExpensive,
+    getAllTourisms
 }

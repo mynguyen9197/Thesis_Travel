@@ -50,8 +50,18 @@ const findCuisineByName = (async(cuisine) => {
     return load(sql)
 })
 
+const findCuisinesByResId = (async(res_id) => {
+    const sql = `SELECT * FROM cuisine_restaurant WHERE res_id = ${res_id};`
+    return load(sql)
+})
+
 const findRestaurantByName = (async(rest) => {
     const sql = `SELECT * FROM restaurant WHERE name = '${rest}';`
+    return load(sql)
+})
+
+const findFoodTypesByResId = (async(res_id) => {
+    const sql = `SELECT * FROM foodtype_restaurant WHERE res_id = ${res_id};`
     return load(sql)
 })
 
@@ -60,8 +70,18 @@ const findFoodTypeByName = (async(type) => {
     return load(sql)
 })
 
+const findMealsByResId = (async(res_id) => {
+    const sql = `SELECT * FROM meal_restaurant WHERE res_id = ${res_id};`
+    return load(sql)
+})
+
 const findMealByName = (async(meal) => {
     const sql = `SELECT * FROM meal WHERE name = '${meal}';`
+    return load(sql)
+})
+
+const findFeaturesByResId = (async(res_id) => {
+    const sql = `SELECT * FROM feature_restaurant WHERE res_id = ${res_id};`
     return load(sql)
 })
 
@@ -211,8 +231,7 @@ const findOtherRestInMealGroup = async(restid) => {
 const updateRestaurant = (async(restaurant) => {
     const sql = `update restaurant set name='${restaurant.name}', about='${restaurant.about}', thumbnail='${restaurant.thumbnail}', 
     open_hour='${restaurant.open_hour}', address='${restaurant.address}', 
-    phone='${restaurant.phone}', price_from='${restaurant.from}', price_to='${restaurant.to}',
-    kind='${restaurant.kind}', meals='${restaurant.meals}', features='${restaurant.features}' where id=${restaurant.id};`;
+    phone='${restaurant.phone}', price_from='${restaurant.from}', price_to='${restaurant.to}' where id=${restaurant.id};`;
     return save(sql)
 })
 
@@ -227,16 +246,34 @@ const activateRestaurant = async(rest_id) => {
 }
 
 const insertNewRestaurant = async(restaurant) => {
-    const sql = `insert into restaurant(name, about, thumbnail, open_hour, address, phone, price_from, price_to, 
-        kind, meals, features) 
+    const sql = `insert into restaurant(name, about, thumbnail, open_hour, address, phone, price_from, price_to) 
     values('${restaurant.name}', '${restaurant.about}', '${restaurant.thumbnail}', 
-    '${restaurant.open_hour}', '${restaurant.address}', '${restaurant.phone}', '${restaurant.from}', '${restaurant.to}',
-    '${restaurant.kind}', '${restaurant.meals}', '${restaurant.features}');`;
+    '${restaurant.open_hour}', '${restaurant.address}', '${restaurant.phone}', '${restaurant.from}', '${restaurant.to}');`;
     return save(sql)
 }
 
 const deactivateImage = ((imageids) => {
     const sql = `update images_restaurant set status=0 where id in (${imageids});`;
+    return save(sql)
+})
+
+const deactivateCuisineOfRestaurant = ((cuisine_ids) => {
+    const sql = `delete from cuisine_restaurant where id in (${cuisine_ids});`;
+    return save(sql)
+})
+
+const deactivateFTOfRestaurant = ((ft_ids) => {
+    const sql = `delete from foodtype_restaurant where id in (${ft_ids});`;
+    return save(sql)
+})
+
+const deactivateMealsOfRestaurant = ((meal_ids) => {
+    const sql = `delete from meal_restaurant where id in (${meal_ids});`;
+    return save(sql)
+})
+
+const deactivateFeaturesOfRestaurant = ((feature_ids) => {
+    const sql = `delete from feature_restaurant where id in (${feature_ids});`;
     return save(sql)
 })
 
@@ -283,5 +320,6 @@ module.exports = {
     deactivateRestaurant, activateRestaurant, insertNewRestaurant,
     deactivateImage, loadCuisineByRestId, loadFoodTypeByRestId,
     loadMealByRestId, loadFeatureByRestId,loadMostViewRestaurants,
-    loadTopRating
+    loadTopRating, findMealsByResId, findFeaturesByResId, findFoodTypesByResId, findCuisinesByResId,
+    deactivateCuisineOfRestaurant, deactivateFTOfRestaurant, deactivateFeaturesOfRestaurant, deactivateMealsOfRestaurant
 }

@@ -1,9 +1,35 @@
 const express = require('express')
+const multer = require('multer')
 const router = express.Router()
 
 const restaurant = require(global.appRoot + '/models/restaurant')
-const { wrapAsync } = require(global.appRoot + '/utils')
+const { wrapAsync, getImageUrlAsLink } = require(global.appRoot + '/utils')
 const { removeExistedImages } = require('./utils')
+
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+      cb(null, './restaurant_images')
+    },
+    filename: function (req, file, cb) {
+      cb(null, file.fieldname + '-' + Date.now()  + '-' + file.originalname)
+    }
+})
+
+const fileFilter = (req, file, cb) => {
+    if(file.mimetype === 'image/jpeg' || file.mimetype === 'image/png'){
+        cb(null, true)
+    } else{
+        cb(null, flase)
+    }
+}
+
+const upload = multer({ 
+    storage: storage,
+    limits : {
+        fileSize: 1024 * 1024 * 5
+    },
+    fileFilter: fileFilter
+})
 
 router.get('/', wrapAsync(async(req, res, next) => {
     try {
@@ -13,6 +39,10 @@ router.get('/', wrapAsync(async(req, res, next) => {
         const meals = await restaurant.loadAllFoodMeal()
 
         const listRestaurants = await restaurant.loadAllRestaurant()
+        const request_url = req.protocol + '://' + req.get('host')
+        listRestaurants.map(restaurant => {
+            restaurant.thumbnail = getImageUrlAsLink(request_url, restaurant.thumbnail)
+        })
         return res.status(200).json({cuisines, features, foodTypes, meals, listRestaurants})
     } catch (error) {
         console.log(error)
@@ -41,61 +71,74 @@ router.get('/:restid', wrapAsync(async(req, res, next) => {
         const features = await restaurant.loadAllFeatures()
         const foodTypes = await restaurant.loadAllFoodType()
         const meals = await restaurant.loadAllFoodMeal()
-        const selectedRestaurant = await restaurant.findRestaurantById(restid)
+
+        const request_url = req.protocol + '://' + req.get('host')
+        let selectedRestaurant = await restaurant.findRestaurantById(restid)
+        if(!selectedRestaurant.length){
+            return res.status(404).json("Restaurant is not found")
+        }
+        selectedRestaurant = selectedRestaurant[0]
+        selectedRestaurant.thumbnail = await getImageUrlAsLink(request_url, selectedRestaurant.thumbnail)
         const images = await restaurant.loadImagesByRestaurantId(restid)
-        return res.status(200).json({cuisines, features, foodTypes, meals, selectedRestaurant, images})
+        images.map(async(image) => {
+            image.address = await getImageUrlAsLink(request_url, image.address)
+        })
+        const kind_meal = await restaurant.findMealsByResId(restid)
+        const kind_feature = await restaurant.findFeaturesByResId(restid)
+        const kind_food = await restaurant.findFoodTypesByResId(restid)
+        const kind_cuisine = await restaurant.findCuisinesByResId(restid)
+        return res.status(200).json({cuisines, features, foodTypes, meals, selectedRestaurant, images, kind_cuisine, kind_feature, kind_food, kind_meal})
     } catch (error) {
         console.log(error)
         return res.status(500).json(error)
     }
 }))
 
-router.post('/', wrapAsync(async(req, res, next) => {
+router.post('/', upload.fields([{ name: 'images' }, { name: 'thumbnail', maxCount: 1 }]), wrapAsync(async(req, res, next) => {
     try {
-        const { newRestaurant } = req.body
-        const { name, about, thumbnail, open_hour, address, phone, from, to, images } = newRestaurant
+        const { name, about, open_hour, address, phone, from, to, foodTypes, meals, features, cuisines } = req.body
+        const thumbnail = req.files['thumbnail'] ? req.files['thumbnail'][0].path : null
+        let images = req.files['images'] ? req.files['images'].map(image => image.path) : null
         const rest = {
-            name, about, thumbnail, open_hour, address, phone, from, to, kind: newRestaurant.foodTypes.map(x => x.name).join(", "), 
-            meals: newRestaurant.meals.map(x => x.name).join(", "), features: newRestaurant.features.map(x => x.name).join(", "), images
+            name, about, open_hour, address, phone, from, to,
+            thumbnail: thumbnail? thumbnail.substr(0, 17) + '\\' + thumbnail.substr(17): ''
         }
         const savedRestaurant = await restaurant.insertNewRestaurant(rest)
+        console.log("saved restaurant: " + savedRestaurant.insertId)
         if(images != null){
             for(let i=0; i<images.length;i++){
                 if(images[i] != null){
-                  await restaurant.insertImage(images[i], savedRestaurant.insertId)
+                    images[i] = images[i].substr(0, 17) + '\\' + images[i].substr(17)
+                    await restaurant.insertImage(images[i], savedRestaurant.insertId)
                 }
             }
         }
         
-        let cuisines = newRestaurant.cuisines.map(x => x.id)
-        cuisines = cuisines.filter((value, index) => cuisines.indexOf(value) == index)
-        for(let i=0;i<cuisines.length;i++){
-            if(cuisines[i] > 0){
-                await restaurant.insertCuisineRestaurant(cuisines[i], savedRestaurant.insertId)
+        const cuisines_ids = cuisines ? cuisines.filter((value, index) => cuisines.indexOf(value) == index) : []
+        for(let i=0;i<cuisines_ids.length;i++){
+            if(cuisines_ids[i] > 0){
+                await restaurant.insertCuisineRestaurant(cuisines_ids[i], savedRestaurant.insertId)
             }
         }
         
-        let foodTypes = newRestaurant.foodTypes.map(x => x.id)
-        foodTypes = foodTypes.filter((value, index) => foodTypes.indexOf(value) == index)
-        for(let i=0;i<foodTypes.length;i++){
-            if(foodTypes[i] > 0){
-                await restaurant.insertFoodTypeRestaurant(foodTypes[i], savedRestaurant.insertId)
+        const foodTypes_ids = foodTypes ? foodTypes.filter((value, index) => foodTypes.indexOf(value) == index) : []
+        for(let i=0;i<foodTypes_ids.length;i++){
+            if(foodTypes_ids[i] > 0){
+                await restaurant.insertFoodTypeRestaurant(foodTypes_ids[i], savedRestaurant.insertId)
             }
         }
             
-        let meals = newRestaurant.meals.map(x => x.id)
-        meals = meals.filter((value, index) => meals.indexOf(value) == index)
-        for(let i=0;i<meals.length;i++){
-            if(meals[i] > 0){
-                await restaurant.insertMealRestaurant(meals[i], savedRestaurant.insertId)
+        const meals_ids = meals ? meals.filter((value, index) => meals.indexOf(value) == index) : []
+        for(let i=0;i<meals_ids.length;i++){
+            if(meals_ids[i] > 0){
+                await restaurant.insertMealRestaurant(meals_ids[i], savedRestaurant.insertId)
             }
         }
             
-        let features = newRestaurant.features.map(x => x.id)
-        features = features.filter((value, index) => features.indexOf(value) == index)
-        for(let i=0;i<features.length;i++){
-            if(features[i] > 0){
-                await restaurant.insertFeatureRestaurant(features[i], savedRestaurant.insertId)
+        const features_ids = features ? features.filter((value, index) => features.indexOf(value) == index) : []
+        for(let i=0;i<features_ids.length;i++){
+            if(features_ids[i] > 0){
+                await restaurant.insertFeatureRestaurant(features_ids[i], savedRestaurant.insertId)
             }
         }
         
@@ -106,92 +149,124 @@ router.post('/', wrapAsync(async(req, res, next) => {
     }
 }))
 
-router.put('/', wrapAsync(async(req, res, next) => {
+router.put('/', upload.single('thumbnail'), wrapAsync(async(req, res, next) => {
     try {
-        const { editedRestaurant } = req.body
-        const { id, name, about, thumbnail, open_hour, address, phone, from, to, images } = editedRestaurant
+        const { id, name, about, open_hour, address, phone, from, to, foodTypes, meals, features, cuisines } = req.body
+        const selectedRestaurant = await restaurant.findRestaurantById(id)
+        if(!selectedRestaurant.length){
+            return res.status(404).json("Restaurant is not found")
+        }
+        const thumbnail = req.file ? req.file.path : null
         const rest = {
-            id, name, about, thumbnail, open_hour, address, phone, from, to, kind: editedRestaurant.foodTypes.map(x => x.name).join(", "), 
-            meals: editedRestaurant.meals.map(x => x.name).join(", "), features: editedRestaurant.features.map(x => x.name).join(", "), images
+            id, name, about, open_hour, address, phone, from, to,
+            thumbnail: thumbnail? thumbnail.substr(0, 12) + '\\' + thumbnail.substr(12): selectedRestaurant[0].thumbnail
         }
         await restaurant.updateRestaurant(rest)
-        const newImages = editedRestaurant.images
-        if(newImages != null){
-            const existedImages = await restaurant.loadImagesByRestaurantId(editedRestaurant.id)
-            const {previousImages, images} = await removeExistedImages(existedImages, newImages)
-            if(images != null){
-                for(let i=0; i<images.length;i++){
-                    if(images[i] != null){
-                      await restaurant.insertImage(images[i], editedRestaurant.id)
-                    }
-                }
-            }
-            if(previousImages.length > 0){
-                const ids = previousImages.map(x => x.id)
-                await restaurant.deactivateImage(ids)
-            }
-        }
         
-        const cuisines = editedRestaurant.cuisines.map(x => x.id)
         if(cuisines != null){
-            let previousKinds = await restaurant.loadCuisineByRestId(editedRestaurant.id)
-            for(let i =0;i<cuisines.length;i++){
+            let previousKinds = await restaurant.loadCuisineByRestId(id)
+            for(let i =0;i<previousKinds.length;i++){
                 let isExisted = false;
-                for(let j=0;j<previousKinds.length;j++){
-                    if(previousKinds[j].cuisine_id == cuisines[i]){
+                for(let j=0;j<cuisines.length;j++){
+                    if(previousKinds[i].cuisine_id == cuisines[j]){
+                        cuisines.splice(j, 1);
+                        j--;
                         isExisted = true;
                     }
                 }
-                if(!isExisted){
-                    await restaurant.insertCuisineRestaurant(cuisines[i], editedRestaurant.id)
+                if(isExisted){
+                    previousKinds.splice(i, 1);
+                    i--;
+                }
+            }
+            if(previousKinds.length > 0){
+                const ids = previousKinds.map(x => x.id)
+                await restaurant.deactivateCuisineOfRestaurant(ids)
+            }
+            for(let i=0;i<cuisines.length;i++){
+                if(cuisines[i] != 0){
+                    await restaurant.insertCuisineRestaurant(cuisines[i], id)
                 }
             }
         }
         
-        const foodTypes = editedRestaurant.foodTypes.map(x => x.id)
         if(foodTypes != null){
-            let previousKinds = await restaurant.loadFoodTypeByRestId(editedRestaurant.id)
-            for(let i =0;i<foodTypes.length;i++){
+            let previousKinds = await restaurant.loadFoodTypeByRestId(id)
+            for(let i =0;i<previousKinds.length;i++){
                 let isExisted = false;
-                for(let j=0;j<previousKinds.length;j++){
-                    if(previousKinds[j].type_id == foodTypes[i]){
+                for(let j=0;j<foodTypes.length;j++){
+                    if(previousKinds[i].type_id == foodTypes[j]){
+                        foodTypes.splice(j, 1);
+                        j--;
                         isExisted = true;
                     }
                 }
-                if(!isExisted){
-                    await restaurant.insertFoodTypeRestaurant(foodTypes[i], editedRestaurant.id)
+                if(isExisted){
+                    previousKinds.splice(i, 1);
+                    i--;
+                }
+            }
+            if(previousKinds.length > 0){
+                const ids = previousKinds.map(x => x.id)
+                await restaurant.deactivateFTOfRestaurant(ids)
+            }
+            for(let i=0;i<foodTypes.length;i++){
+                if(foodTypes[i] != 0){
+                    await restaurant.insertFoodTypeRestaurant(foodTypes[i], id)
                 }
             }
         }
             
-        const meals = editedRestaurant.meals.map(x => x.id)
         if(meals != null){
-            let previousKinds = await restaurant.loadMealByRestId(editedRestaurant.id)
-            for(let i =0;i<meals.length;i++){
+            let previousKinds = await restaurant.loadMealByRestId(id)
+            for(let i =0;i<previousKinds.length;i++){
                 let isExisted = false;
-                for(let j=0;j<previousKinds.length;j++){
-                    if(previousKinds[j].type_id == meals[i]){
+                for(let j=0;j<meals.length;j++){
+                    if(previousKinds[i].type_id == meals[j]){
+                        meals.splice(j, 1);
+                        j--;
                         isExisted = true;
                     }
                 }
-                if(!isExisted){
-                    await restaurant.insertMealRestaurant(meals[i], editedRestaurant.id)
+                if(isExisted){
+                    previousKinds.splice(i, 1);
+                    i--;
+                }
+            }
+            if(previousKinds.length > 0){
+                const ids = previousKinds.map(x => x.id)
+                await restaurant.deactivateMealsOfRestaurant(ids)
+            }
+            for(let i=0;i<meals.length;i++){
+                if(meals[i] != 0){
+                    await restaurant.insertMealRestaurant(meals[i], id)
                 }
             }
         }
             
-        const features = editedRestaurant.features.map(x => x.id)
         if(features != null){
-            let previousKinds = await restaurant.loadFeatureByRestId(editedRestaurant.id)
-            for(let i =0;i<features.length;i++){
+            let previousKinds = await restaurant.loadFeatureByRestId(id)
+            for(let i =0;i<previousKinds.length;i++){
                 let isExisted = false;
-                for(let j=0;j<previousKinds.length;j++){
-                    if(previousKinds[j].type_id == features[i]){
+                for(let j=0;j<features.length;j++){
+                    if(previousKinds[i].type_id == features[j]){
+                        features.splice(j, 1);
+                        j--;
                         isExisted = true;
                     }
                 }
-                if(!isExisted){
-                    await restaurant.insertFeatureRestaurant(features[i], editedRestaurant.id)
+                if(isExisted){
+                    previousKinds.splice(i, 1);
+                    i--;
+                }
+            }
+            if(previousKinds.length > 0){
+                const ids = previousKinds.map(x => x.id)
+                await restaurant.deactivateFeaturesOfRestaurant(ids)
+            }
+            for(let i=0;i<features.length;i++){
+                if(features[i] != 0){
+                    await restaurant.insertFeatureRestaurant(features[i], id)
                 }
             }
         }
