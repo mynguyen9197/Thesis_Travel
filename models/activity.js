@@ -17,7 +17,7 @@ const deactivateImage = ((imageids) => {
 })
 
 const deactivateKindOfPlace = ((ids) => {
-    const sql = `update activity_place set stt=0 where id in (${ids});`;
+    const sql = `delete from activity_place where id in (${ids});`;
     return save(sql)
 })
 

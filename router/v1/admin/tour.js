@@ -1,14 +1,44 @@
 const express = require('express')
+const multer = require('multer')
 const router = express.Router()
 
 const tour = require(global.appRoot + '/models/tour')
-const { wrapAsync } = require(global.appRoot + '/utils')
+const { wrapAsync, getImageUrlAsLink } = require(global.appRoot + '/utils')
 const { removeExistedImages } = require('./utils')
+
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+      cb(null, './tour_images')
+    },
+    filename: function (req, file, cb) {
+      cb(null, file.fieldname + '-' + Date.now()  + '-' + file.originalname)
+    }
+})
+
+const fileFilter = (req, file, cb) => {
+    if(file.mimetype === 'image/jpeg' || file.mimetype === 'image/png'){
+        cb(null, true)
+    } else{
+        cb(null, flase)
+    }
+}
+
+const upload = multer({ 
+    storage: storage,
+    limits : {
+        fileSize: 1024 * 1024 * 5
+    },
+    fileFilter: fileFilter
+})
 
 router.get('/', wrapAsync(async(req, res, next) => {
     try {
         const activities = await tour.loadAllTourActivities()
         const tours = await tour.loadInfoAllTours()
+        const request_url = req.protocol + '://' + req.get('host')
+        tours.map(tour => {
+            tour.thumbnail = getImageUrlAsLink(request_url, tour.thumbnail)
+        })
         return res.status(200).json({activities, tours})
     } catch (error) {
         console.log(error)
@@ -19,7 +49,8 @@ router.get('/', wrapAsync(async(req, res, next) => {
 router.get('/addnew', wrapAsync(async(req, res, next) => {
     try {
         const activities = await tour.loadAllTourActivities()
-        return res.status(200).json({activities})
+        const tourisms = await tour.getAllTourisms()
+        return res.status(200).json({activities, tourisms})
     } catch (error) {
         console.log(error)
         return res.status(500).json(error)
@@ -30,28 +61,45 @@ router.get('/:tourid', wrapAsync(async(req, res, next) => {
     try {
         const { tourid } = req.params
         const activities = await tour.loadAllTourActivities()
-        const selectedTour = await tour.findTourById(tourid)
+        const request_url = req.protocol + '://' + req.get('host')
+        let selectedTour = await tour.findTourById(tourid)
+        if(!selectedTour.length){
+            return res.status(404).json("Tour is not found")
+        }
+        selectedTour = selectedTour[0]
+        selectedTour.thumbnail = await getImageUrlAsLink(request_url, selectedTour.thumbnail)
         const images = await tour.loadImagesByTourId(tourid)
-        return res.status(200).json({activities, selectedTour, images})
+        images.map(async(image) => {
+            image.address = await getImageUrlAsLink(request_url, image.address)
+        })
+        const kind_of_tour = await tour.loadActivityByTourId(tourid)
+        return res.status(200).json({activities, selectedTour, images, kind_of_tour})
     } catch (error) {
         console.log(error)
         return res.status(500).json(error)
     }
 }))
 
-router.post('/', wrapAsync(async(req, res, next) => {
+router.post('/', upload.fields([{ name: 'images' }, { name: 'thumbnail', maxCount: 1 }]), wrapAsync(async(req, res, next) => {
     try {
-        const { newTour } = req.body
-        const savedTour = await tour.insertNewTour(newTour, newTour.tourism_id)
-        const images = newTour.images
+        const { name, price, highlight, wtd, important_info, additional, cancel_policy, key_detail, advantage, duration, tourism_id } = req.body
+        const thumbnail = req.files['thumbnail'] ? req.files['thumbnail'][0].path : null
+        let images = req.files['images'] ? req.files['images'].map(image => image.path) : null
+        const newTour = {
+            name, price, highlight, wtd, important_info, additional, cancel_policy, key_detail, advantage, duration, 
+            thumbnail: thumbnail? thumbnail.substr(0, 12) + '\\' + thumbnail.substr(12): ''
+        }
+        const savedTour = await tour.insertNewTour(newTour, tourism_id)
+        console.log("inserted tour: " + savedTour.insertId)
         if(images != null){
             for(let i=0; i<images.length;i++){
                 if(images[i] != null){
+                    images[i] = images[i].substr(0, 12) + '\\' + images[i].substr(12)
                   await tour.insertImage(images[i], savedTour.insertId)
                 }
             }
         }
-        let type = newTour.kind_of_tour
+        let type = req.body.kind_of_tour ? req.body.kind_of_tour : []
         type = type.filter((value, index) => type.indexOf(value) == index)
         for(let i=0;i<type.length;i++){
             if(type[i] != 0){
@@ -65,28 +113,20 @@ router.post('/', wrapAsync(async(req, res, next) => {
     }
 }))
 
-router.put('/', wrapAsync(async(req, res, next) => {
+router.put('/', upload.single('thumbnail'), wrapAsync(async(req, res, next) => {
     try {
-        const { editedTour } = req.body
-        await tour.updateTour(editedTour)
-        const newImages = editedTour.images
-        if(newImages != null){
-            const existedImages = await tour.loadImagesByTourId(editedTour.id)
-            const {previousImages, images} = await removeExistedImages(existedImages, newImages)
-            if(images != null){
-                for(let i=0; i<images.length;i++){
-                    if(images[i] != null){
-                      await tour.insertImage(images[i], editedTour.id)
-                    }
-                }
-            }
-            if(previousImages.length > 0){
-                const ids = previousImages.map(x => x.id)
-                await tour.deactivateImage(ids)
-            }
+        const { id, name, price, hightlight, wtd, important_info, additional, cancel_policy, key_detail, advantage, duration, tourism_id } = req.body
+        const selectedTour = await tour.findTourById(id)
+        if(!selectedTour.length){
+            return res.status(404).json("Tour is not found")
         }
-        const kind_of_tour = editedTour.kind_of_tour
-        if(kind_of_tour != null){
+        const thumbnail = req.file ? req.file.path : null
+        const editedTour = { 
+            id, name, price, hightlight, wtd, important_info, additional, cancel_policy, key_detail, advantage, duration, tourism_id,
+            thumbnail: thumbnail? thumbnail.substr(0, 12) + '\\' + thumbnail.substr(12): selectedTour[0].thumbnail }
+        await tour.updateTour(editedTour)
+        const kind_of_tour = req.body.kind_of_tour
+        if(kind_of_tour != null && kind_of_tour.length){
             let previousKinds = await tour.loadActivityByTourId(editedTour.id)
             for(let i =0;i<previousKinds.length;i++){
                 let isExisted = false;
