@@ -212,4 +212,37 @@ router.post('/saveDetail', wrapAsync(async(req, res, next) => {
   }
 }))
 
+router.post('/distribute', wrapAsync(async(req, res, next) => {
+  try{
+    const allTour = await tour.loadInfoAllTours()
+    for(let i=0; i<allTour.length;i++){
+      if(allTour[i].price < 500000){
+        await tour.insertActivityTour(allTour[i].id, 116)
+        // console.log({id: allTour[i].id, gi:116})
+      }else if(allTour[i].price >= 500000 && allTour[i].price < 1000000){
+        await tour.insertActivityTour(allTour[i].id, 117)
+        // console.log({id: allTour[i].id, gi:117})
+      } else if(allTour[i].price >= 1000000 && allTour[i].price < 2000000){
+        await tour.insertActivityTour(allTour[i].id, 118)
+        // console.log({id: allTour[i].id, gi:118})
+      } else if(allTour[i].price >= 2000000 && allTour[i].price < 3000000){
+        await tour.insertActivityTour(allTour[i].id, 119)
+        // console.log({id: allTour[i].id, gi:119})
+      } else if(allTour[i].price >= 3000000 && allTour[i].price < 5000000){
+        await tour.insertActivityTour(allTour[i].id, 120)
+        // console.log({id: allTour[i].id, gi:120})
+      } else if(allTour[i].price >= 5000000 && allTour[i].price < 10000000){
+        await tour.insertActivityTour(allTour[i].id, 121)
+        // console.log({id: allTour[i].id, gi:121})
+      } else if(allTour[i].price >= 10000000){
+        await tour.insertActivityTour(allTour[i].id, 122)
+        // console.log({id: allTour[i].id, gi:122})
+      }
+    }
+    return res.status(200).json(allTour)
+  }catch(error){
+    console.log(error)
+  }
+}))
+
 module.exports = router

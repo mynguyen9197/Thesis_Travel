@@ -30,6 +30,11 @@ const findByUsername = (user => {
     return load(sql)
 })
 
+const findByEmail = (user => {
+    const sql = `select * from user where email='${user.email}';`
+    return load(sql)
+})
+
 const findById = (id => {
     const sql = `select * from user where id=${id};`
     return load(sql)
@@ -48,5 +53,5 @@ const updatePassword = (async(user) => {
 module.exports = {
     insertUser, findByUsername, updateAvatar, updateProfile,
     findById, updatePassword, findUsersMissingAvatar, activeAccount,
-    checkActiveAccount
+    checkActiveAccount, findByEmail
 }

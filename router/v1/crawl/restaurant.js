@@ -266,5 +266,26 @@ router.get('/getpages/:url', wrapAsync(async(req, res, next) => {
   }
   res.status(200).send({activityLinks: activityLinks, count:activityLinks.length})
 }))
+
+router.get('/distribute', wrapAsync(async(req, res, next) => {
+  try{
+    const allRes = await Restaurant.loadAllFeaturesOfRes()
+    for(let i=0;i<allRes.length;i++){
+      const kinds = allRes[i].kind ? allRes[i].kind.split(', ') : []
+      if(kinds.includes("$$ - $$$")){
+        // console.log({kind: allRes[i].id})
+        // await Restaurant.insertFoodTypeRestaurant(11, allRes[i].id)
+      }
+      else if(kinds.includes("$")){
+        // console.log({kind: allRes[i].id})
+        // await Restaurant.insertFoodTypeRestaurant(12, allRes[i].id)
+      }
+      else console.log({kind: allRes[i].id})
+    }
+    return res.status(200).json(allRes)
+  }catch(error){
+    console.log(error)
+  }
+}))
   
 module.exports = router

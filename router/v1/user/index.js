@@ -16,6 +16,14 @@ router.post('/signup', wrapAsync(async(req, res, next) => {
     try {
         const {user} = req.body;
         if(user && Object.keys(user).length){
+            const checkedUsername = await User.findByUsername(user)
+            if(checkedUsername.length){
+                return res.status(409).json('This name is already taken')
+            }
+            const checkedUserEmail = await User.findByEmail(user)
+            if(checkedUserEmail.length){
+                return res.status(409).json('This email is already taken')
+            }
             const new_user = {
                 name: user.name,
                 username: user.username,
@@ -30,6 +38,24 @@ router.post('/signup', wrapAsync(async(req, res, next) => {
     } catch (error) {
         console.log(error)
         return res.status(500).json("Something went wrong! Please try again")
+    }
+}))
+
+router.get('/reasend-active-link', wrapAsync(async(req, res, next) => {
+    try{
+        const { user_id } = req.query
+        if(!user_id){
+            return res.status(404).json('Cannot find user_id in request')
+        }
+        const savedUser = await User.findById(user_id)
+        if(!savedUser.length){
+            return res.status(404).json('User does not exist')
+        }
+        await sendActivationEmail(req.protocol + '://' + req.get('host'), user_id, savedUser[0].email)
+        return res.status(200).json('Link has been sent to your email')
+    }catch(error){
+        console.log(error)
+        return res.status(500).json(error.sqlMessage)
     }
 }))
 
