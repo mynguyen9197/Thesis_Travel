@@ -303,6 +303,11 @@ const loadMostViewRestaurants = ((from, to) => {
     return load(query)
 })
 
+const loadAllFeaturesOfRes = (() => {
+    const query = `SELECT id, kind FROM restaurant;`
+    return load(query)
+})
+
 module.exports = {
     insertRestaurant, insertImage, insertComment,
     insertCuisine, findCuisineByName, insertCuisineRestaurant,
@@ -321,5 +326,6 @@ module.exports = {
     deactivateImage, loadCuisineByRestId, loadFoodTypeByRestId,
     loadMealByRestId, loadFeatureByRestId,loadMostViewRestaurants,
     loadTopRating, findMealsByResId, findFeaturesByResId, findFoodTypesByResId, findCuisinesByResId,
-    deactivateCuisineOfRestaurant, deactivateFTOfRestaurant, deactivateFeaturesOfRestaurant, deactivateMealsOfRestaurant
+    deactivateCuisineOfRestaurant, deactivateFTOfRestaurant, deactivateFeaturesOfRestaurant, deactivateMealsOfRestaurant,
+    loadAllFeaturesOfRes
 }
