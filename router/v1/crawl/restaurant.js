@@ -274,13 +274,12 @@ router.get('/distribute', wrapAsync(async(req, res, next) => {
       const kinds = allRes[i].kind ? allRes[i].kind.split(', ') : []
       if(kinds.includes("$$ - $$$")){
         // console.log({kind: allRes[i].id})
-        // await Restaurant.insertFoodTypeRestaurant(11, allRes[i].id)
+        await Restaurant.insertFoodTypeRestaurant(11, allRes[i].id)
       }
       else if(kinds.includes("$")){
         // console.log({kind: allRes[i].id})
-        // await Restaurant.insertFoodTypeRestaurant(12, allRes[i].id)
+        await Restaurant.insertFoodTypeRestaurant(12, allRes[i].id)
       }
-      else console.log({kind: allRes[i].id})
     }
     return res.status(200).json(allRes)
   }catch(error){
