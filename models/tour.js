@@ -51,6 +51,12 @@ const findTourByActivityName = async(name, type) => {
     return load(sql)
 }
 
+const findTourByNameAndActivity = async(name, type) => {
+    const sql = `SELECT DISTINCT t.id, t.name, t.thumbnail, t.rating, t.price, t.review FROM tour t, activity_tour at where LOWER(t.name) like LOWER('%${name}%') 
+    and t.id=at.tour_id and t.is_active=1 and at.activity_id in (${type}) ORDER BY rating DESC, review DESC;`
+    return load(sql)
+}
+
 const findTourismByName = async(name) => {
     const sql = `select id from tourism where name='${name}';`
     return load(sql)
@@ -212,5 +218,5 @@ module.exports = {
     insertNewTour, updateTour, deactivateImage,
     loadActivityByTourId, deactivateKindOfTour,
     loadMostViewTours, loadTopRating, loadTopCheapest, loadTopMostExpensive,
-    getAllTourisms
+    getAllTourisms, findTourByNameAndActivity
 }
