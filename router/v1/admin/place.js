@@ -59,7 +59,7 @@ router.get('/addnew', wrapAsync(async(req, res, next) => {
     }
 }))
 
-router.get('/:placeid', wrapAsync(async(req, res, next) => {
+router.get('/detail/:placeid', wrapAsync(async(req, res, next) => {
     try {
         const { placeid } = req.params
         const activities = await place.loadAllActivities()
@@ -180,6 +180,24 @@ router.put('/activate/:placeid', wrapAsync(async(req, res, next) => {
         console.log(error)
         return res.status(500).json({error})
     }
+}))
+
+router.get('/filter', wrapAsync(async(req, res, next) => {
+    const { search, activity_ids } = req.query
+    let places = []
+    if (!activity_ids && search) {
+        places = await place.findPlaceByName(search)
+    } else if(activity_ids && search) {
+        places = await place.findPlaceByNameAndActivity(search, activity_ids)
+    } else if (activity_ids && !search) {
+        places = await place.loadPlacesByActivityId(activity_ids)
+    } else {
+        return res.status(500).send({error: 'Please add filter or search'})
+    }
+    if(places.length == 0){
+        return res.status(404).send({error: 'No Place Was Found'})
+    }
+    return res.status(200).json({places})
 }))
 
 module.exports = router
