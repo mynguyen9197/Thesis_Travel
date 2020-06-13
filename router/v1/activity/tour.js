@@ -20,11 +20,24 @@ router.get('/', wrapAsync(async(req, res, next) => {
 }))
 
 router.get('/filter', wrapAsync(async(req, res, next) => {
-    const { activity_ids } = req.query
-    const tours = await Tour.loadTourByActivityId(activity_ids)
+    const { search, activity_ids } = req.query
+    let tours = []
+    if (!activity_ids && search) {
+        tours = await Tour.findTourByName(search)
+    } else if(activity_ids && search) {
+        tours = await Tour.findTourByNameAndActivity(search, activity_ids)
+    } else if (activity_ids && !search) {
+        tours = await Tour.loadTourByActivityId(activity_ids)
+    } else {
+        return res.status(500).send({error: 'Please add filter or search'})
+    }
+    if(tours.length == 0){
+        return res.status(404).send({error: 'No Activity Was Found'})
+    }
     
-    return res.status(200).json({ tours: tours, activity_ids })
+    return res.status(200).json({ tours })
 }))
+
 
 router.get('/tour_detail/:tour_id', wrapAsync(async(req, res, next) => {
     try {
