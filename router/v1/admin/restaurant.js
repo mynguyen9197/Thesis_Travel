@@ -64,7 +64,7 @@ router.get('/addnew', wrapAsync(async(req, res, next) => {
     }
 }))
 
-router.get('/:restid', wrapAsync(async(req, res, next) => {
+router.get('/detail/:restid', wrapAsync(async(req, res, next) => {
     try {
         const { restid } = req.params
         const cuisines = await restaurant.loadAllCuisines()
@@ -298,5 +298,49 @@ router.put('/activate/:rest_id', wrapAsync(async(req, res, next) => {
         return res.status(500).json({error})
     }
 }))
+
+router.get('/lookup', wrapAsync(async(req, res, next) => {
+    try {
+        const { search, cuisines, features, foodtypes, meals } = req.query
+        let restaurants = []
+        if (cuisines) {
+            const byCuisines = await restaurant.findResByNameCuisines(search, cuisines)
+            restaurants = disListRestaurant(restaurants, byCuisines)
+        } else if(features) {
+            const byFeatures = await restaurant.findResByNameFeatures(search, features)
+            restaurants = disListRestaurant(restaurants, byFeatures)
+        } else if (foodtypes) {
+            const byFoodTypes = await restaurant.findResByNameFoodTypes(search, foodtypes)
+            restaurants = disListRestaurant(restaurants, byFoodTypes)
+        } else if(meals) {
+            const byMeals = await restaurant.findResByNameMeals(search, meals)
+            restaurants = disListRestaurant(restaurants, byMeals)
+        } else if(search) {
+            const byNameOnly = await restaurant.findResByName(search)
+            restaurants = disListRestaurant(restaurants, byNameOnly)
+        } else {
+            return res.status(500).send({error: 'Please add filter or search'})
+        }
+        if(restaurants.length == 0){
+            return res.status(404).send({error: 'No Restaurant Was Found'})
+        }
+        return res.status(200).json({restaurants, count: restaurants.length})
+    } catch (error) {
+        console.log(error)
+    }
+}))
+
+function disListRestaurant(rests1, rests2){
+    let result = []
+    if(rests1.length == 0) {
+        result = rests2.slice()
+    }else {
+        for (const item of rests2) {
+            rests1.filter(x => x.id == item.id)
+        }
+        result = rests1
+    }
+    return result
+}
 
 module.exports = router

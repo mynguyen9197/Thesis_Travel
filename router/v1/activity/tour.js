@@ -38,7 +38,6 @@ router.get('/filter', wrapAsync(async(req, res, next) => {
     return res.status(200).json({ tours })
 }))
 
-
 router.get('/tour_detail/:tour_id', wrapAsync(async(req, res, next) => {
     try {
         const { tour_id } = req.params
