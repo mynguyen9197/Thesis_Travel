@@ -18,7 +18,7 @@ router.post('/signup', wrapAsync(async(req, res, next) => {
         if(user && Object.keys(user).length){
             const checkedUsername = await User.findByUsername(user)
             if(checkedUsername.length){
-                return res.status(409).json('This name is already taken')
+                return res.status(409).json('This username is already taken')
             }
             const checkedUserEmail = await User.findByEmail(user)
             if(checkedUserEmail.length){
