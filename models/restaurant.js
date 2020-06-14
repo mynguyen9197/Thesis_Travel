@@ -115,11 +115,6 @@ const loadTop20ByRating = (async() => {
     return load(query)
 }) 
 
-const loadTopRating = (async() => {
-    const query = 'SELECT id, name, thumbnail, common_rating, ranking, review_count FROM restaurant where is_active=1 ORDER BY common_rating DESC, review_count DESC;'
-    return load(query)
-}) 
-
 const loadAllRestaurant = (async() => {
     const query = 'SELECT id, name, thumbnail, common_rating, ranking, review_count FROM restaurant;'
     return load(query)
@@ -147,6 +142,15 @@ const findResByNameCuisines = ((name, cuisines_ids) => {
     return load(query)
 })
 
+const findMostViewedResByNameCuisines = ((name, cuisines_ids, from, to) => {
+    const query = `SELECT b.*, count(a.id) as times FROM restaurant_user_log a,
+        (SELECT DISTINCT r.* from restaurant r, cuisine_restaurant cr
+        WHERE r.id=cr.res_id and cr.cuisine_id in (${cuisines_ids}) and LOWER(r.name) like LOWER('%${name}%')) as b
+    WHERE a.rest_id=b.id and log_time between '${from}' and '${to}' group by rest_id  
+    ORDER BY times DESC, common_rating DESC, review_count DESC;`
+    return load(query)
+})
+
 const findResByNameFeatures = ((name, features_ids) => {
     const query = `SELECT DISTINCT r.* from restaurant r, feature_restaurant fr
     WHERE r.id=fr.res_id and fr.feature_id in (${features_ids}) and LOWER(r.name) like LOWER('%${name}%') 
@@ -154,10 +158,28 @@ const findResByNameFeatures = ((name, features_ids) => {
     return load(query)
 })
 
+const findMostViewedResByNameFeatures = ((name, features_ids, from, to) => {
+    const query = `SELECT b.*, count(a.id) as times from restaurant_user_log a,
+        (SELECT DISTINCT r.* from restaurant r, feature_restaurant fr
+        WHERE r.id=fr.res_id and fr.feature_id in (${features_ids}) and LOWER(r.name) like LOWER('%${name}%')) as b
+    WHERE a.rest_id=b.id and log_time between '${from}' and '${to}' group by rest_id 
+    ORDER BY times DESC, common_rating DESC, review_count DESC;`
+    return load(query)
+})
+
 const findResByNameFoodTypes = ((name, types_ids) => {
     const query = `SELECT DISTINCT r.* from restaurant r, foodtype_restaurant fr
     WHERE r.id=fr.res_id and fr.type_id in (${types_ids}) and LOWER(r.name) like LOWER('%${name}%') 
     ORDER BY common_rating DESC, review_count DESC;`
+    return load(query)
+})
+
+const findMostViewedResByNameFoodTypes = ((name, types_ids, from, to) => {
+    const query = `SELECT b.*, count(a.id) as times from restaurant_user_log a,
+        (SELECT DISTINCT r.* from restaurant r, foodtype_restaurant fr
+        WHERE r.id=fr.res_id and fr.type_id in (${types_ids}) and LOWER(r.name) like LOWER('%${name}%')) as b
+    WHERE a.rest_id=b.id and log_time between '${from}' and '${to}' group by rest_id 
+    ORDER BY times DESC, common_rating DESC, review_count DESC;`
     return load(query)
 })
 
@@ -173,10 +195,28 @@ const findResByName = ((name) => {
     return load(query)
 })
 
+const findMostViewedResByName = ((name, from, to) => {
+    const query = `SELECT b.*, count(a.id) as times from restaurant_user_log a,
+        (SELECT DISTINCT * from restaurant r 
+        WHERE LOWER(r.name) like LOWER('%${name}%')) as b
+    WHERE a.rest_id=b.id and log_time between '${from}' and '${to}' group by rest_id
+    ORDER BY times DESC, common_rating DESC, review_count DESC;`
+    return load(query)
+})
+
 const findResByNameMeals = ((name, meals_ids) => {
     const query = `SELECT DISTINCT r.* from restaurant r, meal_restaurant mr
     WHERE r.id=mr.res_id and mr.meal_id in (${meals_ids}) and LOWER(r.name) like LOWER('%${name}%') 
     ORDER BY common_rating DESC, review_count DESC;`
+    return load(query)
+})
+
+const findMostViewResByNameMeals = ((name, meals_ids, from, to) => {
+    const query = `SELECT b.*, count(a.id) as times from restaurant_user_log a,
+        (SELECT DISTINCT r.* from restaurant r, meal_restaurant mr
+        WHERE r.id=mr.res_id and mr.meal_id in (${meals_ids}) and LOWER(r.name) like LOWER('%${name}%')) as b
+    WHERE a.rest_id=b.id and log_time between '${from}' and '${to}' group by rest_id
+    ORDER BY times DESC, common_rating DESC, review_count DESC;`
     return load(query)
 })
 
@@ -324,8 +364,9 @@ module.exports = {
     findOtherRestInFeatureGroup, updateRestaurant, loadAllRestaurant,
     deactivateRestaurant, activateRestaurant, insertNewRestaurant,
     deactivateImage, loadCuisineByRestId, loadFoodTypeByRestId,
-    loadMealByRestId, loadFeatureByRestId,loadMostViewRestaurants,
-    loadTopRating, findMealsByResId, findFeaturesByResId, findFoodTypesByResId, findCuisinesByResId,
+    loadMealByRestId, loadFeatureByRestId,loadMostViewRestaurants, 
+    findMealsByResId, findFeaturesByResId, findFoodTypesByResId, findCuisinesByResId,
     deactivateCuisineOfRestaurant, deactivateFTOfRestaurant, deactivateFeaturesOfRestaurant, deactivateMealsOfRestaurant,
-    loadAllFeaturesOfRes
+    loadAllFeaturesOfRes, findMostViewedResByNameCuisines, findMostViewedResByNameFeatures,
+    findMostViewedResByNameFoodTypes, findMostViewResByNameMeals, findMostViewedResByName
 }
