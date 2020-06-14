@@ -18,21 +18,27 @@ router.get('/', wrapAsync(async(req, res, next) => {
 router.get('/lookup', wrapAsync(async(req, res, next) => {
     try {
         const { search, cuisines, features, foodtypes, meals } = req.query
+        let sql_search = search ? search: ''
         let restaurants = []
-        if (cuisines) {
-            const byCuisines = await Restaurant.findResByNameCuisines(search, cuisines)
-            restaurants = disListRestaurant(restaurants, byCuisines)
-        } else if(features) {
-            const byFeatures = await Restaurant.findResByNameFeatures(search, features)
-            restaurants = disListRestaurant(restaurants, byFeatures)
-        } else if (foodtypes) {
-            const byFoodTypes = await Restaurant.findResByNameFoodTypes(search, foodtypes)
-            restaurants = disListRestaurant(restaurants, byFoodTypes)
-        } else if(meals) {
-            const byMeals = await Restaurant.findResByNameMeals(search, meals)
-            restaurants = disListRestaurant(restaurants, byMeals)
-        } else if(search) {
-            const byNameOnly = await Restaurant.findResByName(search)
+        if(cuisines || features || foodtypes || meals){
+            if (cuisines) {
+                const byCuisines = await Restaurant.findResByNameCuisines(sql_search, cuisines)
+                restaurants = disListRestaurant(restaurants, byCuisines)
+            }
+            if(features) {
+                const byFeatures = await Restaurant.findResByNameFeatures(sql_search, features)
+                restaurants = disListRestaurant(restaurants, byFeatures)
+            }
+            if (foodtypes) {
+                const byFoodTypes = await Restaurant.findResByNameFoodTypes(sql_search, foodtypes)
+                restaurants = disListRestaurant(restaurants, byFoodTypes)
+            } 
+            if(meals) {
+                const byMeals = await Restaurant.findResByNameMeals(sql_search, meals)
+                restaurants = disListRestaurant(restaurants, byMeals)
+            }
+        }else if(sql_search) {
+            const byNameOnly = await Restaurant.findResByName(sql_search)
             restaurants = disListRestaurant(restaurants, byNameOnly)
         } else {
             return res.status(500).send({error: 'Please add filter or search'})
@@ -72,20 +78,39 @@ router.get('/most-viewed', wrapAsync(async(req, res, next) => {
         const today = new Date(Date.now() - tzoffset)
         let last30days = new Date(Date.now() - tzoffset)
         last30days.setDate(new Date(today.getDate() - 30))
-        const mostViewRestaurants = await Restaurant.loadMostViewRestaurants(last30days.toISOString().split('T')[0], today.toISOString().split('T')[0])
-        console.log({last30days: last30days.toISOString().split('T')[0], lastUpdate: today.toISOString().split('T')[0]})
-        return res.status(200).json(mostViewRestaurants)
+        const from = last30days.toISOString().split('T')[0]
+        const to = today.toISOString().split('T')[0]
+        const { search, cuisines, features, foodtypes, meals } = req.query
+        let sql_search = search ? search : ''
+        let restaurants = []
+        if(cuisines || features || foodtypes || meals){
+            if (cuisines) {
+                const byCuisines = await Restaurant.findMostViewedResByNameCuisines(sql_search, cuisines, from, to)
+                restaurants = disListRestaurant(restaurants, byCuisines)
+            }
+            if(features) {
+                const byFeatures = await Restaurant.findMostViewedResByNameFeatures(sql_search, features, from, to)
+                restaurants = disListRestaurant(restaurants, byFeatures)
+            }
+            if (foodtypes) {
+                const byFoodTypes = await Restaurant.findMostViewedResByNameFoodTypes(sql_search, foodtypes, from, to)
+                restaurants = disListRestaurant(restaurants, byFoodTypes)
+            }
+            if(meals) {
+                const byMeals = await Restaurant.findMostViewResByNameMeals(sql_search, meals, from, to)
+                restaurants = disListRestaurant(restaurants, byMeals)
+            }
+        } else if(sql_search) {
+            const byNameOnly = await Restaurant.findMostViewedResByName(sql_search, from, to)
+            restaurants = disListRestaurant(restaurants, byNameOnly)
+        } else {
+            return res.status(500).send({error: 'Please add filter or search'})
+        }
+        if(restaurants.length == 0){
+            return res.status(404).send({error: 'No Restaurant Was Found'})
+        }
+        return res.status(200).json({restaurants})
     } catch {
-        console.log(error)
-        return res.status(500).json({error: error.sqlMessage})
-    }
-}))
-
-router.get('/highest-rating', wrapAsync(async(req, res, next) => {
-    try{
-        const listRestaurants = await Restaurant.loadTopRating()
-        return res.status(200).json(listRestaurants)
-    } catch(error) {
         console.log(error)
         return res.status(500).json({error: error.sqlMessage})
     }
