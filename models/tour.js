@@ -41,19 +41,59 @@ const getAllTourisms = () => {
     return load(sql)
 }
 
+const findCheapestTourByName = async(name) => {
+    const sql = `SELECT * FROM tour WHERE LOWER(name) like ('%${name}%') and is_active=1 ORDER BY price, rating DESC, review DESC;`
+    return load(sql)
+}
+
+const findMostExpensiveTourByName = async(name) => {
+    const sql = `SELECT * FROM tour WHERE LOWER(name) like ('%${name}%') and is_active=1 ORDER BY price DESC, rating DESC, review DESC;`
+    return load(sql)
+}
+
+const findMostViewedTourByName = async(name, from, to) => {
+    const sql = `SELECT b.*, count(a.id) as times from tour_user_log a,
+    (SELECT * FROM tour WHERE LOWER(name) like ('%${name}%')) as b
+    WHERE a.tour_id=b.id and log_time between '${from}' and '${to}' group by tour_id 
+    ORDER BY times DESC, rating DESC, review DESC;`
+    return load(sql)
+}
+
 const findTourByName = async(name) => {
-    const sql = `SELECT * FROM tour where name = '${name}';`
+    const sql = `SELECT * FROM tour WHERE LOWER(name) like ('%${name}%') and is_active=1 ORDER BY rating DESC, review DESC;`
     return load(sql)
 }
 
 const findTourByActivityName = async(name, type) => {
-    const sql = `SELECT t.* FROM tour t, activity_tour at where t.name = '${name}' and t.id=at.tour_id and at.activity_id=${type};`
+    const sql = `SELECT t.* FROM tour t, activity_tour at where LOWER(t.name) like ('%${name}%') and t.id=at.tour_id and at.activity_id=${type};`
     return load(sql)
 }
 
 const findTourByNameAndActivity = async(name, type) => {
     const sql = `SELECT DISTINCT t.id, t.name, t.thumbnail, t.rating, t.price, t.review FROM tour t, activity_tour at where LOWER(t.name) like LOWER('%${name}%') 
     and t.id=at.tour_id and t.is_active=1 and at.activity_id in (${type}) ORDER BY rating DESC, review DESC;`
+    return load(sql)
+}
+
+const findMostViewedTourByNameAndActivity = async(name, type, from, to) => {
+    const sql = `SELECT b.*, count(a.id) as times FROM tour_user_log a,
+    (SELECT DISTINCT t.id, t.name, t.thumbnail, t.rating, t.price, t.review 
+        FROM tour t, activity_tour at WHERE LOWER(t.name) like LOWER('%${name}%') 
+    and t.id=at.tour_id and t.is_active=1 and at.activity_id in (${type})) as b
+    WHERE a.tour_id=b.id and log_time between '${from}' and '${to}' group by tour_id 
+    ORDER BY times DESC, rating DESC, review DESC;`
+    return load(sql)
+}
+
+const findCheapestTourByNameAndActivity = async(name, type) => {
+    const sql = `SELECT DISTINCT t.id, t.name, t.thumbnail, t.rating, t.price, t.review FROM tour t, activity_tour at where LOWER(t.name) like LOWER('%${name}%') 
+    and t.id=at.tour_id and t.is_active=1 and at.activity_id in (${type}) ORDER BY price, rating DESC, review DESC;`
+    return load(sql)
+}
+
+const findMostExpensiveTourByNameAndActivity = async(name, type) => {
+    const sql = `SELECT DISTINCT t.id, t.name, t.thumbnail, t.rating, t.price, t.review FROM tour t, activity_tour at where LOWER(t.name) like LOWER('%${name}%') 
+    and t.id=at.tour_id and t.is_active=1 and at.activity_id in (${type}) ORDER BY price DESC, rating DESC, review DESC;`
     return load(sql)
 }
 
@@ -68,8 +108,32 @@ const findTourismById = async(tourism_id) => {
 }
 
 const loadTourByActivityId = async(act_ids) => {
-    const query = `SELECT DISTINCT t.id, t.name, t.thumbnail, t.rating, t.price, t.review FROM tour t, activity_tour at WHERE t.id=at.tour_id and at.activity_id in (${act_ids}) ORDER BY rating DESC, 
+    const query = `SELECT DISTINCT t.id, t.name, t.thumbnail, t.rating, t.price, t.review FROM tour t, activity_tour at 
+    WHERE t.id=at.tour_id and at.activity_id in (${act_ids}) ORDER BY rating DESC, 
     review DESC;`
+    return load(query)
+}
+
+const loadCheapestTourByActivityId = async(act_ids) => {
+    const query = `SELECT DISTINCT t.id, t.name, t.thumbnail, t.rating, t.price, t.review FROM tour t, activity_tour at 
+    WHERE t.id=at.tour_id and at.activity_id in (${act_ids}) ORDER BY price, rating DESC, 
+    review DESC;`
+    return load(query)
+}
+
+const loadMostExpensiveTourByActivityId = async(act_ids) => {
+    const query = `SELECT DISTINCT t.id, t.name, t.thumbnail, t.rating, t.price, t.review FROM tour t, activity_tour at 
+    WHERE t.id=at.tour_id and at.activity_id in (${act_ids}) ORDER BY price DESC, rating DESC, 
+    review DESC;`
+    return load(query)
+}
+
+const loadMostViewedTourByActivityId = async(act_ids, from, to) => {
+    const query = `SELECT b.*, count(a.id) as times from tour_user_log a,
+    (SELECT DISTINCT t.id, t.name, t.thumbnail, t.rating, t.price, t.review FROM tour t, activity_tour at 
+        WHERE t.id=at.tour_id and at.activity_id in (${act_ids})) as b
+    WHERE a.tour_id=b.id and log_time between '${from}' and '${to}' group by tour_id 
+    ORDER BY times DESC, rating DESC, review DESC;`
     return load(query)
 }
 
@@ -90,12 +154,6 @@ const findTourById = (id) => {
 
 const loadTourByListId = async(tour_ids) => {
     const query = `SELECT DISTINCT id, name, thumbnail, rating, price, review FROM tour where id in (${tour_ids}) ORDER BY rating DESC, 
-    review DESC;`
-    return load(query)
-}
-
-const loadTopRating = async() => {
-    const query = `SELECT DISTINCT id, name, thumbnail, rating, price, review FROM tour where is_active=1 ORDER BY rating DESC, 
     review DESC;`
     return load(query)
 }
@@ -217,6 +275,10 @@ module.exports = {
     deactivateTour, activateTour,
     insertNewTour, updateTour, deactivateImage,
     loadActivityByTourId, deactivateKindOfTour,
-    loadMostViewTours, loadTopRating, loadTopCheapest, loadTopMostExpensive,
-    getAllTourisms, findTourByNameAndActivity
+    loadMostViewTours, loadTopCheapest, loadTopMostExpensive,
+    getAllTourisms, findTourByNameAndActivity,
+    findMostViewedTourByName, findMostViewedTourByNameAndActivity, loadMostViewedTourByActivityId,
+    findMostExpensiveTourByName, findCheapestTourByName,
+    findMostExpensiveTourByNameAndActivity, findCheapestTourByNameAndActivity,
+    loadMostExpensiveTourByActivityId, loadCheapestTourByActivityId
 }

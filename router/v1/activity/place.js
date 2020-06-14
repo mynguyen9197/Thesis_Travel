@@ -72,23 +72,27 @@ router.get('/place_detail/:placeid', wrapAsync(async(req, res, next) => {
 
 router.get('/most-viewed', wrapAsync(async(req, res, next) => {
     try{
+        const { search, activity_ids } = req.query
+        let places = []
         const tzoffset = new Date().getTimezoneOffset() * 60000;
         const today = new Date(Date.now() - tzoffset)
         let last30days = new Date(Date.now() - tzoffset)
         last30days.setDate(new Date(today.getDate() - 30))
-        const mostViewPlaces = await Activity.loadMostViewPlaces(last30days.toISOString().split('T')[0], today.toISOString().split('T')[0])
-        console.log({last30days: last30days.toISOString().split('T')[0], lastUpdate: today.toISOString().split('T')[0]})
-        return res.status(200).json(mostViewPlaces)
-    } catch(error) {
-        console.log(error)
-        return res.status(500).json({error: error.sqlMessage})
-    }
-}))
-
-router.get('/highest-rating', wrapAsync(async(req, res, next) => {
-    try{
-        const activities = await Activity.loadTopRating()
-        return res.status(200).json(activities)
+        const from = last30days.toISOString().split('T')[0]
+        const to = today.toISOString().split('T')[0]
+        if (!activity_ids && search) {
+            places = await Activity.findMostViewedPlaceByName(search, from, to)
+        } else if(activity_ids && search) {
+            places = await Activity.findMostViewedPlaceByNameAndActivity(search, activity_ids, from, to)
+        } else if (activity_ids && !search) {
+            places = await Activity.loadMostViewedPlacesByActivityId(activity_ids, from, to)
+        } else {
+            return res.status(500).send({error: 'Please add filter or search'})
+        }
+        if(places.length == 0){
+            return res.status(404).send({error: 'No Activity Was Found'})
+        }
+        return res.status(200).json({places})
     } catch(error) {
         console.log(error)
         return res.status(500).json({error: error.sqlMessage})

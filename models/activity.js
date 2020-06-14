@@ -94,12 +94,7 @@ const loadReviewByPlaceId = ((placeid) => {
 const loadTop20ByRating = (() => {
     const query = 'SELECT id, name, thumbnail, rating, ranking, review FROM place where is_active=1 ORDER BY rating DESC, ranking DESC, review DESC LIMIT 20;'
     return load(query)
-})  
-
-const loadTopRating = (() => {
-    const query = 'SELECT id, name, thumbnail, rating, ranking, review FROM place where is_active=1 ORDER BY rating DESC, ranking DESC, review DESC;'
-    return load(query)
-})  
+})
 
 const loadAllPlaces = (() => {
     const query = 'SELECT id, name, thumbnail, rating, ranking, review FROM place where is_active=1;'
@@ -132,6 +127,15 @@ const loadPlacesByActivityId = async(act_ids) => {
     return load(query)
 }
 
+const loadMostViewedPlacesByActivityId = async(act_ids, from, to) => {
+    const query = `SELECT b.*, count(a.id) as times FROM place_user_log a,
+    (SELECT DISTINCT p.id, p.name, p.thumbnail, p.rating, p.ranking, p.review FROM place p, activity_place ap 
+        WHERE p.id=ap.place_id and p.is_active=1 and ap.activity_id in (${act_ids})) as b
+    WHERE a.place_id=b.id and log_time between '${from}' and '${to}' group by place_id 
+    ORDER BY times DESC, rating DESC, ranking DESC, review DESC;`
+    return load(query)
+}
+
 const loadPlacesByPlaceIds = async(place_ids) => {
     const query = `SELECT DISTINCT p.id, p.name, p.thumbnail, p.rating, p.ranking, p.review FROM place p WHERE p.id in (${place_ids}) and p.is_active=1 ORDER BY rating DESC, 
     ranking DESC, review DESC;`
@@ -149,6 +153,15 @@ const findPlaceByName = (name => {
     return load(query)
 })
 
+const findMostViewedPlaceByName = ((name, from, to) => {
+    const query =  `SELECT b.*, count(a.id) as times FROM place_user_log a,
+    (SELECT id, name, thumbnail, rating, ranking, review FROM place 
+        WHERE LOWER(name) like LOWER('%${name}%') and is_active=1) as b
+    WHERE a.place_id=b.id and log_time between '${from}' and '${to}' 
+    GROUP BY place_id ORDER BY times DESC, rating DESC, ranking DESC, review DESC; `
+    return load(query)
+})
+
 const findRatedPlaceByUser = async(userid) => {
     const query =  `SELECT * FROM rating_place WHERE user_id=${userid} ORDER BY id DESC; `
     return load(query)
@@ -158,6 +171,15 @@ const findPlaceByNameAndActivity = ((name, act_ids) => {
     const query = `SELECT DISTINCT p.id, p.name, p.thumbnail, p.rating, p.ranking, p.review FROM place p, activity_place ap
     WHERE p.id=ap.place_id and p.is_active=1 and ap.activity_id in (${act_ids}) and LOWER(p.name) like LOWER('%${name}%') ORDER BY rating DESC, 
     ranking DESC, review DESC;`
+    return load(query)
+})
+
+const findMostViewedPlaceByNameAndActivity = ((name, act_ids, from, to) => {
+    const query = `SELECT b.*, count(a.id) as times FROM place_user_log a,
+    (SELECT DISTINCT p.id, p.name, p.thumbnail, p.rating, p.ranking, p.review FROM place p, activity_place ap
+        WHERE p.id=ap.place_id and p.is_active=1 and ap.activity_id in (${act_ids}) and LOWER(p.name) like LOWER('%${name}%')) as b
+    WHERE a.place_id=b.id and log_time between '${from}' and '${to}' group by place_id 
+    ORDER BY times DESC, rating DESC, ranking DESC, review DESC;`
     return load(query)
 })
 
@@ -242,5 +264,6 @@ module.exports = {
     deactivatePlace, activatePlace,
     loadChildCategoriesOnly, deactivateImage,
     loadActivityByPlaceId, deactivateKindOfPlace,
-    addNewPlace, loadMostViewPlaces, loadTopRating
+    addNewPlace, loadMostViewPlaces,
+    findMostViewedPlaceByName, findMostViewedPlaceByNameAndActivity, loadMostViewedPlacesByActivityId
 }
