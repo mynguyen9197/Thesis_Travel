@@ -46,7 +46,7 @@ router.get('/lookup', wrapAsync(async(req, res, next) => {
         if(restaurants.length == 0){
             return res.status(404).send({error: 'No Restaurant Was Found'})
         }
-        return res.status(200).json({restaurants, count: restaurants.length})
+        return res.status(200).json({restaurants})
     } catch (error) {
         console.log(error)
     }
