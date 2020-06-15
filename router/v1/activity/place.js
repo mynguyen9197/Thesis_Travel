@@ -6,12 +6,12 @@ const { wrapAsync, getImageUrlAsLink } = require(global.appRoot + '/utils')
 
 router.get('/', wrapAsync(async(req, res, next) => {
     const categories = await Activity.loadAllCategories()
-    const kinds = await Activity.loadAllActivities()
-    const activities = await Activity.loadTop20ByRating()
-    if ( activities === null ) {
+    const activities = await Activity.loadAllActivities()
+    const places = await Activity.loadTop20ByRating()
+    if ( places === null ) {
         return res.status(404).send({error: 'No Activity Was Found'})
     }
-    return res.status(200).json({categories, kinds, activities})
+    return res.status(200).json({categories, activities, places})
 }))
 
 router.get('/category/:category_id', wrapAsync(async(req, res, next) => {
