@@ -81,7 +81,7 @@ router.get('/most-viewed', wrapAsync(async(req, res, next) => {
         if(tours.length == 0){
             return res.status(404).send({error: 'No Activity Was Found'})
         }
-        return res.status(200).json(tours)
+        return res.status(200).json({tours})
     } catch(error) {
         console.log(error)
         return res.status(500).json(error)
@@ -104,7 +104,7 @@ router.get('/cheapest', wrapAsync(async(req, res, next) => {
         if(tours.length == 0){
             return res.status(404).send({error: 'No Activity Was Found'})
         }
-        return res.status(200).json(tours)
+        return res.status(200).json({tours})
     } catch (error){
         console.log(error)
         return res.status(500).json(error)
@@ -127,7 +127,7 @@ router.get('/most-expensive', wrapAsync(async(req, res, next) => {
         if(tours.length == 0){
             return res.status(404).send({error: 'No Activity Was Found'})
         }
-        return res.status(200).json(tours)
+        return res.status(200).json({tours})
     } catch(error) {
         console.log(error)
         return res.status(500).json(error)
