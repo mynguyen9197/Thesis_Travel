@@ -111,11 +111,6 @@ const loadActivitiesByCategoryId = ((cat_id) => {
     return load(query)
 })
 
-const loadAllActivities = ((cat_id) => {
-    const query = `SELECT * FROM activity_of_place;`
-    return load(query)
-})
-
 const loadActivityByName = ((name) => {
     const query = `SELECT * FROM activity_of_place WHERE name='${name}';`
     return load(query)
@@ -269,6 +264,6 @@ module.exports = {
     deactivatePlace, activatePlace,
     loadChildCategoriesOnly, deactivateImage,
     loadActivityByPlaceId, deactivateKindOfPlace,
-    addNewPlace, loadMostViewPlaces, loadAllActivities,
+    addNewPlace, loadMostViewPlaces,
     findMostViewedPlaceByName, findMostViewedPlaceByNameAndActivity, loadMostViewedPlacesByActivityId
 }
