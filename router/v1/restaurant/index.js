@@ -116,6 +116,16 @@ router.get('/most-viewed', wrapAsync(async(req, res, next) => {
     }
 }))
 
+router.get('/highest-rating', wrapAsync(async(req, res, next) => {
+    try {
+        const listRestaurants = await Restaurant.loadTopRating()
+        return res.status(200).json({listRestaurants})
+    } catch(error) {
+        console.log(error)
+        return res.status(500).json({error: error.sqlMessage})
+    }
+}))
+
 function disListRestaurant(rests1, rests2){
     let result = []
     if(rests1.length == 0) {

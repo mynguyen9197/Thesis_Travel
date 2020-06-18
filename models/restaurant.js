@@ -348,10 +348,15 @@ const loadAllFeaturesOfRes = (() => {
     return load(query)
 })
 
+const loadTopRating = (async() => {
+    const query = 'SELECT id, name, thumbnail, common_rating, ranking, review_count FROM restaurant where is_active=1 ORDER BY common_rating DESC, review_count DESC;'
+    return load(query)
+}) 
+
 module.exports = {
     insertRestaurant, insertImage, insertComment,
     insertCuisine, findCuisineByName, insertCuisineRestaurant,
-    insertMealRestaurant, insertFeatureRestaurant,
+    insertMealRestaurant, insertFeatureRestaurant, loadTopRating,
     findRestaurantByName, findFoodTypeByName, findMealByName,
     findMealByName, findRestFeatureByName, insertFoodTypeRestaurant,
     loadAllCuisines, loadAllFeatures, loadAllFoodMeal, loadAllFoodType,

@@ -261,6 +261,12 @@ const loadMostViewTours = ((from, to) => {
     return load(query)
 })
 
+const loadTopRating = async() => {
+    const query = `SELECT DISTINCT id, name, thumbnail, rating, price, review FROM tour where is_active=1 ORDER BY rating DESC, 
+    review DESC;`
+    return load(query)
+}
+
 module.exports = {
     insertTour, insertTourism,
     insertComment, loadAllTourism, insertImage,
@@ -272,7 +278,7 @@ module.exports = {
     checkIfUserAlreadyReview, insertRating, updateRating,
     loadAllIdAndNameTours, loadTourByListId,
     findOtherTourInGroup, loadInfoAllTours,
-    deactivateTour, activateTour,
+    deactivateTour, activateTour, loadTopRating,
     insertNewTour, updateTour, deactivateImage,
     loadActivityByTourId, deactivateKindOfTour,
     loadMostViewTours, loadTopCheapest, loadTopMostExpensive,

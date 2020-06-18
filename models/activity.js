@@ -243,6 +243,11 @@ const addNewPlace = (async(place) => {
     return save(sql)
 })
 
+const loadTopRating = (() => {
+    const query = 'SELECT id, name, thumbnail, rating, ranking, review FROM place where is_active=1 ORDER BY rating DESC, ranking DESC, review DESC;'
+    return load(query)
+})
+
 module.exports = {
     insertPlace, insertImage,
     insertContact, insertComment,
@@ -264,6 +269,6 @@ module.exports = {
     deactivatePlace, activatePlace,
     loadChildCategoriesOnly, deactivateImage,
     loadActivityByPlaceId, deactivateKindOfPlace,
-    addNewPlace, loadMostViewPlaces,
+    addNewPlace, loadMostViewPlaces, loadTopRating,
     findMostViewedPlaceByName, findMostViewedPlaceByNameAndActivity, loadMostViewedPlacesByActivityId
 }
