@@ -160,7 +160,7 @@ router.put('/', upload.single('thumbnail'), wrapAsync(async(req, res, next) => {
         if(!selectedRestaurant.length){
             return res.status(404).json("Restaurant is not found")
         }
-        const thumbnail = req.file ? req.file.path : null
+        const thumbnail = req.file ? req.file.path : req.body.thumbnail ? req.body.thumbnail : null
         const rest = {
             id, name, about, open_hour, address, phone, from, to,
             thumbnail: thumbnail? thumbnail.substr(0, 12) + '\\' + thumbnail.substr(12): selectedRestaurant[0].thumbnail

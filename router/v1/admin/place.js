@@ -125,7 +125,7 @@ router.put('/', upload.single('thumbnail'), wrapAsync(async(req, res, next) => {
         if(!selectedPlace.length){
             return res.status(404).json("Place is not found")
         }
-        const thumbnail = req.file ? req.file.path : null
+        const thumbnail = req.file ? req.file.path : req.body.thumbnail ? req.body.thumbnail :null
         const editedPlace = { 
             id, name, about, duration, open_hour, address, phone, 
             thumbnail: thumbnail? thumbnail.substr(0, 12) + '\\' + thumbnail.substr(12): selectedPlace[0].thumbnail }

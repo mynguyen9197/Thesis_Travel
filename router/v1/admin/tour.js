@@ -124,7 +124,7 @@ router.put('/', upload.single('thumbnail'), wrapAsync(async(req, res, next) => {
         if(!selectedTour.length){
             return res.status(404).json("Tour is not found")
         }
-        const thumbnail = req.file ? req.file.path : null
+        const thumbnail = req.file ? req.file.path : req.body.thumbnail ? req.body.thumbnail : null
         const editedTour = { 
             id, name, price, hightlight, wtd, important_info, additional, cancel_policy, key_detail, advantage, duration, tourism_id,
             thumbnail: thumbnail? thumbnail.substr(0, 12) + '\\' + thumbnail.substr(12): selectedTour[0].thumbnail }
