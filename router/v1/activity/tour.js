@@ -137,7 +137,7 @@ router.get('/most-expensive', wrapAsync(async(req, res, next) => {
 router.get('/highest-rating', wrapAsync(async(req, res, next) => {
     try {
         const tours = await Tour.loadTopRating()
-        return res.status(200).json({tours})
+        return res.status(200).json(tours)
     } catch(error) {
         console.log(error)
         return res.status(500).json({error: error.sqlMessage})
