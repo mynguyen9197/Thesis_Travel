@@ -90,6 +90,10 @@ router.post('/', upload.fields([{ name: 'images' }, { name: 'thumbnail', maxCoun
         const newPlace = {
             name, about, duration, open_hour, address, thumbnail: thumbnail? thumbnail.substr(0, 12) + '\\' + thumbnail.substr(12): '', phone
         }
+        const isExisted = await place.loadByName(name)
+        if(isExisted.length){
+            return res.status(409).json({message: 'This name is existing'})
+        }
         const savedPlace = await place.addNewPlace(newPlace)
         console.log("inserted place: " + savedPlace.insertId)
         if(images != null){

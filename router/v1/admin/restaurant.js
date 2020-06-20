@@ -103,6 +103,10 @@ router.post('/', upload.fields([{ name: 'images' }, { name: 'thumbnail', maxCoun
             name, about, open_hour, address, phone, from, to,
             thumbnail: thumbnail? thumbnail.substr(0, 17) + '\\' + thumbnail.substr(17): ''
         }
+        const isExisted = await restaurant.findResByName(name)
+        if(isExisted.length){
+            return res.status(409).json({message: 'This name is existing'})
+        }
         const savedRestaurant = await restaurant.insertNewRestaurant(rest)
         console.log("saved restaurant: " + savedRestaurant.insertId)
         if(images != null){

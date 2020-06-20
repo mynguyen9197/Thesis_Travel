@@ -89,6 +89,10 @@ router.post('/', upload.fields([{ name: 'images' }, { name: 'thumbnail', maxCoun
             name, price, highlight, wtd, important_info, additional, cancel_policy, key_detail, advantage, duration, 
             thumbnail: thumbnail? thumbnail.substr(0, 12) + '\\' + thumbnail.substr(12): ''
         }
+        const isExisted = await tour.findTourByName(name)
+        if(isExisted.length){
+            return res.status(409).json({message: 'This name is existing'})
+        }
         const savedTour = await tour.insertNewTour(newTour, tourism_id)
         console.log("inserted tour: " + savedTour.insertId)
         if(images != null){
