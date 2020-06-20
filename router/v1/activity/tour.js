@@ -43,6 +43,7 @@ router.get('/tour_detail/:tour_id', wrapAsync(async(req, res, next) => {
         const { tour_id } = req.params
         const request_url = req.protocol + '://' + req.get('host')
         const tour_detail = await Tour.findTourById(tour_id)
+        tour_detail[0].thumbnail = getImageUrlAsLink(request_url, tour_detail[0].thumbnail)
         let images = await Tour.loadImagesByTourId(tour_id)
         images.map(image => {
             image.address = getImageUrlAsLink(request_url, image.address)

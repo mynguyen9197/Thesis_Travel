@@ -57,6 +57,7 @@ router.get('/restaurant_detail/:id', wrapAsync(async(req, res, next) => {
         const { id } = req.params
         const request_url = req.protocol + '://' + req.get('host')
         const restaurant = await Restaurant.findRestaurantById(id)
+        restaurant[0].thumbnail = getImageUrlAsLink(request_url, restaurant[0].thumbnail)
         const images = await Restaurant.loadImagesByRestaurantId(id)
         images.map(image => {
             image.address = getImageUrlAsLink(request_url, image.address)

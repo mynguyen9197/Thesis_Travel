@@ -56,6 +56,7 @@ router.get('/place_detail/:placeid', wrapAsync(async(req, res, next) => {
         const { placeid } = req.params
         const request_url = req.protocol + '://' + req.get('host')
         const place_detail = await Activity.loadDetailById(placeid)
+        place_detail[0].thumbnail = getImageUrlAsLink(request_url, place_detail[0].thumbnail)
         const images = await Activity.loadImagesByPlaceId(placeid)
         images.map(image => {
             image.address = getImageUrlAsLink(request_url, image.address)
