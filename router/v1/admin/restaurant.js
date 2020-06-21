@@ -19,7 +19,7 @@ const fileFilter = (req, file, cb) => {
     if(file.mimetype === 'image/jpeg' || file.mimetype === 'image/png'){
         cb(null, true)
     } else{
-        cb(null, flase)
+        cb(null, false)
     }
 }
 
@@ -278,6 +278,42 @@ router.put('/', upload.single('thumbnail'), wrapAsync(async(req, res, next) => {
     } catch (error) {
         console.log(error)
         return res.status(500).json({error})
+    }
+}))
+
+router.put('/update-images', upload.array('images'), wrapAsync(async(req, res, next) => {
+    try {
+        const res_id = req.body.id
+        const selectedRestaurant = await restaurant.findRestaurantById(res_id)
+        if(!selectedRestaurant.length){
+            return res.status(404).json("Restaurant is not found")
+        }
+        const existingImages = await restaurant.loadImagesByRestaurantId(res_id)
+        if(existingImages.length){
+            const ids = existingImages.map(img => img.id)
+            await restaurant.deactivateImage(ids)
+        }
+        let images = req.files ? req.files.map(image => image.path) : null
+        if(images != null){
+            for(let i=0; i<images.length;i++){
+                if(images[i] != null){
+                    images[i] = images[i].substr(0, 17) + '\\' + images[i].substr(17)
+                    await restaurant.insertImage(images[i], res_id)
+                }
+            }
+        }
+        const { existedImages } = req.body
+        if(existedImages){
+            for(let i=0; i<existedImages.length;i++){
+                if(existedImages[i] != null){
+                    await restaurant.insertImage(existedImages[i], res_id)
+                }
+            }
+        }
+        return res.status(200).json('update images successfully')
+    } catch(error){
+        console.log(error)
+        return res.status(500).json('There is something wrong')
     }
 }))
 

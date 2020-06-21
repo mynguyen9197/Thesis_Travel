@@ -293,7 +293,7 @@ const insertNewRestaurant = async(restaurant) => {
 }
 
 const deactivateImage = ((imageids) => {
-    const sql = `update images_restaurant set status=0 where id in (${imageids});`;
+    const sql = `delete from images_restaurant where id in (${imageids});`;
     return save(sql)
 })
 

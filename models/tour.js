@@ -241,7 +241,7 @@ const updateTour = (async(tour) => {
 })
 
 const deactivateImage = ((imageids) => {
-    const sql = `update images_tour set status=0 where id in (${imageids});`;
+    const sql = `delete from images_tour where id in (${imageids});`;
     return save(sql)
 })
 

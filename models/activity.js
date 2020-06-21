@@ -12,7 +12,7 @@ const insertImage = ((image, place) => {
 })
 
 const deactivateImage = ((imageids) => {
-    const sql = `update images set status=0 where id in (${imageids});`;
+    const sql = `delete from images where id in (${imageids});`;
     return save(sql)
 })
 

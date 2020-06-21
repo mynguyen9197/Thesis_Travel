@@ -19,7 +19,7 @@ const fileFilter = (req, file, cb) => {
     if(file.mimetype === 'image/jpeg' || file.mimetype === 'image/png'){
         cb(null, true)
     } else{
-        cb(null, flase)
+        cb(null, false)
     }
 }
 
@@ -160,6 +160,42 @@ router.put('/', upload.single('thumbnail'), wrapAsync(async(req, res, next) => {
     } catch (error) {
         console.log(error)
         return res.status(500).json({error})
+    }
+}))
+
+router.put('/update-images', upload.array('images'), wrapAsync(async(req, res, next) => {
+    try {
+        const tour_id = req.body.id
+        const selectedTour = await tour.findTourById(tour_id)
+        if(!selectedTour.length){
+            return res.status(404).json("Tour is not found")
+        }
+        const existingImages = await tour.loadImagesByTourId(tour_id)
+        if(existingImages.length){
+            const ids = existingImages.map(img => img.id)
+            await tour.deactivateImage(ids)
+        }
+        let images = req.files ? req.files.map(image => image.path) : null
+        if(images != null){
+            for(let i=0; i<images.length;i++){
+                if(images[i] != null){
+                    images[i] = images[i].substr(0, 12) + '\\' + images[i].substr(12)
+                    await tour.insertImage(images[i], tour_id)
+                }
+            }
+        }
+        const { existedImages } = req.body
+        if(existedImages){
+            for(let i=0; i<existedImages.length;i++){
+                if(existedImages[i] != null){
+                    await tour.insertImage(existedImages[i], tour_id)
+                }
+            }
+        }
+        return res.status(200).json('update images successfully')
+    } catch(error){
+        console.log(error)
+        return res.status(500).json('There is something wrong')
     }
 }))
 
