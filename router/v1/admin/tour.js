@@ -83,11 +83,11 @@ router.get('/detail/:tourid', wrapAsync(async(req, res, next) => {
 
 router.post('/', upload.fields([{ name: 'images' }, { name: 'thumbnail', maxCount: 1 }]), wrapAsync(async(req, res, next) => {
     try {
-        const { name, price, highlight, wtd, important_info, additional, cancel_policy, key_detail, advantage, duration, tourism_id } = req.body
+        const { name, price, overview, highlight, wtd, important_info, additional, cancel_policy, key_detail, advantage, duration, tourism_id } = req.body
         const thumbnail = req.files['thumbnail'] ? req.files['thumbnail'][0].path : null
         let images = req.files['images'] ? req.files['images'].map(image => image.path) : null
         const newTour = {
-            name, price, highlight, wtd, important_info, additional, cancel_policy, key_detail, advantage, duration, 
+            name, overview, price, highlight, wtd, important_info, additional, cancel_policy, key_detail, advantage, duration, 
             thumbnail: thumbnail? thumbnail.substr(0, 12) + '\\' + thumbnail.substr(12): ''
         }
         const isExisted = await tour.findTourByName(name)
@@ -120,14 +120,14 @@ router.post('/', upload.fields([{ name: 'images' }, { name: 'thumbnail', maxCoun
 
 router.put('/', upload.single('thumbnail'), wrapAsync(async(req, res, next) => {
     try {
-        const { id, name, price, hightlight, wtd, important_info, additional, cancel_policy, key_detail, advantage, duration, tourism_id } = req.body
+        const { id, name, overview, price, hightlight, wtd, important_info, additional, cancel_policy, key_detail, advantage, duration, tourism_id } = req.body
         const selectedTour = await tour.findTourById(id)
         if(!selectedTour.length){
             return res.status(404).json("Tour is not found")
         }
         const thumbnail = req.file ? req.file.path : req.body.thumbnail ? req.body.thumbnail : null
         const editedTour = { 
-            id, name, price, hightlight, wtd, important_info, additional, cancel_policy, key_detail, advantage, duration, tourism_id,
+            id, name, overview, price, hightlight, wtd, important_info, additional, cancel_policy, key_detail, advantage, duration, tourism_id,
             thumbnail: thumbnail? thumbnail.substr(0, 12) + '\\' + thumbnail.substr(12): selectedTour[0].thumbnail }
         await tour.updateTour(editedTour)
         const kind_of_tour = req.body.kind_of_tour
@@ -153,7 +153,9 @@ router.put('/', upload.single('thumbnail'), wrapAsync(async(req, res, next) => {
             }
             for(let i=0;i<kind_of_tour.length;i++){
                 if(kind_of_tour[i] != 0){
-                    await tour.insertActivityTour(editedTour.id, kind_of_tour[i])
+                    if(kind_of_tour[i]){
+                        await tour.insertActivityTour(editedTour.id, kind_of_tour[i])
+                    }
                 }
             }
         }

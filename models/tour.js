@@ -227,14 +227,14 @@ const activateTour = async(tour_id) => {
 }
 
 const insertNewTour = async(tour, tourism_id) => {
-    const sql = `insert into tour(name, price, highlight, wtd, important_info, additional, cancel_policy, key_detail, advantage, thumbnail, tourism_id, duration)
-    values('${tour.name}', ${tour.price}, '${tour.highlight}', '${tour.wtd}', '${tour.important_info}', '${tour.additional}', '${tour.cancel_policy}',
+    const sql = `insert into tour(name, overview, price, highlight, wtd, important_info, additional, cancel_policy, key_detail, advantage, thumbnail, tourism_id, duration)
+    values('${tour.name}', '${tour.overview}', ${tour.price}, '${tour.highlight}', '${tour.wtd}', '${tour.important_info}', '${tour.additional}', '${tour.cancel_policy}',
     '${tour.key_detail}', '${tour.advantage}', '${tour.thumbnail}', ${tourism_id}, '${tour.duration}');`
     return save(sql)
 }
 
 const updateTour = (async(tour) => {
-    const sql = `update tour set name='${tour.name}', price=${tour.price}, highlight='${tour.highlight}', wtd='${tour.wtd}', important_info='${tour.important_info}', additional='${tour.additional}', 
+    const sql = `update tour set name='${tour.name}', overview='${tour.overview}', price=${tour.price}, highlight='${tour.highlight}', wtd='${tour.wtd}', important_info='${tour.important_info}', additional='${tour.additional}', 
     cancel_policy='${tour.cancel_policy}', key_detail='${tour.key_detail}', advantage='${tour.advantage}', thumbnail='${tour.thumbnail}', 
     tourism_id=${tour.tourism_id}, duration='${tour.duration}' where id=${tour.id};`
     return save(sql)
