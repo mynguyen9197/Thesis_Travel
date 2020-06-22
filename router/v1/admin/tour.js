@@ -61,6 +61,7 @@ router.get('/detail/:tourid', wrapAsync(async(req, res, next) => {
     try {
         const { tourid } = req.params
         const activities = await tour.loadAllTourActivities()
+        const tourisms = await tour.getAllTourisms()
         const request_url = req.protocol + '://' + req.get('host')
         let selectedTour = await tour.findTourById(tourid)
         if(!selectedTour.length){
@@ -73,7 +74,7 @@ router.get('/detail/:tourid', wrapAsync(async(req, res, next) => {
             image.address = await getImageUrlAsLink(request_url, image.address)
         })
         const kind_of_tour = await tour.loadActivityByTourId(tourid)
-        return res.status(200).json({activities, selectedTour, images, kind_of_tour})
+        return res.status(200).json({activities, selectedTour, images, kind_of_tour, tourisms})
     } catch (error) {
         console.log(error)
         return res.status(500).json(error)
