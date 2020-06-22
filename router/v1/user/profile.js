@@ -38,7 +38,7 @@ router.post('/upload-avatar', upload.single('avatar'), wrapAsync(async(req, res,
         const decoded = jwt.verify(req.token, 'RESTFULAPIs')
         const path = req.file ? req.file.path : null
         if(path){
-            const url_img = path.substr(0, 11) + '\\' + path.substr(11)
+            const url_img = path.replace('\\', '/')
             const request_url = req.protocol + '://' + req.get('host')
             await User.updateAvatar(url_img, decoded.id)
             return res.status(200).json(request_url + '/' + url_img)
@@ -60,7 +60,7 @@ router.put('/update-profile', upload.single('avatar'), wrapAsync(async(req, res,
             const user = {
                 id: decoded.id,
                 name: name,
-                avatar: path ? path.substr(0, 11) + '\\' + path.substr(11) : savedUser[0].avatar
+                avatar: path ? path.replace('\\', '/') : savedUser[0].avatar
             }
             await User.updateProfile(user)
             const request_url = req.protocol + '://' + req.get('host')

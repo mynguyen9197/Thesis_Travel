@@ -101,7 +101,7 @@ router.post('/', upload.fields([{ name: 'images' }, { name: 'thumbnail', maxCoun
         let images = req.files['images'] ? req.files['images'].map(image => image.path) : null
         const rest = {
             name, about, open_hour, address, phone, from, to,
-            thumbnail: thumbnail? thumbnail.substr(0, 17) + '\\' + thumbnail.substr(17): ''
+            thumbnail: thumbnail? thumbnail.replace('\\', '/'): ''
         }
         const isExisted = await restaurant.findResByName(name)
         if(isExisted.length){
@@ -112,7 +112,7 @@ router.post('/', upload.fields([{ name: 'images' }, { name: 'thumbnail', maxCoun
         if(images != null){
             for(let i=0; i<images.length;i++){
                 if(images[i] != null){
-                    images[i] = images[i].substr(0, 17) + '\\' + images[i].substr(17)
+                    images[i] = images[i].replace('\\', '/')
                     await restaurant.insertImage(images[i], savedRestaurant.insertId)
                 }
             }
@@ -160,7 +160,7 @@ router.put('/', upload.single('thumbnail'), wrapAsync(async(req, res, next) => {
         if(!selectedRestaurant.length){
             return res.status(404).json("Restaurant is not found")
         }
-        let thumbnail = req.file ? req.file.path.substr(0, 17) + '\\' + req.file.path.substr(17) : null
+        let thumbnail = req.file ? req.file.path.replace('\\', '/') : null
         if(thumbnail == null){
             const existingImage = req.body.thumbnail
             if(existingImage){
@@ -305,7 +305,7 @@ router.put('/update-images', upload.array('images'), wrapAsync(async(req, res, n
         if(images != null){
             for(let i=0; i<images.length;i++){
                 if(images[i] != null){
-                    images[i] = images[i].substr(0, 17) + '\\' + images[i].substr(17)
+                    images[i] = images[i].replace('\\', '/')
                     await restaurant.insertImage(images[i], res_id)
                 }
             }

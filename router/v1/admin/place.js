@@ -88,7 +88,7 @@ router.post('/', upload.fields([{ name: 'images' }, { name: 'thumbnail', maxCoun
         const thumbnail = req.files['thumbnail'] ? req.files['thumbnail'][0].path : null
         let images = req.files['images'] ? req.files['images'].map(image => image.path) : null
         const newPlace = {
-            name, about, duration, open_hour, address, thumbnail: thumbnail? thumbnail.substr(0, 12) + '\\' + thumbnail.substr(12): '', phone
+            name, about, duration, open_hour, address, thumbnail: thumbnail? thumbnail.replace('\\', '/'): '', phone
         }
         const isExisted = await place.loadByName(name)
         if(isExisted.length){
@@ -99,7 +99,7 @@ router.post('/', upload.fields([{ name: 'images' }, { name: 'thumbnail', maxCoun
         if(images != null){
             for(let i=0; i<images.length;i++){
                 if(images[i] != null){
-                    images[i] = images[i].substr(0, 12) + '\\' + images[i].substr(12)
+                    images[i] = images[i].replace('\\', '/')
                   await place.insertImage(images[i], savedPlace.insertId)
                 }
             }
@@ -125,7 +125,7 @@ router.put('/', upload.single('thumbnail'), wrapAsync(async(req, res, next) => {
         if(!selectedPlace.length){
             return res.status(404).json("Place is not found")
         }
-        let thumbnail = req.file ? req.file.path.substr(0, 12) + '\\' + req.file.path.substr(12) : null
+        let thumbnail = req.file ? req.file.path.replace('\\', '/') : null
         if(thumbnail == null){
             const existingImage = req.body.thumbnail
             if(existingImage){
@@ -189,7 +189,7 @@ router.put('/update-images', upload.array('images'), wrapAsync(async(req, res, n
         if(images != null){
             for(let i=0; i<images.length;i++){
                 if(images[i] != null){
-                    images[i] = images[i].substr(0, 12) + '\\' + images[i].substr(12)
+                    images[i] = images[i].replace('\\', '/')
                     await place.insertImage(images[i], place_id)
                 }
             }
