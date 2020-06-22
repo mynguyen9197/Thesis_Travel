@@ -160,13 +160,21 @@ router.put('/', upload.single('thumbnail'), wrapAsync(async(req, res, next) => {
         if(!selectedRestaurant.length){
             return res.status(404).json("Restaurant is not found")
         }
-        const thumbnail = req.file ? req.file.path : req.body.thumbnail ? req.body.thumbnail : null
+        let thumbnail = req.file ? req.file.path.substr(0, 17) + '\\' + req.file.path.substr(17) : null
+        if(thumbnail == null){
+            const existingImage = req.body.thumbnail
+            if(existingImage){
+                thumbnail = existingImage
+            }
+        }
         const rest = {
             id, name, about, open_hour, address, phone, from, to,
-            thumbnail: thumbnail? thumbnail.substr(0, 12) + '\\' + thumbnail.substr(12): selectedRestaurant[0].thumbnail
+            thumbnail: thumbnail? thumbnail: selectedRestaurant[0].thumbnail
         }
         await restaurant.updateRestaurant(rest)
-        
+        if(req.file && req.file.path){
+            await restaurant.insertImage(thumbnail, id)
+        }
         if(cuisines != null){
             let previousKinds = await restaurant.loadCuisineByRestId(id)
             for(let i =0;i<previousKinds.length;i++){

@@ -125,11 +125,20 @@ router.put('/', upload.single('thumbnail'), wrapAsync(async(req, res, next) => {
         if(!selectedPlace.length){
             return res.status(404).json("Place is not found")
         }
-        const thumbnail = req.file ? req.file.path : req.body.thumbnail ? req.body.thumbnail :null
+        let thumbnail = req.file ? req.file.path.substr(0, 12) + '\\' + req.file.path.substr(12) : null
+        if(thumbnail == null){
+            const existingImage = req.body.thumbnail
+            if(existingImage){
+                thumbnail = existingImage
+            }
+        }
         const editedPlace = { 
             id, name, about, duration, open_hour, address, phone, 
-            thumbnail: thumbnail? thumbnail.substr(0, 12) + '\\' + thumbnail.substr(12): selectedPlace[0].thumbnail }
+            thumbnail: thumbnail? thumbnail : selectedPlace[0].thumbnail }
         await place.updatePlace(editedPlace)
+        if(req.file && req.file.path){
+            await place.insertImage(thumbnail, id)
+        }
         let kind_of_place = req.body.kind_of_place
         if(kind_of_place != null && kind_of_place.length){
             let previousKinds = await place.loadActivityByPlaceId(editedPlace.id)

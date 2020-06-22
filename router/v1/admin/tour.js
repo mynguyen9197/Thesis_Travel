@@ -125,11 +125,20 @@ router.put('/', upload.single('thumbnail'), wrapAsync(async(req, res, next) => {
         if(!selectedTour.length){
             return res.status(404).json("Tour is not found")
         }
-        const thumbnail = req.file ? req.file.path : req.body.thumbnail ? req.body.thumbnail : null
+        let thumbnail = req.file ? req.file.path.substr(0, 12) + '\\' + req.file.path.substr(12) : null
+        if(thumbnail == null){
+            const existingImage = req.body.thumbnail
+            if(existingImage){
+                thumbnail = existingImage
+            }
+        }
         const editedTour = { 
             id, name, overview, price, hightlight, wtd, important_info, additional, cancel_policy, key_detail, advantage, duration, tourism_id,
-            thumbnail: thumbnail? thumbnail.substr(0, 12) + '\\' + thumbnail.substr(12): selectedTour[0].thumbnail }
+            thumbnail: thumbnail? thumbnail: selectedTour[0].thumbnail }
         await tour.updateTour(editedTour)
+        if(req.file && req.file.path){
+            await tour.insertImage(thumbnail, id)
+        }
         const kind_of_tour = req.body.kind_of_tour
         if(kind_of_tour != null && kind_of_tour.length){
             let previousKinds = await tour.loadActivityByTourId(editedTour.id)
