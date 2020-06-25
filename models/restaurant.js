@@ -169,7 +169,7 @@ const findMostViewedResByNameFeatures = ((name, features_ids, from, to) => {
 
 const findResByNameFoodTypes = ((name, types_ids) => {
     const query = `SELECT DISTINCT r.* from restaurant r, foodtype_restaurant fr
-    WHERE r.id=fr.res_id and fr.type_id in (${types_ids}) and LOWER(r.name) like LOWER('%${name}%') r.is_active=1 
+    WHERE r.id=fr.res_id and fr.type_id in (${types_ids}) and LOWER(r.name) like LOWER('%${name}%') and r.is_active=1 
     ORDER BY common_rating DESC, review_count DESC;`
     return load(query)
 })
@@ -206,7 +206,7 @@ const findMostViewedResByName = ((name, from, to) => {
 
 const findResByNameMeals = ((name, meals_ids) => {
     const query = `SELECT DISTINCT r.* from restaurant r, meal_restaurant mr
-    WHERE r.id=mr.res_id and mr.meal_id in (${meals_ids}) and LOWER(r.name) like LOWER('%${name}%') r.is_active=1
+    WHERE r.id=mr.res_id and mr.meal_id in (${meals_ids}) and LOWER(r.name) like LOWER('%${name}%') and r.is_active=1
     ORDER BY common_rating DESC, review_count DESC;`
     return load(query)
 })
@@ -383,6 +383,16 @@ const findAllResByName = ((name) => {
     return load(query)
 })
 
+const updateUserIdComment = ((comt_id, user_id) => {
+    const sql = `update comments_restaurant set user_id=${user_id} where id=${comt_id};`;
+    return save(sql)
+})
+
+const getAllComment = async() => {
+    const query = `SELECT * from comments_restaurant;`
+    return load(query)
+}
+
 module.exports = {
     insertRestaurant, insertImage, insertComment,
     insertCuisine, findCuisineByName, insertCuisineRestaurant,
@@ -405,5 +415,6 @@ module.exports = {
     loadAllFeaturesOfRes, findMostViewedResByNameCuisines, findMostViewedResByNameFeatures,
     findMostViewedResByNameFoodTypes, findMostViewResByNameMeals, findMostViewedResByName,
     findAllResByNameCuisines, findAllResByNameFeatures, findAllResByNameFoodTypes, 
-    findAllResByNameMeals, findAllResByName
+    findAllResByNameMeals, findAllResByName,
+    updateUserIdComment, getAllComment
 }

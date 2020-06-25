@@ -205,4 +205,61 @@ router.post('/log/restaurant', wrapAsync(async(req, res, next) => {
     }
 }))
 
+router.post('/comment/place', wrapAsync(async(req, res, next) => {
+    try {
+        const comments = await activity.getAllComment()
+        for(let i=0;i<comments.length; i++){
+            let user_id = faker.random.number({min:1, max:1092})
+            let savedUser = await User.findById(user_id)
+            while(!savedUser.length){
+                user_id = faker.random.number({min:1, max:1092})
+                savedUser = await User.findById(user_id)
+            }
+            await activity.updateUserIdComment(comments[i].id, user_id)
+        }
+        return res.status(200).json('okkk')
+    } catch(error) {
+        console.log(error)
+        return res.status(500).json(error)
+    }
+}))
+
+router.post('/comment/tour', wrapAsync(async(req, res, next) => {
+    try {
+        const comments = await Tour.getAllComment()
+        for(let i=0;i<comments.length; i++){
+            let user_id = faker.random.number({min:1, max:1092})
+            let savedUser = await User.findById(user_id)
+            while(!savedUser.length){
+                user_id = faker.random.number({min:1, max:1092})
+                savedUser = await User.findById(user_id)
+            }
+            await Tour.updateUserIdComment(comments[i].id, user_id)
+        }
+        return res.status(200).json('okkk')
+    } catch(error) {
+        console.log(error)
+        return res.status(500).json(error)
+    }
+}))
+
+router.post('/comment/restaurant', wrapAsync(async(req, res, next) => {
+    try {
+        const comments = await Restaurant.getAllComment()
+        for(let i=0;i<comments.length; i++){
+            let user_id = faker.random.number({min:1, max:1092})
+            let savedUser = await User.findById(user_id)
+            while(!savedUser.length){
+                user_id = faker.random.number({min:1, max:1092})
+                savedUser = await User.findById(user_id)
+            }
+            await Restaurant.updateUserIdComment(comments[i].id, user_id)
+        }
+        return res.status(200).json('okkk')
+    } catch(error) {
+        console.log(error)
+        return res.status(500).json(error)
+    }
+}))
+
 module.exports = router

@@ -264,6 +264,16 @@ const loadAllPlacesByActivityId = async(act_ids) => {
     return load(query)
 }
 
+const updateUserIdComment = ((cmt_id, user_id) => {
+    const sql = `update comments set user_id=${user_id} where id=${cmt_id};`;
+    return save(sql)
+})
+
+const getAllComment = async() => {
+    const query = `SELECT * from comments;`
+    return load(query)
+}
+
 module.exports = {
     insertPlace, insertImage,
     insertContact, insertComment,
@@ -287,5 +297,6 @@ module.exports = {
     loadActivityByPlaceId, deactivateKindOfPlace,
     addNewPlace, loadMostViewPlaces, loadTopRating,
     findMostViewedPlaceByName, findMostViewedPlaceByNameAndActivity, loadMostViewedPlacesByActivityId,
-    findAllPlaceByName, findAllPlaceByNameAndActivity, loadAllPlacesByActivityId
+    findAllPlaceByName, findAllPlaceByNameAndActivity, loadAllPlacesByActivityId,
+    updateUserIdComment, getAllComment
 }

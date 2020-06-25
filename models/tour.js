@@ -284,6 +284,16 @@ const loadAllTourByActivityId = async(act_ids) => {
     return load(query)
 }
 
+const updateUserIdComment = ((comt_id, user_id) => {
+    const sql = `update comments_tour set user_id=${user_id} where id=${comt_id};`;
+    return save(sql)
+})
+
+const getAllComment = async() => {
+    const query = `SELECT * from comments_tour;`
+    return load(query)
+}
+
 module.exports = {
     insertTour, insertTourism,
     insertComment, loadAllTourism, insertImage,
@@ -304,5 +314,6 @@ module.exports = {
     findMostExpensiveTourByName, findCheapestTourByName,
     findMostExpensiveTourByNameAndActivity, findCheapestTourByNameAndActivity,
     loadMostExpensiveTourByActivityId, loadCheapestTourByActivityId,
-    findAllTourByName, findAllTourByNameAndActivity, loadAllTourByActivityId
+    findAllTourByName, findAllTourByNameAndActivity, loadAllTourByActivityId,
+    updateUserIdComment, getAllComment
 }
