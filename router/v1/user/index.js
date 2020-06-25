@@ -87,10 +87,13 @@ router.post('/login', wrapAsync(async(req, res, next) => {
                     if(!savedUser[0].activate){
                         return res.status(401).json("Your account has not been activated.")
                     }
+                    if(!savedUser[0].is_used){
+                        await User.markAsLogined(savedUser[0].id)
+                    }
                     const request_url = req.protocol + '://' + req.get('host')
                     const token = jwt.sign({ id: savedUser[0].id, role: savedUser[0].role }, 'RESTFULAPIs', { expiresIn: 60 * 60 * 24  })
                     const avatar = getImageUrlAsLink(request_url, savedUser[0].avatar)
-                    return res.status(200).json({token: token, role: savedUser[0].role, name: savedUser[0].name, avatar: avatar})
+                    return res.status(200).json({token: token, role: savedUser[0].role, name: savedUser[0].name, avatar: avatar, logged_before: savedUser[0].is_used})
                 }
             } else {
                 return res.status(401).send("User does not exist!")

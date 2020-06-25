@@ -50,8 +50,13 @@ const updatePassword = (async(user) => {
     return save(sql)
 })
 
+const markAsLogined = (async(id) => {
+    const sql = `update user set is_used=1 where id=${id};`
+    return save(sql)
+})
+
 module.exports = {
     insertUser, findByUsername, updateAvatar, updateProfile,
     findById, updatePassword, findUsersMissingAvatar, activeAccount,
-    checkActiveAccount, findByEmail
+    checkActiveAccount, findByEmail, markAsLogined
 }
