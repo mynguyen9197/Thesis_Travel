@@ -24,7 +24,7 @@ router.post("/review", wrapAsync(async(req, res, next) => {
         const info = {
             user_id: decoded.id,
             date: date.toString(),
-            rating: rating + 1,
+            rating: rating,
             res_id: restid,
         }
         let savedId = decoded.id
@@ -32,14 +32,14 @@ router.post("/review", wrapAsync(async(req, res, next) => {
         if(alreadyReviewed.length){
             saveRating = await restaurant.updateRating(info)
             action = 'update'
-            let {ratingListAsString, averageRating} = calculateRating(review, 4-rating, 5-alreadyReviewed[0].rating)
+            let {ratingListAsString, averageRating} = calculateRating(review, 5-rating, 5-alreadyReviewed[0].rating)
             console.log({ratingListAsString, averageRating})
             await restaurant.updateReview(ratingListAsString, averageRating, restid)
         } else {
             const saveRating = await restaurant.insertRating(info)
             action = 'insert'
             savedId = saveRating.insertId
-            let {ratingListAsString, averageRating} = calculateRating(review, 4-rating, -1)
+            let {ratingListAsString, averageRating} = calculateRating(review, 5-rating, -1)
             console.log({ratingListAsString, averageRating})
             await restaurant.updateReview(ratingListAsString, averageRating, restid)
         }

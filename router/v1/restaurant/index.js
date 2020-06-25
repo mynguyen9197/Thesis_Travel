@@ -1,5 +1,6 @@
 const express = require('express')
 const router = express.Router()
+const jwt = require('jsonwebtoken')
 
 const { wrapAsync, getImageUrlAsLink } = require(global.appRoot + '/utils')
 const Restaurant = require(global.appRoot + '/models/restaurant')
@@ -57,6 +58,9 @@ router.get('/restaurant_detail/:id', wrapAsync(async(req, res, next) => {
         const { id } = req.params
         const request_url = req.protocol + '://' + req.get('host')
         const restaurant = await Restaurant.findRestaurantById(id)
+        if(!restaurant.length){
+            return res.status(404).json('Restaurant is not found')
+        }
         restaurant[0].thumbnail = getImageUrlAsLink(request_url, restaurant[0].thumbnail)
         const images = await Restaurant.loadImagesByRestaurantId(id)
         images.map(image => {
@@ -66,6 +70,15 @@ router.get('/restaurant_detail/:id', wrapAsync(async(req, res, next) => {
         comments.map(comment => {
             comment.avatar = getImageUrlAsLink(request_url, comment.avatar)
         })
+        const bearerHeader = req.headers['authorization']
+        if(bearerHeader){
+            const token = bearerHeader.split(' ')[1]
+            const decoded = jwt.verify(token, 'RESTFULAPIs')
+            if(decoded){
+                const rating = await Restaurant.checkIfUserAlreadyReview(id, decoded.id)
+                return res.status(200).json({restaurant, images, comments, rating: rating[0]})
+            }
+        }
         return res.status(200).json({restaurant, images, comments})
     } catch (error) {
         console.log(error)

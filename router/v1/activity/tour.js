@@ -1,5 +1,6 @@
 const express = require('express')
 const router = express.Router()
+const jwt = require('jsonwebtoken')
 
 const Tour = require(global.appRoot + '/models/tour')
 const { wrapAsync, getImageUrlAsLink } = require(global.appRoot + '/utils')
@@ -43,6 +44,9 @@ router.get('/tour_detail/:tour_id', wrapAsync(async(req, res, next) => {
         const { tour_id } = req.params
         const request_url = req.protocol + '://' + req.get('host')
         const tour_detail = await Tour.findTourById(tour_id)
+        if(!tour_detail.length){
+            return res.status(404).json('Tour is not found')
+        }
         tour_detail[0].thumbnail = getImageUrlAsLink(request_url, tour_detail[0].thumbnail)
         let images = await Tour.loadImagesByTourId(tour_id)
         images.map(image => {
@@ -53,6 +57,15 @@ router.get('/tour_detail/:tour_id', wrapAsync(async(req, res, next) => {
             comment.avatar = getImageUrlAsLink(request_url, comment.avatar)
         })
         const tourism = await Tour.findTourismById(tour_detail[0].tourism_id)
+        const bearerHeader = req.headers['authorization']
+        if(bearerHeader){
+            const token = bearerHeader.split(' ')[1]
+            const decoded = jwt.verify(token, 'RESTFULAPIs')
+            if(decoded){
+                const rating = await Tour.checkIfUserAlreadyReview(tour_id, decoded.id)
+                return res.status(200).json({tour_detail, images, comments, tourism, rating: rating[0]})
+            }
+        }
         return res.status(200).send({tour_detail, images, comments, tourism})
     } catch (error) {
         console.log(error)

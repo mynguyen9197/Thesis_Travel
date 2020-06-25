@@ -1,5 +1,6 @@
 const express = require('express')
 const router = express.Router()
+const jwt = require('jsonwebtoken')
 
 const Activity = require(global.appRoot + '/models/activity')
 const { wrapAsync, getImageUrlAsLink } = require(global.appRoot + '/utils')
@@ -56,6 +57,9 @@ router.get('/place_detail/:placeid', wrapAsync(async(req, res, next) => {
         const { placeid } = req.params
         const request_url = req.protocol + '://' + req.get('host')
         const place_detail = await Activity.loadDetailById(placeid)
+        if(!place_detail.length){
+            return res.status(404).json('Place is not found')
+        }
         place_detail[0].thumbnail = getImageUrlAsLink(request_url, place_detail[0].thumbnail)
         const images = await Activity.loadImagesByPlaceId(placeid)
         images.map(image => {
@@ -65,6 +69,15 @@ router.get('/place_detail/:placeid', wrapAsync(async(req, res, next) => {
         comments.map(comment => {
             comment.avatar = getImageUrlAsLink(request_url, comment.avatar)
         })
+        const bearerHeader = req.headers['authorization']
+        if(bearerHeader){
+            const token = bearerHeader.split(' ')[1]
+            const decoded = jwt.verify(token, 'RESTFULAPIs')
+            if(decoded){
+                const rating = await Activity.checkIfUserAlreadyReview(placeid, decoded.id)
+                return res.status(200).json({place_detail, images, comments, rating: rating[0]})
+            }
+        }
         return res.status(200).json({place_detail, images, comments})
     } catch (error) {
         console.log(error)

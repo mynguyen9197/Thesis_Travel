@@ -24,7 +24,7 @@ router.post("/review", wrapAsync(async(req, res, next) => {
         const info = {
             user_id: decoded.id,
             date: date.toString(),
-            rating: rating + 1,
+            rating: rating,
             tour_id: tourid,
         }
         let savedId = decoded.id
@@ -32,14 +32,14 @@ router.post("/review", wrapAsync(async(req, res, next) => {
         if(alreadyReviewed.length){
             await tour.updateRating(info)
             action = 'update'
-            let {ratingListAsString, averageRating} = calculateRating(review, 4-rating, 5-alreadyReviewed[0].rating)
+            let {ratingListAsString, averageRating} = calculateRating(review, 5-rating, 5-alreadyReviewed[0].rating)
             console.log({ratingListAsString, averageRating})
             await tour.updateReview(ratingListAsString, averageRating, tourid)
         } else {
             const saveRating = await tour.insertRating(info)
             action = 'insert'
             savedId = saveRating.insertId
-            let {ratingListAsString, averageRating} = calculateRating(review, 4-rating, -1)
+            let {ratingListAsString, averageRating} = calculateRating(review, 5-rating, -1)
             console.log({ratingListAsString, averageRating})
             await tour.updateReview(ratingListAsString, averageRating, tourid)
         }
