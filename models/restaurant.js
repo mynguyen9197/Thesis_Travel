@@ -137,7 +137,7 @@ const loadCommentsByRestaurantId = async(id) => {
 
 const findResByNameCuisines = ((name, cuisines_ids) => {
     const query = `SELECT DISTINCT r.* from restaurant r, cuisine_restaurant cr
-    WHERE r.id=cr.res_id and cr.cuisine_id in (${cuisines_ids}) and LOWER(r.name) like LOWER('%${name}%') 
+    WHERE r.id=cr.res_id and cr.cuisine_id in (${cuisines_ids}) and LOWER(r.name) like LOWER('%${name}%') and r.is_active=1 
     ORDER BY common_rating DESC, review_count DESC;`
     return load(query)
 })
@@ -153,7 +153,7 @@ const findMostViewedResByNameCuisines = ((name, cuisines_ids, from, to) => {
 
 const findResByNameFeatures = ((name, features_ids) => {
     const query = `SELECT DISTINCT r.* from restaurant r, feature_restaurant fr
-    WHERE r.id=fr.res_id and fr.feature_id in (${features_ids}) and LOWER(r.name) like LOWER('%${name}%') 
+    WHERE r.id=fr.res_id and fr.feature_id in (${features_ids}) and LOWER(r.name) like LOWER('%${name}%') and r.is_active=1 
     ORDER BY common_rating DESC, review_count DESC;`
     return load(query)
 })
@@ -169,7 +169,7 @@ const findMostViewedResByNameFeatures = ((name, features_ids, from, to) => {
 
 const findResByNameFoodTypes = ((name, types_ids) => {
     const query = `SELECT DISTINCT r.* from restaurant r, foodtype_restaurant fr
-    WHERE r.id=fr.res_id and fr.type_id in (${types_ids}) and LOWER(r.name) like LOWER('%${name}%') 
+    WHERE r.id=fr.res_id and fr.type_id in (${types_ids}) and LOWER(r.name) like LOWER('%${name}%') r.is_active=1 
     ORDER BY common_rating DESC, review_count DESC;`
     return load(query)
 })
@@ -190,7 +190,7 @@ const findResByRestIds = ((rest_ids) => {
 
 const findResByName = ((name) => {
     const query = `SELECT DISTINCT * from restaurant r 
-    WHERE LOWER(r.name) like LOWER('%${name}%') 
+    WHERE LOWER(r.name) like LOWER('%${name}%') and r.is_active=1
     ORDER BY common_rating DESC, review_count DESC;`
     return load(query)
 })
@@ -206,7 +206,7 @@ const findMostViewedResByName = ((name, from, to) => {
 
 const findResByNameMeals = ((name, meals_ids) => {
     const query = `SELECT DISTINCT r.* from restaurant r, meal_restaurant mr
-    WHERE r.id=mr.res_id and mr.meal_id in (${meals_ids}) and LOWER(r.name) like LOWER('%${name}%') 
+    WHERE r.id=mr.res_id and mr.meal_id in (${meals_ids}) and LOWER(r.name) like LOWER('%${name}%') r.is_active=1
     ORDER BY common_rating DESC, review_count DESC;`
     return load(query)
 })
@@ -353,6 +353,36 @@ const loadTopRating = (async() => {
     return load(query)
 }) 
 
+const findAllResByNameCuisines = ((name, cuisines_ids) => {
+    const query = `SELECT DISTINCT r.* from restaurant r, cuisine_restaurant cr
+    WHERE r.id=cr.res_id and cr.cuisine_id in (${cuisines_ids}) and LOWER(r.name) like LOWER('%${name}%');`
+    return load(query)
+})
+
+const findAllResByNameFeatures = ((name, features_ids) => {
+    const query = `SELECT DISTINCT r.* from restaurant r, feature_restaurant fr
+    WHERE r.id=fr.res_id and fr.feature_id in (${features_ids}) and LOWER(r.name) like LOWER('%${name}%');`
+    return load(query)
+})
+
+const findAllResByNameFoodTypes = ((name, types_ids) => {
+    const query = `SELECT DISTINCT r.* from restaurant r, foodtype_restaurant fr
+    WHERE r.id=fr.res_id and fr.type_id in (${types_ids}) and LOWER(r.name) like LOWER('%${name}%');`
+    return load(query)
+})
+
+const findAllResByNameMeals = ((name, meals_ids) => {
+    const query = `SELECT DISTINCT r.* from restaurant r, meal_restaurant mr
+    WHERE r.id=mr.res_id and mr.meal_id in (${meals_ids}) and LOWER(r.name) like LOWER('%${name}%');`
+    return load(query)
+})
+
+const findAllResByName = ((name) => {
+    const query = `SELECT DISTINCT * from restaurant r 
+    WHERE LOWER(r.name) like LOWER('%${name}%');`
+    return load(query)
+})
+
 module.exports = {
     insertRestaurant, insertImage, insertComment,
     insertCuisine, findCuisineByName, insertCuisineRestaurant,
@@ -373,5 +403,7 @@ module.exports = {
     findMealsByResId, findFeaturesByResId, findFoodTypesByResId, findCuisinesByResId,
     deactivateCuisineOfRestaurant, deactivateFTOfRestaurant, deactivateFeaturesOfRestaurant, deactivateMealsOfRestaurant,
     loadAllFeaturesOfRes, findMostViewedResByNameCuisines, findMostViewedResByNameFeatures,
-    findMostViewedResByNameFoodTypes, findMostViewResByNameMeals, findMostViewedResByName
+    findMostViewedResByNameFoodTypes, findMostViewResByNameMeals, findMostViewedResByName,
+    findAllResByNameCuisines, findAllResByNameFeatures, findAllResByNameFoodTypes, 
+    findAllResByNameMeals, findAllResByName
 }

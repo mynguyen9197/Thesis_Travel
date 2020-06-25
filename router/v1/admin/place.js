@@ -90,7 +90,7 @@ router.post('/', upload.fields([{ name: 'images' }, { name: 'thumbnail', maxCoun
         const newPlace = {
             name, about, duration, open_hour, address, thumbnail: thumbnail? thumbnail.replace('\\', '/'): '', phone
         }
-        const isExisted = await place.loadByName(name)
+        const isExisted = await place.findAllPlaceByName(name)
         if(isExisted.length){
             return res.status(409).json({message: 'This name is existing'})
         }
@@ -232,19 +232,24 @@ router.put('/activate/:placeid', wrapAsync(async(req, res, next) => {
 }))
 
 router.get('/filter', wrapAsync(async(req, res, next) => {
-    const { search, activity_ids } = req.query
+    const { search, activity_ids, status } = req.query
     let places = []
     if (!activity_ids && search) {
-        places = await place.findPlaceByName(search)
+        places = await place.findAllPlaceByName(search)
     } else if(activity_ids && search) {
-        places = await place.findPlaceByNameAndActivity(search, activity_ids)
+        places = await place.findAllPlaceByNameAndActivity(search, activity_ids)
     } else if (activity_ids && !search) {
-        places = await place.loadPlacesByActivityId(activity_ids)
+        places = await place.loadAllPlacesByActivityId(activity_ids)
     } else {
         return res.status(500).send({error: 'Please add filter or search'})
     }
     if(places.length == 0){
         return res.status(404).send({error: 'No Place Was Found'})
+    }
+    if(status === 'active'){
+        places = places.filter(x => x.is_active === 1)
+    } else if(status === 'inactive'){
+        places = places.filter(x => x.is_active === 0)
     }
     return res.status(200).json({places})
 }))

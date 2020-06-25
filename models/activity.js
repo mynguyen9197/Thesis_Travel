@@ -248,6 +248,22 @@ const loadTopRating = (() => {
     return load(query)
 })
 
+const findAllPlaceByName = (name => {
+    const query =  `SELECT id, name, thumbnail, rating, ranking, review, is_active FROM place WHERE LOWER(name) like LOWER('%${name}%');`
+    return load(query)
+})
+
+const findAllPlaceByNameAndActivity = ((name, act_ids) => {
+    const query = `SELECT DISTINCT p.id, p.name, p.thumbnail, p.rating, p.ranking, p.review, p.is_active FROM place p, activity_place ap
+    WHERE p.id=ap.place_id and ap.activity_id in (${act_ids}) and LOWER(p.name) like LOWER('%${name}%');`
+    return load(query)
+})
+
+const loadAllPlacesByActivityId = async(act_ids) => {
+    const query = `SELECT DISTINCT p.id, p.name, p.thumbnail, p.rating, p.ranking, p.review, p.is_active FROM place p, activity_place ap WHERE p.id=ap.place_id and ap.activity_id in (${act_ids});`
+    return load(query)
+}
+
 module.exports = {
     insertPlace, insertImage,
     insertContact, insertComment,
@@ -270,5 +286,6 @@ module.exports = {
     loadChildCategoriesOnly, deactivateImage,
     loadActivityByPlaceId, deactivateKindOfPlace,
     addNewPlace, loadMostViewPlaces, loadTopRating,
-    findMostViewedPlaceByName, findMostViewedPlaceByNameAndActivity, loadMostViewedPlacesByActivityId
+    findMostViewedPlaceByName, findMostViewedPlaceByNameAndActivity, loadMostViewedPlacesByActivityId,
+    findAllPlaceByName, findAllPlaceByNameAndActivity, loadAllPlacesByActivityId
 }

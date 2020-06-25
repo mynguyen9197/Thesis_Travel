@@ -103,7 +103,7 @@ router.post('/', upload.fields([{ name: 'images' }, { name: 'thumbnail', maxCoun
             name, about, open_hour, address, phone, from, to,
             thumbnail: thumbnail? thumbnail.replace('\\', '/'): ''
         }
-        const isExisted = await restaurant.findResByName(name)
+        const isExisted = await restaurant.findAllResByName(name)
         if(isExisted.length){
             return res.status(409).json({message: 'This name is existing'})
         }
@@ -349,28 +349,33 @@ router.put('/activate/:rest_id', wrapAsync(async(req, res, next) => {
 
 router.get('/lookup', wrapAsync(async(req, res, next) => {
     try {
-        const { search, cuisines, features, foodtypes, meals } = req.query
+        const { search, cuisines, features, foodtypes, meals, status } = req.query
         let restaurants = []
         if (cuisines) {
-            const byCuisines = await restaurant.findResByNameCuisines(search, cuisines)
+            const byCuisines = await restaurant.findAllResByNameCuisines(search, cuisines)
             restaurants = disListRestaurant(restaurants, byCuisines)
         } else if(features) {
-            const byFeatures = await restaurant.findResByNameFeatures(search, features)
+            const byFeatures = await restaurant.findAllResByNameFeatures(search, features)
             restaurants = disListRestaurant(restaurants, byFeatures)
         } else if (foodtypes) {
-            const byFoodTypes = await restaurant.findResByNameFoodTypes(search, foodtypes)
+            const byFoodTypes = await restaurant.findAllResByNameFoodTypes(search, foodtypes)
             restaurants = disListRestaurant(restaurants, byFoodTypes)
         } else if(meals) {
-            const byMeals = await restaurant.findResByNameMeals(search, meals)
+            const byMeals = await restaurant.findAllResByNameMeals(search, meals)
             restaurants = disListRestaurant(restaurants, byMeals)
         } else if(search) {
-            const byNameOnly = await restaurant.findResByName(search)
+            const byNameOnly = await restaurant.findAllResByName(search)
             restaurants = disListRestaurant(restaurants, byNameOnly)
         } else {
             return res.status(500).send({error: 'Please add filter or search'})
         }
         if(restaurants.length == 0){
             return res.status(404).send({error: 'No Restaurant Was Found'})
+        }
+        if(status === 'active'){
+            restaurants = restaurants.filter(x => x.is_active === 1)
+        } else if(status === 'inactive'){
+            restaurants = restaurants.filter(x => x.is_active === 0)
         }
         return res.status(200).json({restaurants, count: restaurants.length})
     } catch (error) {

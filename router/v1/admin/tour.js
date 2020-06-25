@@ -5,6 +5,7 @@ const router = express.Router()
 const tour = require(global.appRoot + '/models/tour')
 const { wrapAsync, getImageUrlAsLink } = require(global.appRoot + '/utils')
 const { removeExistedImages } = require('./utils')
+const { static } = require('express')
 
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
@@ -90,7 +91,7 @@ router.post('/', upload.fields([{ name: 'images' }, { name: 'thumbnail', maxCoun
             name, overview, price, highlight, wtd, important_info, additional, cancel_policy, key_detail, advantage, duration, 
             thumbnail: thumbnail? thumbnail.replace('\\', '/'): ''
         }
-        const isExisted = await tour.findTourByName(name)
+        const isExisted = await tour.findAllTourByName(name)
         if(isExisted.length){
             return res.status(409).json({message: 'This name is existing'})
         }
@@ -234,21 +235,25 @@ router.put('/activate/:tour_id', wrapAsync(async(req, res, next) => {
 }))
 
 router.get('/filter', wrapAsync(async(req, res, next) => {
-    const { search, activity_ids } = req.query
+    const { search, activity_ids, status } = req.query
     let tours = []
     if (!activity_ids && search) {
-        tours = await tour.findTourByName(search)
+        tours = await tour.findAllTourByName(search)
     } else if(activity_ids && search) {
-        tours = await tour.findTourByNameAndActivity(search, activity_ids)
+        tours = await tour.findAllTourByNameAndActivity(search, activity_ids)
     } else if (activity_ids && !search) {
-        tours = await tour.loadTourByActivityId(activity_ids)
+        tours = await tour.loadAllTourByActivityId(activity_ids)
     } else {
         return res.status(500).send({error: 'Please add filter or search'})
     }
     if(tours.length == 0){
         return res.status(404).send({error: 'No Activity Was Found'})
     }
-    
+    if(status === 'active'){
+        tours = tours.filter(x => x.is_active === 1)
+    } else if(status === 'inactive'){
+        tours = tours.filter(x => x.is_active === 0)
+    }
     return res.status(200).json({ tours })
 }))
 
