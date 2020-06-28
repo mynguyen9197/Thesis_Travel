@@ -369,13 +369,14 @@ router.get('/lookup', wrapAsync(async(req, res, next) => {
         } else {
             return res.status(500).send({error: 'Please add filter or search'})
         }
-        if(restaurants.length == 0){
-            return res.status(404).send({error: 'No Restaurant Was Found'})
-        }
+        
         if(status === 'active'){
             restaurants = restaurants.filter(x => x.is_active === 1)
         } else if(status === 'inactive'){
             restaurants = restaurants.filter(x => x.is_active === 0)
+        }
+        if(restaurants.length == 0){
+            return res.status(404).send({error: 'No Restaurant Was Found'})
         }
         return res.status(200).json({restaurants, count: restaurants.length})
     } catch (error) {

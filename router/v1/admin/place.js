@@ -243,13 +243,14 @@ router.get('/filter', wrapAsync(async(req, res, next) => {
     } else {
         return res.status(500).send({error: 'Please add filter or search'})
     }
-    if(places.length == 0){
-        return res.status(404).send({error: 'No Place Was Found'})
-    }
+    
     if(status === 'active'){
         places = places.filter(x => x.is_active === 1)
     } else if(status === 'inactive'){
         places = places.filter(x => x.is_active === 0)
+    }
+    if(places.length == 0){
+        return res.status(404).send({error: 'No Place Was Found'})
     }
     return res.status(200).json({places})
 }))
