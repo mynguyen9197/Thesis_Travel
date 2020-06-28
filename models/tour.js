@@ -138,7 +138,7 @@ const loadMostViewedTourByActivityId = async(act_ids, from, to) => {
 }
 
 const loadInfoAllTours = async() => {
-    const query = `SELECT t.id, t.name, t.thumbnail, t.rating, t.price, t.review from tour t;`
+    const query = `SELECT t.id, t.name, t.thumbnail, t.rating, t.price, t.review, t.is_active from tour t;`
     return load(query)
 }
 

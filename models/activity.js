@@ -92,12 +92,12 @@ const loadReviewByPlaceId = ((placeid) => {
 })
 
 const loadTop20ByRating = (() => {
-    const query = 'SELECT id, name, thumbnail, rating, ranking, review FROM place where is_active=1 ORDER BY rating DESC, ranking DESC, review DESC LIMIT 20;'
+    const query = 'SELECT id, name, thumbnail, rating, ranking, review FROM place where is_active=1 ORDER BY rating DESC, ranking DESC, review DESC;'
     return load(query)
 })
 
 const loadAllPlaces = (() => {
-    const query = 'SELECT id, name, thumbnail, rating, ranking, review FROM place where is_active=1;'
+    const query = 'SELECT id, name, thumbnail, rating, ranking, review, is_active FROM place;'
     return load(query)
 })  
 

@@ -111,12 +111,12 @@ const loadAllFoodMeal = async() => {
 }
 
 const loadTop20ByRating = (async() => {
-    const query = 'SELECT id, name, thumbnail, common_rating, ranking, review_count FROM restaurant ORDER BY common_rating DESC, review_count DESC LIMIT 20;'
+    const query = 'SELECT id, name, thumbnail, common_rating, ranking, review_count FROM restaurant where is_active=1 ORDER BY common_rating DESC, review_count DESC;'
     return load(query)
 }) 
 
 const loadAllRestaurant = (async() => {
-    const query = 'SELECT id, name, thumbnail, common_rating, ranking, review_count FROM restaurant;'
+    const query = 'SELECT id, name, thumbnail, common_rating, ranking, review_count, is_active FROM restaurant;'
     return load(query)
 }) 
 
