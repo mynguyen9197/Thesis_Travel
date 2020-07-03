@@ -106,6 +106,33 @@ router.post('/login', wrapAsync(async(req, res, next) => {
     }
 }))
 
+router.post('/get-id-if-cors', wrapAsync(async(req, res, next) => {
+    try {
+        const {user} = req.body;
+        if(user && Object.keys(user).length){
+            const savedUser = await User.findByUsername(user)
+            if(savedUser.length){
+                const match = await bcrypt.compare(user.password, savedUser[0].password)
+                if(!match){
+                    return res.status(404).json("Account does not exist!")
+                } else {
+                    if(savedUser[0].activate || savedUser[0].is_used){
+                        return res.status(409).json('Account is existing')
+                    } else {
+                        return res.status(200).json({id: savedUser[0].id})
+                    }
+                }
+            } else {
+                return res.status(404).json("User does not exist!")
+            }
+        }
+        return res.status(404).json("User does not exist!")
+    } catch(error){
+        console.log(error)
+        return res.status(500).json(error)
+    }
+}))
+
 router.get('/history', verifyToken, wrapAsync(async(req, res, next) => {
     const decoded = jwt.verify(req.token, 'RESTFULAPIs')
     const recentPlaces = await Place.getRecentActivities(decoded.id)
