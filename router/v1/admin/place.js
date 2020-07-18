@@ -252,6 +252,10 @@ router.get('/filter', wrapAsync(async(req, res, next) => {
     if(places.length == 0){
         return res.status(404).send({error: 'No Place Was Found'})
     }
+    const request_url = req.protocol + '://' + req.get('host')
+    places.map(place => {
+        place.thumbnail = getImageUrlAsLink(request_url, place.thumbnail)
+    })
     return res.status(200).json({places})
 }))
 

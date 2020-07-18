@@ -6,18 +6,22 @@ const { wrapAsync, getImageUrlAsLink } = require(global.appRoot + '/utils')
 const Restaurant = require(global.appRoot + '/models/restaurant')
 
 router.get('/', wrapAsync(async(req, res, next) => {
+    const request_url = req.protocol + '://' + req.get('host')
     const cuisines = await Restaurant.loadAllCuisines()
     const features = await Restaurant.loadAllFeatures()
     const foodTypes = await Restaurant.loadAllFoodType()
     const meals = await Restaurant.loadAllFoodMeal()
 
     const listRestaurants = await Restaurant.loadTop20ByRating()
-
+    listRestaurants.map(rest => {
+        rest.thumbnail = getImageUrlAsLink(request_url, rest.thumbnail)
+    })
     res.status(200).send({cuisines, features, foodTypes, meals, listRestaurants})
 }))
 
 router.get('/lookup', wrapAsync(async(req, res, next) => {
     try {
+        const request_url = req.protocol + '://' + req.get('host')
         const { search, cuisines, features, foodtypes, meals } = req.query
         let sql_search = search ? search: ''
         let restaurants = []
@@ -47,6 +51,9 @@ router.get('/lookup', wrapAsync(async(req, res, next) => {
         if(restaurants.length == 0){
             return res.status(404).send({error: 'No Restaurant Was Found'})
         }
+        restaurants.map(rest => {
+            rest.thumbnail = getImageUrlAsLink(request_url, rest.thumbnail)
+        })
         return res.status(200).json({restaurants})
     } catch (error) {
         console.log(error)
@@ -88,6 +95,7 @@ router.get('/restaurant_detail/:id', wrapAsync(async(req, res, next) => {
 
 router.get('/most-viewed', wrapAsync(async(req, res, next) => {
     try{
+        const request_url = req.protocol + '://' + req.get('host')
         const tzoffset = new Date().getTimezoneOffset() * 60000;
         const today = new Date(Date.now() - tzoffset)
         let last30days = new Date(Date.now() - tzoffset)
@@ -123,6 +131,9 @@ router.get('/most-viewed', wrapAsync(async(req, res, next) => {
         if(restaurants.length == 0){
             return res.status(404).send({error: 'No Restaurant Was Found'})
         }
+        restaurants.map(rest => {
+            rest.thumbnail = getImageUrlAsLink(request_url, rest.thumbnail)
+        })
         return res.status(200).json({restaurants})
     } catch {
         console.log(error)
@@ -132,7 +143,11 @@ router.get('/most-viewed', wrapAsync(async(req, res, next) => {
 
 router.get('/highest-rating', wrapAsync(async(req, res, next) => {
     try {
+        const request_url = req.protocol + '://' + req.get('host')
         const listRestaurants = await Restaurant.loadTopRating()
+        restaurants.map(rest => {
+            rest.thumbnail = getImageUrlAsLink(request_url, rest.thumbnail)
+        })
         return res.status(200).json(listRestaurants)
     } catch(error) {
         console.log(error)

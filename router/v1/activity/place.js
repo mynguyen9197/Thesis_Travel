@@ -6,18 +6,23 @@ const Activity = require(global.appRoot + '/models/activity')
 const { wrapAsync, getImageUrlAsLink } = require(global.appRoot + '/utils')
 
 router.get('/', wrapAsync(async(req, res, next) => {
+    const request_url = req.protocol + '://' + req.get('host')
     const categories = await Activity.loadAllCategories()
     const activities = await Activity.loadAllActivities()
     const places = await Activity.loadTop20ByRating()
     if ( places === null ) {
         return res.status(404).send({error: 'No Place Was Found'})
     }
+    places.map(place => {
+        place.thumbnail = getImageUrlAsLink(request_url, place.thumbnail)
+    })
     return res.status(200).json({categories, activities, places})
 }))
 
 router.get('/category/:category_id', wrapAsync(async(req, res, next) => {
     try {
         const { category_id } = req.params
+        const request_url = req.protocol + '://' + req.get('host')
         const activities = await Activity.loadActivitiesByCategoryId(category_id)
         if ( activities === null ) {
             return res.status(404).send({error: 'No Place Was Found'})
@@ -27,6 +32,9 @@ router.get('/category/:category_id', wrapAsync(async(req, res, next) => {
             return res.status(400).send("No Place Was Found")
         }
         const events = await Activity.loadPlacesByActivityId(activity_ids)
+        events.map(place => {
+            place.thumbnail = getImageUrlAsLink(request_url, place.thumbnail)
+        })
         return res.status(200).json({ activities, events })
     } catch (error) {
         console.log(error)
@@ -37,6 +45,7 @@ router.get('/category/:category_id', wrapAsync(async(req, res, next) => {
 router.get('/filter', wrapAsync(async(req, res, next) => {
     const { search, activity_ids } = req.query
     let places = []
+    const request_url = req.protocol + '://' + req.get('host')
     if (!activity_ids && search) {
         places = await Activity.findPlaceByName(search)
     } else if(activity_ids && search) {
@@ -49,6 +58,9 @@ router.get('/filter', wrapAsync(async(req, res, next) => {
     if(places.length == 0){
         return res.status(404).send({error: 'No Place Was Found'})
     }
+    places.map(place => {
+        place.thumbnail = getImageUrlAsLink(request_url, place.thumbnail)
+    })
     return res.status(200).json({places})
 }))
 
@@ -88,6 +100,7 @@ router.get('/place_detail/:placeid', wrapAsync(async(req, res, next) => {
 router.get('/most-viewed', wrapAsync(async(req, res, next) => {
     try{
         const { search, activity_ids } = req.query
+        const request_url = req.protocol + '://' + req.get('host')
         let places = []
         const tzoffset = new Date().getTimezoneOffset() * 60000;
         const today = new Date(Date.now() - tzoffset)
@@ -107,6 +120,9 @@ router.get('/most-viewed', wrapAsync(async(req, res, next) => {
         if(places.length == 0){
             return res.status(404).send({error: 'No Place Was Found'})
         }
+        places.map(place => {
+            place.thumbnail = getImageUrlAsLink(request_url, place.thumbnail)
+        })
         return res.status(200).json({places})
     } catch(error) {
         console.log(error)
@@ -116,7 +132,11 @@ router.get('/most-viewed', wrapAsync(async(req, res, next) => {
 
 router.get('/highest-rating', wrapAsync(async(req, res, next) => {
     try {
+        const request_url = req.protocol + '://' + req.get('host')
         const activities = await Activity.loadTopRating()
+        activities.map(place => {
+            place.thumbnail = getImageUrlAsLink(request_url, place.thumbnail)
+        })
         return res.status(200).json(activities)
     } catch(error) {
         console.log(error)

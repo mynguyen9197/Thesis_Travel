@@ -7,12 +7,16 @@ const { wrapAsync, getImageUrlAsLink } = require(global.appRoot + '/utils')
 
 router.get('/', wrapAsync(async(req, res, next) => {
     try {
+        const request_url = req.protocol + '://' + req.get('host')
         const activities = await Tour.loadAllTourActivities()
         if ( activities === null ) {
             return res.status(404).send({error: 'No Tour Was Found'})
         }
         const activity_ids = activities.map(x => x.id)
         const tours = await Tour.loadTourByActivityId(activity_ids)
+        tours.map(tour => {
+            tour.thumbnail = getImageUrlAsLink(request_url, tour.thumbnail)
+        })
         return res.status(200).json({ activities, tours: tours })
     } catch (error) {
         console.log(error)
@@ -22,6 +26,7 @@ router.get('/', wrapAsync(async(req, res, next) => {
 
 router.get('/filter', wrapAsync(async(req, res, next) => {
     const { search, activity_ids } = req.query
+    const request_url = req.protocol + '://' + req.get('host')
     let tours = []
     if (!activity_ids && search) {
         tours = await Tour.findTourByName(search)
@@ -35,7 +40,9 @@ router.get('/filter', wrapAsync(async(req, res, next) => {
     if(tours.length == 0){
         return res.status(404).send({error: 'No Tour Was Found'})
     }
-    
+    tours.map(tour => {
+        tour.thumbnail = getImageUrlAsLink(request_url, tour.thumbnail)
+    })
     return res.status(200).json({ tours })
 }))
 
@@ -75,6 +82,7 @@ router.get('/tour_detail/:tour_id', wrapAsync(async(req, res, next) => {
 
 router.get('/most-viewed', wrapAsync(async(req, res, next) => {
     try{
+        const request_url = req.protocol + '://' + req.get('host')
         const tzoffset = new Date().getTimezoneOffset() * 60000;
         const today = new Date(Date.now() - tzoffset)
         let last30days = new Date(Date.now() - tzoffset)
@@ -95,6 +103,9 @@ router.get('/most-viewed', wrapAsync(async(req, res, next) => {
         if(tours.length == 0){
             return res.status(404).send({error: 'No Tour Was Found'})
         }
+        tours.map(tour => {
+            tour.thumbnail = getImageUrlAsLink(request_url, tour.thumbnail)
+        })
         return res.status(200).json({tours})
     } catch(error) {
         console.log(error)
@@ -105,6 +116,7 @@ router.get('/most-viewed', wrapAsync(async(req, res, next) => {
 router.get('/cheapest', wrapAsync(async(req, res, next) => {
     try{
         const { search, activity_ids } = req.query
+        const request_url = req.protocol + '://' + req.get('host')
         let tours = []
         if (!activity_ids && search) {
             tours = await Tour.findCheapestTourByName(search)
@@ -118,6 +130,9 @@ router.get('/cheapest', wrapAsync(async(req, res, next) => {
         if(tours.length == 0){
             return res.status(404).send({error: 'No Tour Was Found'})
         }
+        tours.map(tour => {
+            tour.thumbnail = getImageUrlAsLink(request_url, tour.thumbnail)
+        })
         return res.status(200).json({tours})
     } catch (error){
         console.log(error)
@@ -127,6 +142,7 @@ router.get('/cheapest', wrapAsync(async(req, res, next) => {
 
 router.get('/most-expensive', wrapAsync(async(req, res, next) => {
     try{
+        const request_url = req.protocol + '://' + req.get('host')
         const { search, activity_ids } = req.query
         let tours = []
         if (!activity_ids && search) {
@@ -141,6 +157,9 @@ router.get('/most-expensive', wrapAsync(async(req, res, next) => {
         if(tours.length == 0){
             return res.status(404).send({error: 'No Tour Was Found'})
         }
+        tours.map(tour => {
+            tour.thumbnail = getImageUrlAsLink(request_url, tour.thumbnail)
+        })
         return res.status(200).json({tours})
     } catch(error) {
         console.log(error)
@@ -150,7 +169,11 @@ router.get('/most-expensive', wrapAsync(async(req, res, next) => {
 
 router.get('/highest-rating', wrapAsync(async(req, res, next) => {
     try {
+        const request_url = req.protocol + '://' + req.get('host')
         const tours = await Tour.loadTopRating()
+        tours.map(tour => {
+            tour.thumbnail = getImageUrlAsLink(request_url, tour.thumbnail)
+        })
         return res.status(200).json(tours)
     } catch(error) {
         console.log(error)

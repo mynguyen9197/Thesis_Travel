@@ -378,6 +378,10 @@ router.get('/lookup', wrapAsync(async(req, res, next) => {
         if(restaurants.length == 0){
             return res.status(404).send({error: 'No Restaurant Was Found'})
         }
+        const request_url = req.protocol + '://' + req.get('host')
+        restaurants.map(restaurant => {
+            restaurant.thumbnail = getImageUrlAsLink(request_url, restaurant.thumbnail)
+        })
         return res.status(200).json({restaurants, count: restaurants.length})
     } catch (error) {
         console.log(error)

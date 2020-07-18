@@ -255,6 +255,10 @@ router.get('/filter', wrapAsync(async(req, res, next) => {
     if(tours.length == 0){
         return res.status(404).send({error: 'No Tour Was Found'})
     }
+    const request_url = req.protocol + '://' + req.get('host')
+    tours.map(tour => {
+        tour.thumbnail = getImageUrlAsLink(request_url, tour.thumbnail)
+    })
     return res.status(200).json({ tours })
 }))
 
