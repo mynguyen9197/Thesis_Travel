@@ -10,7 +10,7 @@ router.get('/', wrapAsync(async(req, res, next) => {
     const activities = await Activity.loadAllActivities()
     const places = await Activity.loadTop20ByRating()
     if ( places === null ) {
-        return res.status(404).send({error: 'No Activity Was Found'})
+        return res.status(404).send({error: 'No Place Was Found'})
     }
     return res.status(200).json({categories, activities, places})
 }))
@@ -20,11 +20,11 @@ router.get('/category/:category_id', wrapAsync(async(req, res, next) => {
         const { category_id } = req.params
         const activities = await Activity.loadActivitiesByCategoryId(category_id)
         if ( activities === null ) {
-            return res.status(404).send({error: 'No Activity Was Found'})
+            return res.status(404).send({error: 'No Place Was Found'})
         }
         const activity_ids = activities.map(x => x.id)
         if(activity_ids.length === 0){
-            return res.status(400).send("No Activity Was Found")
+            return res.status(400).send("No Place Was Found")
         }
         const events = await Activity.loadPlacesByActivityId(activity_ids)
         return res.status(200).json({ activities, events })
@@ -44,10 +44,10 @@ router.get('/filter', wrapAsync(async(req, res, next) => {
     } else if (activity_ids && !search) {
         places = await Activity.loadPlacesByActivityId(activity_ids)
     } else {
-        return res.status(500).send({error: 'Please add filter or search'})
+        return res.status(500).send({error: 'No Place Was Found'})
     }
     if(places.length == 0){
-        return res.status(404).send({error: 'No Activity Was Found'})
+        return res.status(404).send({error: 'No Place Was Found'})
     }
     return res.status(200).json({places})
 }))
@@ -102,10 +102,10 @@ router.get('/most-viewed', wrapAsync(async(req, res, next) => {
         } else if (activity_ids && !search) {
             places = await Activity.loadMostViewedPlacesByActivityId(activity_ids, from, to)
         } else {
-            return res.status(500).send({error: 'Please add filter or search'})
+            return res.status(500).send({error: 'No Place Was Found'})
         }
         if(places.length == 0){
-            return res.status(404).send({error: 'No Activity Was Found'})
+            return res.status(404).send({error: 'No Place Was Found'})
         }
         return res.status(200).json({places})
     } catch(error) {

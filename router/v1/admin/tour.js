@@ -244,7 +244,7 @@ router.get('/filter', wrapAsync(async(req, res, next) => {
     } else if (activity_ids && !search) {
         tours = await tour.loadAllTourByActivityId(activity_ids)
     } else {
-        return res.status(500).send({error: 'Please add filter or search'})
+        return res.status(500).send({error: 'No Tour Was Found'})
     }
     
     if(status === 'active'){
@@ -253,7 +253,7 @@ router.get('/filter', wrapAsync(async(req, res, next) => {
         tours = tours.filter(x => x.is_active === 0)
     }
     if(tours.length == 0){
-        return res.status(404).send({error: 'No Activity Was Found'})
+        return res.status(404).send({error: 'No Tour Was Found'})
     }
     return res.status(200).json({ tours })
 }))

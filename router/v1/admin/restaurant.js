@@ -367,7 +367,7 @@ router.get('/lookup', wrapAsync(async(req, res, next) => {
             const byNameOnly = await restaurant.findAllResByName(search)
             restaurants = disListRestaurant(restaurants, byNameOnly)
         } else {
-            return res.status(500).send({error: 'Please add filter or search'})
+            return res.status(500).send({error: 'No Restaurant Was Found'})
         }
         
         if(status === 'active'){

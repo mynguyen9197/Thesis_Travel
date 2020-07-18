@@ -241,7 +241,7 @@ router.get('/filter', wrapAsync(async(req, res, next) => {
     } else if (activity_ids && !search) {
         places = await place.loadAllPlacesByActivityId(activity_ids)
     } else {
-        return res.status(500).send({error: 'Please add filter or search'})
+        return res.status(500).send({error: 'No Place Was Found'})
     }
     
     if(status === 'active'){

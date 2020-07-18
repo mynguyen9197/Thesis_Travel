@@ -9,7 +9,7 @@ router.get('/', wrapAsync(async(req, res, next) => {
     try {
         const activities = await Tour.loadAllTourActivities()
         if ( activities === null ) {
-            return res.status(404).send({error: 'No Activity Was Found'})
+            return res.status(404).send({error: 'No Tour Was Found'})
         }
         const activity_ids = activities.map(x => x.id)
         const tours = await Tour.loadTourByActivityId(activity_ids)
@@ -30,10 +30,10 @@ router.get('/filter', wrapAsync(async(req, res, next) => {
     } else if (activity_ids && !search) {
         tours = await Tour.loadTourByActivityId(activity_ids)
     } else {
-        return res.status(500).send({error: 'Please add filter or search'})
+        return res.status(500).send({error: 'No Tour Was Found'})
     }
     if(tours.length == 0){
-        return res.status(404).send({error: 'No Activity Was Found'})
+        return res.status(404).send({error: 'No Tour Was Found'})
     }
     
     return res.status(200).json({ tours })
@@ -90,10 +90,10 @@ router.get('/most-viewed', wrapAsync(async(req, res, next) => {
         } else if (activity_ids && !search) {
             tours = await Tour.loadMostViewedTourByActivityId(activity_ids, from, to)
         } else {
-            return res.status(500).send({error: 'Please add filter or search'})
+            return res.status(500).send({error: 'No Tour Was Found'})
         }
         if(tours.length == 0){
-            return res.status(404).send({error: 'No Activity Was Found'})
+            return res.status(404).send({error: 'No Tour Was Found'})
         }
         return res.status(200).json({tours})
     } catch(error) {
@@ -113,10 +113,10 @@ router.get('/cheapest', wrapAsync(async(req, res, next) => {
         } else if (activity_ids && !search) {
             tours = await Tour.loadCheapestTourByActivityId(activity_ids)
         } else {
-            return res.status(500).send({error: 'Please add filter or search'})
+            return res.status(500).send({error: 'No Tour Was Found'})
         }
         if(tours.length == 0){
-            return res.status(404).send({error: 'No Activity Was Found'})
+            return res.status(404).send({error: 'No Tour Was Found'})
         }
         return res.status(200).json({tours})
     } catch (error){
@@ -136,10 +136,10 @@ router.get('/most-expensive', wrapAsync(async(req, res, next) => {
         } else if (activity_ids && !search) {
             tours = await Tour.loadMostExpensiveTourByActivityId(activity_ids)
         } else {
-            return res.status(500).send({error: 'Please add filter or search'})
+            return res.status(500).send({error: 'No Tour Was Found'})
         }
         if(tours.length == 0){
-            return res.status(404).send({error: 'No Activity Was Found'})
+            return res.status(404).send({error: 'No Tour Was Found'})
         }
         return res.status(200).json({tours})
     } catch(error) {

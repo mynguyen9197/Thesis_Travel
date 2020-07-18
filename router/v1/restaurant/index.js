@@ -42,7 +42,7 @@ router.get('/lookup', wrapAsync(async(req, res, next) => {
             const byNameOnly = await Restaurant.findResByName(sql_search)
             restaurants = disListRestaurant(restaurants, byNameOnly)
         } else {
-            return res.status(500).send({error: 'Please add filter or search'})
+            return res.status(500).send({error: 'No Restaurant Was Found'})
         }
         if(restaurants.length == 0){
             return res.status(404).send({error: 'No Restaurant Was Found'})
@@ -118,7 +118,7 @@ router.get('/most-viewed', wrapAsync(async(req, res, next) => {
             const byNameOnly = await Restaurant.findMostViewedResByName(sql_search, from, to)
             restaurants = disListRestaurant(restaurants, byNameOnly)
         } else {
-            return res.status(500).send({error: 'Please add filter or search'})
+            return res.status(500).send({error: 'No Restaurant Was Found'})
         }
         if(restaurants.length == 0){
             return res.status(404).send({error: 'No Restaurant Was Found'})
