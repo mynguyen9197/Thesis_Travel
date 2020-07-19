@@ -145,7 +145,7 @@ router.get('/highest-rating', wrapAsync(async(req, res, next) => {
     try {
         const request_url = req.protocol + '://' + req.get('host')
         const listRestaurants = await Restaurant.loadTopRating()
-        restaurants.map(rest => {
+        listRestaurants.map(rest => {
             rest.thumbnail = getImageUrlAsLink(request_url, rest.thumbnail)
         })
         return res.status(200).json(listRestaurants)

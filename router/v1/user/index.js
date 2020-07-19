@@ -135,9 +135,19 @@ router.post('/get-id-if-cors', wrapAsync(async(req, res, next) => {
 
 router.get('/history', verifyToken, wrapAsync(async(req, res, next) => {
     const decoded = jwt.verify(req.token, 'RESTFULAPIs')
+    const request_url = req.protocol + '://' + req.get('host')
     const recentPlaces = await Place.getRecentActivities(decoded.id)
+    recentPlaces.map(place => {
+        place.thumbnail = getImageUrlAsLink(request_url, place.thumbnail)
+    })
     const recentTours = await Tour.getRecentActivities(decoded.id)
+    recentTours.map(tour => {
+        tour.thumbnail = getImageUrlAsLink(request_url, tour.thumbnail)
+    })
     const recentRestaurants = await Restaurant.getRecentActivities(decoded.id)
+    recentRestaurants.map(rest => {
+        rest.thumbnail = getImageUrlAsLink(request_url, rest.thumbnail)
+    })
     return res.status(200).json({places: recentPlaces, tours: recentTours, restaurants: recentRestaurants})
 }))
 
